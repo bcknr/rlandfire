@@ -1,17 +1,29 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # rlandfire
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 An R package for working with LANDFIRE data.
 
 ## Installation
 
-You can install the development version of rlandfire from
-[GitHub](https://github.com/) with:
+You can install the development version of rlandfire from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -20,16 +32,13 @@ devtools::install_github("bcknr/rlandfire")
 
 ## `landfireAPI()`
 
-The `landfireAPI()` function calls the LANDFIRE Product Services (LFPS)
-API and downloads products with a user specified resolution and
-projection. The image below shows the relationship between the
-`landfireAPI()` arguments and the LFPS parameters.
+The `landfireAPI()` function calls the LANDFIRE Product Services (LFPS) API and downloads products with a user specified resolution and projection. The image below shows the relationship between the `landfireAPI()` arguments and the LFPS parameters.
 
 ![Comparison of LFPS and \`landfireAPI()\`](img/lfps.png)
 
 ### Example
 
-``` r
+```{r example, eval=FALSE}
 library(rlandfire)
 
 # LFPS Parameters

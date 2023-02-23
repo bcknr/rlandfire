@@ -1,6 +1,6 @@
 Package: rlandfire
 Type: Package
-Title: Access the LANDFIRE Product Services API in R
+Title: An R Package for Working with LANDFIRE Data
 Version: 0.1.0
 Author:
   c(person(given = "Mark",
