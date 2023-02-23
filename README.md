@@ -1,2 +1,5 @@
 # rlandfire
-An R interface to call the LANDFIRE Product Services (LFPS) API and download LANDFIRE data products with a user specified resolution and projection. 
+An R package for working with [LANDFIRE](https://landfire.gov/) data.
+
+## `landfireAPI`
+Call the LANDFIRE Product Services (LFPS) API and download LANDFIRE data products with a user specified resolution and projection. 
