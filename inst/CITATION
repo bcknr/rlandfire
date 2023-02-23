@@ -1,11 +1,12 @@
 citHeader("To cite rlandfire in publications use:")
 
 citEntry(
-  entry    = "Unpublished",
-  title    = "rlandfire",
+  entry    = "Manual",
+  title    = "rlandfire: Access the LANDFIRE Product Services API in R",
   author   = "Mark A. Buckner",
   year     = 2023,
-  note     = "In development",
+  note     = "Development version 0.1.0",
+  url      = "https://github.com/bcknr/rlandfire"
   textVersion = paste(
 
   )
