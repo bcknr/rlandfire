@@ -1,13 +1,25 @@
 Package: rlandfire
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Access the LANDFIRE Product Services API in R
 Version: 0.1.0
-Author: Who wrote it
+Author:
+  c(person(given = "Mark",
+           family = "Buckner",
+           role = c("aut", "cre")
+           email = "mab677@cornell.edu"))
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: An R interface to call the LANDFIRE Product Services (LFPS) API to 
+    download LANDFIRE data products with a user specified resolution and 
+    projection. 
+License: GPL (>= 3) 
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/bcknr/rlandfire
 BugReports: https://github.com/bcknr/rlandfire/issues
+RoxygenNote: 7.2.3
+Imports: 
+    httr,
+    stringr
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
