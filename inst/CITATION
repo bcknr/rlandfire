@@ -7,6 +7,7 @@ citEntry(
   year     = 2023,
   note     = "R Package dev. version 0.1.0",
   url      = "https://github.com/bcknr/rlandfire",
+  doi      = "10.6084/m9.figshare.22203250"
   textVersion = paste(
 
   )
