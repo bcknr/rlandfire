@@ -19,7 +19,12 @@ BugReports: https://github.com/bcknr/rlandfire/issues
 RoxygenNote: 7.2.3
 Imports: 
     httr,
-    stringr
+    sf,
+    stringr,
+    terra,
+    zip
 Suggests: 
+    raster,
+    stars,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
