@@ -36,22 +36,38 @@ The `landfireAPI()` function calls the LANDFIRE Product Services (LFPS) API and 
 
 ![Comparison of LFPS and \`landfireAPI()\`](img/lfps.png)
 
-### Example
-
 ```{r example, eval=FALSE}
 library(rlandfire)
 
 # LFPS Parameters
-products <-  c("ASP2020", "ELEV2020", "SLPP2020")
+products <-  c("ASP2020", "ELEV2020", "140CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 projection <- 6414
 resolution <- 90
+edit_rule <- list(c("condition","ELEV2020","lt",500), 
+                  c("change", "140CC", "st", 181))
 
 # R specific arguments
 save_file <- tempfile(fileext = ".zip")
 
 # call API
-ncal <- landfireAPI(products, aoi, projection, resolution, path = save_file)
+ncal <- landfireAPI(products, aoi, projection, resolution, 
+                    edit_rule = edit_rule, path = save_file)
+```
+
+## `getAOI()`
+
+`getAOI` returns extent vector, ordered `xmin`, `ymin`, `xmax`, `ymax` with a lat/lon (wgs84) projection from objects with class `SpatRaster`, `SpatVector`, `sf`, `stars` or `RasterLayer`. Additionally, the the extent can be extended by passing a numeric vector with length 1, 2, or 4 (see: `terra::extend()`).
+
+```{r AOI_example, eval=FALSE}
+library(terra)
+
+# Create raster layer
+r <- terra::rast(nrows = 50, ncols = 50, xmin = -30, xmax = 10, ymin = -30,
+   ymax = 10, crs = terra::crs("epsg:4326"), vals = rnorm(2500))
+
+# Extract and extend AOI
+ext <- getAOI(r, c(10, 15))
 ```
 
 ## License
