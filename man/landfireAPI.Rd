@@ -60,6 +60,6 @@ projection <- 6414
 resolution <- 90
 edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 save_file <- tempfile(fileext = ".zip")
-test <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
+resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 }
 }
