@@ -33,7 +33,7 @@
 #' resolution <- 90
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
-#' test <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
+#' resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }
 
 landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
@@ -42,10 +42,11 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   #### Checks
   # Missing
-  stopifnot("argument `products` is missing with no default" != !missing(products))
-  stopifnot("argument `aoi` is missing with no default" != !missing(aoi))
+  stopifnot("argument `products` is missing with no default" = !missing(products))
+  stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
 
   if(!is.null(edit_rule)){
+    stopifnot("argument `edit_rule` must be a list" = inherits(edit_rule, "list"))
 
     class <- sapply(edit_rule, `[`, 1)
 
@@ -182,7 +183,19 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   }
 
-  return(r)
+  # construct landfire_api object
+  structure(
+    list(
+      request = list(query = base_url$query,
+                     date = Sys.time(),
+                     url = url,
+                     job_id = job_id,
+                     dwl_url = dwl_url),
+      content = inf_msg, # currently just returns a vector
+      response = r
+    ),
+    class = "landfire_api"
+  )
 
 }
 
