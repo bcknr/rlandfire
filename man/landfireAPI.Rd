@@ -37,7 +37,7 @@ resample resolution in meters. Default is 30m.}
 
 \item{edit_mask}{Optional. **Not currently functional**}
 
-\item{path}{Path to `.zip` directory. Passed to `utils::download.file()`.
+\item{path}{Path to `.zip` directory. Passed to [utils::download.file()].
 If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
@@ -60,6 +60,6 @@ projection <- 6414
 resolution <- 90
 edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 save_file <- tempfile(fileext = ".zip")
-test <- landfireAPI(products, aoi, projection, resolution, path = save_file)
+test <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 }
 }
