@@ -16,7 +16,7 @@
 #'   "product", "operator", "value". Limited to fuel theme products only.
 #'   (see: [https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf])
 #' @param edit_mask Optional. **Not currently functional**
-#' @param path Path to `.zip` directory. Passed to `utils::download.file()`.
+#' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
@@ -33,7 +33,7 @@
 #' resolution <- 90
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
-#' test <- landfireAPI(products, aoi, projection, resolution, path = save_file)
+#' test <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }
 
 landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
@@ -45,9 +45,23 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   stopifnot("argument `products` is missing with no default" != !missing(products))
   stopifnot("argument `aoi` is missing with no default" != !missing(aoi))
 
-  # Operator class must be "change" or "condition"
-  # Conditional operator must be one of c("eq","ge","gt","le","lt","ne")
-  # Change operator must be one of c("cm","cv","cx","bd","ib","mb","st")
+  if(!is.null(edit_rule)){
+
+    class <- sapply(edit_rule, `[`, 1)
+
+    stopifnot(
+      '`edit_rule` operator classes must only be "condition" or "change"' =
+        all(class %in% c("condition", "change"))
+    )
+
+    stopifnot(
+      '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"' =
+        all(sapply(edit_rule, `[`, 3)[class == "condition"] %in% c("eq","ge","gt","le","lt","ne")))
+
+    stopifnot(
+      '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"' =
+        all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","bd","ib","mb","st")))
+  }
 
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
