@@ -27,7 +27,7 @@ test_that("`landfireAPI()` recognizes arguement errors", {
   expect_error(landfireAPI(products, aoi, edit_rule = "edit_rule"),
                "argument `edit_rule` must be a list")
 
-  # Check edit_rule arguements
+  # Check edit_rule arguments
   expect_error(landfireAPI(products, aoi,
                            edit_rule = list(c("wrong","ELEV2020","lt",500), c("change", "140CC", "st", 181))),
                '`edit_rule` operator classes must only be "condition" or "change"')
@@ -43,9 +43,21 @@ test_that("`landfireAPI()` recognizes failed call", {
   projection <- 123456
   path <- tempfile(fileext = ".zip")
 
-  expect_error(landfireAPI(products, aoi, projection, path = path),
+  expect_warning(landfireAPI(products, aoi, projection, path = path),
                "Job Status:  esriJobFailed")
 })
 
 
 # Tests for .fmt_editrules (internal)
+
+test_that("`.fmt_editrules` correctly formats requests",{
+  single_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
+  multi_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181),
+                    c("condition","ELEV2020","ge",600), c("change", "140CC", "db", 20),
+                    c("condition","ELEV2020","eq",550), c("change", "140CC", "st", 0))
+
+  expect_identical(.fmt_editrules(single_rule),
+                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"140CC\",\"operator\":\"st\",\"value\":181}]}]}")
+  expect_identical(.fmt_editrules(multi_rule),
+                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"140CC\",\"operator\":\"st\",\"value\":181}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"ge\",\"value\":600}],\"change\":[{\"product\":\"140CC\",\"operator\":\"db\",\"value\":20}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":550}],\"change\":[{\"product\":\"140CC\",\"operator\":\"st\",\"value\":0}]}]}")
+})
