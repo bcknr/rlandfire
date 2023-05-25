@@ -21,8 +21,7 @@ Imports:
     httr,
     sf,
     stringr,
-    terra,
-    zip
+    terra
 Suggests: 
     raster,
     stars,
