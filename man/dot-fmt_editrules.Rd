@@ -19,6 +19,6 @@ Internal: Format edit_rule for API call
 \examples{
 \dontrun{
 edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
-.fmt_editrule(edit_rule)
+.fmt_editrules(edit_rule)
 }
 }

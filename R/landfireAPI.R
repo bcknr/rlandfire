@@ -61,7 +61,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
     stopifnot(
       '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"' =
-        all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","bd","ib","mb","st")))
+        all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st")))
   }
 
   if(is.null(path)){
@@ -81,6 +81,8 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
 
+  stopifnot("argument `max_time` must be >= 5" = max_time >= 5)
+
   #check for special characters in edit mask
   # grepl('[^[:alnum:]]', val)
   # Check it is sf or spatvector
@@ -90,36 +92,6 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   if(!is.null(edit_rule)) {
     edit_rule <- .fmt_editrules(edit_rule)
   }
-
-  # # POST edit_mask
-  # if(!is.null(edit_mask)) {
-  #   if(inherits(edit_mask, "character")){
-  #     # Its a file path
-  #     zip_path <- edit_mask
-  #   } else {
-  #     # Generate tmp structure
-  #     name <- deparse(substitute(edit_mask))
-  #     dir <- paste0(tempdir(), "/editmask")
-  #     dir.create(dir)
-  #     name <- paste0(dir, "/", name, ".shp")
-  #
-  #     # Save as shp file
-  #     if(inherits(edit_mask, "sf")) {
-  #       sf::st_write(edit_mask, file_name)
-  #     } else {
-  #       terra::writeVector(edit_mask, file_name)
-  #     }
-  #
-  #     # Zip files
-  #     zip_path <- paste0(tempdir(), "/editmask.zip")
-  #     zip::zip(zipfile = zip_path, root = dir, files = list.files(dir))
-  #   }
-  #
-  #   # Post
-  #   post_url <- "https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/uploads/upload"
-  #   post_return <- httr::POST(url = post_url, body = httr::upload_file(zip_path), encode = "json")
-  #
-  # }
 
   base_url <- httr::parse_url("https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/submitJob?")
   base_url$query <- list(Layer_List = paste(products, collapse = ";"),
@@ -151,8 +123,8 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
     inf_msg <- message[grep("esriJobMessageType", message)]
 
     if(verbose == TRUE) {
-      # There is a better way to do this but for now...
-      cat("\014") # clear console each loop
+      # There is a better way to do this but for now...clear console each loop:
+      cat("\014")
 
       cat(job_status,"\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
           "\n-------------------",
@@ -162,12 +134,14 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
     # If failed exit and report
     if(status != 200 | grepl("Failed",job_status)) {
-      stop(job_status)
+      warning(job_status)
+      status <- "Failed"
       break
 
       # If success report success and download file
     } else if(grepl("Succeeded",job_status)) {
       utils::download.file(dwl_url, path, method = method, quiet = !verbose)
+      status <- "Succeeded"
       break
 
       # Print current status, wait, and check again
@@ -178,7 +152,9 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
     # Max time error
     if(i == mt) {
       cat("\n")
-      stop("Job status: Incomplete and max_time reached\nVisit URL to check status and download manually\n   ", r$url)
+      warning("Job status: Incomplete and max_time reached\nVisit URL to check status and download manually:\n   ", r$url)
+      status <- "Timed out"
+      break
     }
 
   }
@@ -192,7 +168,9 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                      job_id = job_id,
                      dwl_url = dwl_url),
       content = inf_msg, # currently just returns a vector
-      response = r
+      response = r,
+      status = status,
+      path = path
     ),
     class = "landfire_api"
   )
@@ -214,7 +192,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 #' @examples
 #' \dontrun{
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
-#' .fmt_editrule(edit_rule)
+#' .fmt_editrules(edit_rule)
 #' }
 .fmt_editrules <- function(rules) {
   class <- sapply(rules, `[`, 1)
