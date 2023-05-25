@@ -4,7 +4,7 @@
 #' `landfireAPI` downloads LANDFIRE data by calling the LFPS API
 #'
 #' @param products Product names as character vector
-#'   (see: https://lfps.usgs.gov/helpdocs/productstable.html)
+#'   (see: [https://lfps.usgs.gov/helpdocs/productstable.html])
 #' @param aoi Area of interest as character or numeric vector defined by
 #'   latitude and longitude in decimal degrees in WGS84 and ordered
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
@@ -12,25 +12,28 @@
 #'    Default is a localized Albers projection.
 #' @param resolution Optional. A numeric value between 31-9999 specifying the
 #'   resample resolution in meters. Default is 30m.
-#' @param edit_rule Optional. **Not currently functional**
+#' @param edit_rule Optional. A list of character vectors ordered "operator class"
+#'   "product", "operator", "value". Limited to fuel theme products only.
+#'   (see: [https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf])
 #' @param edit_mask Optional. **Not currently functional**
-#' @param path Path to `.zip` directory. Passed to `utils::download.file()`.
+#' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
-#' @param method Passed to `utils::download.file()`. See `?download.file`
+#' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param verbose If FALSE suppress all status messages
 #'
-#' @return Returns API call passed from httr::get(). Downloads files to `path`
+#' @return Returns API call passed from [httr::get()]. Downloads files to `path`
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "SLPP2020")
+#' products <-  c("ASP2020", "ELEV2020", "140CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' projection <- 6414
 #' resolution <- 90
+#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
-#' test <- landfireAPI(products, aoi, projection, resolution, path = save_file)
+#' resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }
 
 landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
@@ -39,8 +42,27 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   #### Checks
   # Missing
-  stopifnot("argument `products` is missing with no default" != !missing(products))
-  stopifnot("argument `aoi` is missing with no default" != !missing(aoi))
+  stopifnot("argument `products` is missing with no default" = !missing(products))
+  stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
+
+  if(!is.null(edit_rule)){
+    stopifnot("argument `edit_rule` must be a list" = inherits(edit_rule, "list"))
+
+    class <- sapply(edit_rule, `[`, 1)
+
+    stopifnot(
+      '`edit_rule` operator classes must only be "condition" or "change"' =
+        all(class %in% c("condition", "change"))
+    )
+
+    stopifnot(
+      '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"' =
+        all(sapply(edit_rule, `[`, 3)[class == "condition"] %in% c("eq","ge","gt","le","lt","ne")))
+
+    stopifnot(
+      '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"' =
+        all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st")))
+  }
 
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
@@ -59,14 +81,24 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
 
+  stopifnot("argument `max_time` must be >= 5" = max_time >= 5)
+
+  #check for special characters in edit mask
+  # grepl('[^[:alnum:]]', val)
+  # Check it is sf or spatvector
+
   #### End Checks
+
+  if(!is.null(edit_rule)) {
+    edit_rule <- .fmt_editrules(edit_rule)
+  }
 
   base_url <- httr::parse_url("https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/submitJob?")
   base_url$query <- list(Layer_List = paste(products, collapse = ";"),
                          Area_of_Interest = paste(aoi, collapse = " "),
                          Output_Projection = projection,
-                         Resample_Resolution = resolution #,
-                         #Edit_Rule = edit_rule,
+                         Resample_Resolution = resolution,
+                         Edit_Rule = edit_rule #,
                          #Edit_Mask = edit_mask
   )
 
@@ -91,8 +123,8 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
     inf_msg <- message[grep("esriJobMessageType", message)]
 
     if(verbose == TRUE) {
-      # There is a better way to do this but for now...
-      cat("\014") # clear console each loop
+      # There is a better way to do this but for now...clear console each loop:
+      cat("\014")
 
       cat(job_status,"\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
           "\n-------------------",
@@ -102,12 +134,14 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
     # If failed exit and report
     if(status != 200 | grepl("Failed",job_status)) {
-      stop(job_status)
+      warning(job_status)
+      status <- "Failed"
       break
 
       # If success report success and download file
     } else if(grepl("Succeeded",job_status)) {
       utils::download.file(dwl_url, path, method = method, quiet = !verbose)
+      status <- "Succeeded"
       break
 
       # Print current status, wait, and check again
@@ -118,14 +152,82 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
     # Max time error
     if(i == mt) {
       cat("\n")
-      stop("Job status: Incomplete and max_time reached\nVisit URL to check status and download manually\n   ", r$url)
+      warning("Job status: Incomplete and max_time reached\nVisit URL to check status and download manually:\n   ", r$url)
+      status <- "Timed out"
+      break
     }
 
   }
 
-  return(r)
+  # construct landfire_api object
+  structure(
+    list(
+      request = list(query = base_url$query,
+                     date = Sys.time(),
+                     url = url,
+                     job_id = job_id,
+                     dwl_url = dwl_url),
+      content = inf_msg, # currently just returns a vector
+      response = r,
+      status = status,
+      path = path
+    ),
+    class = "landfire_api"
+  )
 
 }
 
-#TODO Get edit_rule and edit_mask running
+#TODO Get edit_mask running
 #TODO Overwrite the console instead of clearing
+
+
+
+#' Internal: Format edit_rule for API call
+#'
+#' @param rules A list of character vectors ordered "operator class"
+#'   "product", "operator", "value". Limited to fuel theme products only.
+#'
+#' @return Character vector (length = 1) with formated edit rules call
+#'
+#' @examples
+#' \dontrun{
+#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
+#' .fmt_editrules(edit_rule)
+#' }
+.fmt_editrules <- function(rules) {
+  class <- sapply(rules, `[`, 1)
+
+  params <- lapply(rules, function(x) {
+    paste0('"product":"', x[2],
+           '","operator":"', x[3],
+           '","value":', x[4])
+  })
+
+  # Condition - ID groups with same class and build request
+  cnd <- which(class == "condition")
+  breaks <- c(0, which(diff(cnd) != 1), length(cnd))
+  cnd_grp <- lapply(seq(length(breaks) - 1), function(i) cnd[(breaks[i] + 1):breaks[i+1]])
+
+  cnd <- lapply(cnd_grp, function(i) paste0('"condition":[{', paste0(params[i], collapse = '},{'),'}]'))
+
+  # Change - ID groups with same class and build request
+  chng <- which(class == "change")
+  breaks <- c(0, which(diff(chng) != 1), length(chng))
+  chng_grp <- lapply(seq(length(breaks) - 1), function(i) chng[(breaks[i] + 1):breaks[i+1]])
+
+  chng <- lapply(chng_grp, function(i) paste0('"change":[{', paste0(params[i], collapse = '},{'),'}]'))
+
+  # Retain original order
+  order_cnd <- sapply(cnd_grp, `[`, 1)
+  order_chng <- sapply(chng_grp, `[`, 1)
+
+  edit_rule <- c()
+  edit_rule[order_cnd] <- unlist(cnd)
+  edit_rule[order_chng] <- unlist(chng)
+
+  # Assemble final string
+  paste0('{"edit":[{',
+         paste0(edit_rule[!is.na(edit_rule)], collapse = ','),
+         '}]}'
+  )
+}

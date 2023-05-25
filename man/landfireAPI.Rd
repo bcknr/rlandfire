@@ -19,7 +19,7 @@ landfireAPI(
 }
 \arguments{
 \item{products}{Product names as character vector
-(see: https://lfps.usgs.gov/helpdocs/productstable.html)}
+(see: [https://lfps.usgs.gov/helpdocs/productstable.html])}
 
 \item{aoi}{Area of interest as character or numeric vector defined by
 latitude and longitude in decimal degrees in WGS84 and ordered
@@ -31,32 +31,35 @@ Default is a localized Albers projection.}
 \item{resolution}{Optional. A numeric value between 31-9999 specifying the
 resample resolution in meters. Default is 30m.}
 
-\item{edit_rule}{Optional. **Not currently functional**}
+\item{edit_rule}{Optional. A list of character vectors ordered "operator class"
+"product", "operator", "value". Limited to fuel theme products only.
+(see: [https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf])}
 
 \item{edit_mask}{Optional. **Not currently functional**}
 
-\item{path}{Path to `.zip` directory. Passed to `utils::download.file()`.
+\item{path}{Path to `.zip` directory. Passed to [utils::download.file()].
 If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
 
-\item{method}{Passed to `utils::download.file()`. See `?download.file`}
+\item{method}{Passed to [utils::download.file()]. See `?download.file`}
 
 \item{verbose}{If FALSE suppress all status messages}
 }
 \value{
-Returns API call passed from httr::get(). Downloads files to `path`
+Returns API call passed from [httr::get()]. Downloads files to `path`
 }
 \description{
 `landfireAPI` downloads LANDFIRE data by calling the LFPS API
 }
 \examples{
 \dontrun{
-products <-  c("ASP2020", "ELEV2020", "SLPP2020")
+products <-  c("ASP2020", "ELEV2020", "140CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 projection <- 6414
 resolution <- 90
+edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
 save_file <- tempfile(fileext = ".zip")
-test <- landfireAPI(products, aoi, projection, resolution, path = save_file)
+resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 }
 }
