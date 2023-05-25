@@ -1,13 +1,14 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# rlandfire
+<img align="left" width="125" height="125" src="./img/rlandfire.png">
+
+## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This project is an in-development R package for working with LANDFIRE
-data.
+![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
 
 ## Installation
 
