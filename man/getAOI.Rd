@@ -2,7 +2,7 @@
 % Please edit documentation in R/getAOI.R
 \name{getAOI}
 \alias{getAOI}
-\title{Create extent vector for `landfireAPI()`}
+\title{Create extent vector for \code{landfireAPI()}}
 \usage{
 getAOI(data, extend = NULL)
 }
@@ -10,14 +10,14 @@ getAOI(data, extend = NULL)
 \item{data}{A SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object}
 
 \item{extend}{Optional. A numeric vector of 1, 2, or 4 elements passed to
-[terra::extend()] by which to increase the extent by.}
+\code{\link[terra:extend]{terra::extend()}} by which to increase the extent by.}
 }
 \value{
-Returns an extent vector ordered `xmin`, `ymin`, `xmax`, `ymax`
-   with a lat/lon projection.
+Returns an extent vector ordered \code{xmin}, \code{ymin}, \code{xmax}, \code{ymax}
+with a lat/lon projection.
 }
 \description{
-`getAOI` creates and extent vector in WGS84 from spatial data
+\code{getAOI} creates and extent vector in WGS84 from spatial data
 }
 \examples{
 r <- terra::rast(nrows = 50, ncols = 50, xmin = -30, xmax = 10, ymin = -30,

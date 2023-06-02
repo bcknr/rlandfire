@@ -9,6 +9,8 @@
 #'
 #' @return Returns an extent vector ordered `xmin`, `ymin`, `xmax`, `ymax`
 #'    with a lat/lon projection.
+#'
+#' @md
 #' @export
 #'
 #' @examples
@@ -33,5 +35,6 @@ getAOI <- function(data, extend = NULL) {
   if(sf::st_crs(data) != sf::st_crs(4326)) {
     ext <- terra::project(ext, sf::st_crs(data)$wkt, sf::st_crs(4326)$wkt)
   }
-  as.vector(ext)
+  as.vector(c(ext$xmin, ext$ymin, ext$xmax, ext$ymax))
 }
+
