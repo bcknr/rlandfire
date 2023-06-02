@@ -46,7 +46,7 @@
 
 landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                         edit_rule = NULL, edit_mask = NULL, path = NULL,
-                        max_time = 1000, method = "curl", verbose = TRUE) {
+                        max_time = 10000, method = "curl", verbose = TRUE) {
 
   #### Checks
   # Missing
@@ -96,7 +96,9 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   # Check it is sf or spatvector
 
   # Values in range
-  if(resolution == 30) resolution <- NULL
+  if(is.numeric(resolution) && resolution == 30) {
+    resolution <- NULL
+  }
 
   #### End Checks
 

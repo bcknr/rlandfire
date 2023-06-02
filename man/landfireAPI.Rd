@@ -12,7 +12,7 @@ landfireAPI(
   edit_rule = NULL,
   edit_mask = NULL,
   path = NULL,
-  max_time = 1000,
+  max_time = 10000,
   method = "curl",
   verbose = TRUE
 )
