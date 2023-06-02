@@ -4,7 +4,7 @@
 #' `landfireAPI` downloads LANDFIRE data by calling the LFPS API
 #'
 #' @param products Product names as character vector
-#'   (see: [https://lfps.usgs.gov/helpdocs/productstable.html])
+#'   (see: \href{https://lfps.usgs.gov/helpdocs/productstable.html}{Products Table})
 #' @param aoi Area of interest as character or numeric vector defined by
 #'   latitude and longitude in decimal degrees in WGS84 and ordered
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
@@ -14,7 +14,7 @@
 #'   resample resolution in meters. Default is 30m.
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
 #'   "product", "operator", "value". Limited to fuel theme products only.
-#'   (see: [https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf])
+#'   (see: \href{https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
 #' @param edit_mask Optional. **Not currently functional**
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
@@ -22,7 +22,15 @@
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param verbose If FALSE suppress all status messages
 #'
-#' @return Returns API call passed from [httr::get()]. Downloads files to `path`
+#' @return
+#' Returns a `landfire_api` object with named elements:
+#' * `request` - list with elements `query`, `date`, `url`, `job_id`,`dwl_url`
+#' * `content` - Informative messages passed from API
+#' * `response` - Full response
+#' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
+#' * `path` - path to save directory
+#'
+#' @md
 #' @export
 #'
 #' @examples

@@ -9,6 +9,8 @@
 #'
 #' @return Returns an extent vector ordered `xmin`, `ymin`, `xmax`, `ymax`
 #'    with a lat/lon projection.
+#'
+#' @md
 #' @export
 #'
 #' @examples

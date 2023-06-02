@@ -19,11 +19,11 @@ landfireAPI(
 }
 \arguments{
 \item{products}{Product names as character vector
-(see: [https://lfps.usgs.gov/helpdocs/productstable.html])}
+(see: \href{https://lfps.usgs.gov/helpdocs/productstable.html}{Products Table})}
 
 \item{aoi}{Area of interest as character or numeric vector defined by
 latitude and longitude in decimal degrees in WGS84 and ordered
-`xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.}
+\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax} or a LANDFIRE map zone.}
 
 \item{projection}{Optional. A numeric value of the WKID for the output projection
 Default is a localized Albers projection.}
@@ -33,24 +33,31 @@ resample resolution in meters. Default is 30m.}
 
 \item{edit_rule}{Optional. A list of character vectors ordered "operator class"
 "product", "operator", "value". Limited to fuel theme products only.
-(see: [https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf])}
+(see: \href{https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
 
-\item{edit_mask}{Optional. **Not currently functional**}
+\item{edit_mask}{Optional. \strong{Not currently functional}}
 
-\item{path}{Path to `.zip` directory. Passed to [utils::download.file()].
+\item{path}{Path to \code{.zip} directory. Passed to \code{\link[utils:download.file]{utils::download.file()}}.
 If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
 
-\item{method}{Passed to [utils::download.file()]. See `?download.file`}
+\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
 
 \item{verbose}{If FALSE suppress all status messages}
 }
 \value{
-Returns API call passed from [httr::get()]. Downloads files to `path`
+Returns a \code{landfire_api} object with named elements:
+\itemize{
+\item \code{request} - list with elements \code{query}, \code{date}, \code{url}, \code{job_id},\code{dwl_url}
+\item \code{content} - Informative messages passed from API
+\item \code{response} - Full response
+\item \code{status} - Final API status, one of "Failed", "Succeeded", or "Timed out"
+\item \code{path} - path to save directory
+}
 }
 \description{
-`landfireAPI` downloads LANDFIRE data by calling the LFPS API
+\code{landfireAPI} downloads LANDFIRE data by calling the LFPS API
 }
 \examples{
 \dontrun{
