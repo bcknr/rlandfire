@@ -1,11 +1,12 @@
 test_that("`getAOI` works with supported object classes", {
   r <- terra::rast(nrows = 50, ncols = 50,
-                   xmin = -30, xmax = 10,
-                   ymin = -30, ymax = 10,
+                   xmin = -123.7835, xmax = -123.6352,
+                   ymin = 41.7534, ymax = 41.8042,
                    crs = terra::crs("epsg:4326"),
                    vals = rnorm(2500))
   v <- terra::as.polygons(r)
-  ext <- c("xmin" = -30, "xmax" = 10, "ymin" = -30, "ymax" = 10)
+  ext <- c("xmin" = -123.7835, "xmax" = -123.6352,
+           "ymin" = 41.7534, "ymax" = 41.8042)
 
   expect_equal(getAOI(r), ext)
   expect_equal(getAOI(v), ext)
