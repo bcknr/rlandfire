@@ -87,6 +87,9 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   # grepl('[^[:alnum:]]', val)
   # Check it is sf or spatvector
 
+  # Values in range
+  if(resolution == 30) resolution <- NULL
+
   #### End Checks
 
   if(!is.null(edit_rule)) {
