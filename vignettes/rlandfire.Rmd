@@ -1,0 +1,25 @@
+---
+title: "rlandfire"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rlandfire}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rlandfire)
+```
+
+<img src="../man/figures/rlandfire.png" align="left" width="125" height="125"/>
+
+## rlandfire: Tools for Accessing and Working with LANDFIRE in R
+
+![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
