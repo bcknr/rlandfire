@@ -53,7 +53,7 @@ library(tidyterra)
 
 To start, we will load in the boundary of the Calwood Fire, which I previously downloaded from Boulder Counties' [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/). This file is compressed, so we need to first extract it before reading the shapefile.
 
-```{r, fig.align = "center", fig.height = 6, fig.width = 8}
+```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 boundary_file <- file.path(tempdir(), "Wildfire_History")
 utils::unzip("Wildfire_History.zip", exdir = boundary_file)
 
@@ -124,7 +124,7 @@ lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
 
 Now we can reclassify the canopy cover layers to remove any values which do not fall into our vegetation class of interest, calculate the change, and plot.
 
-```{r, fig.align = "center", fig.height = 6, fig.width = 8}
+```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
 lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
 
