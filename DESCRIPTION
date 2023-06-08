@@ -23,10 +23,12 @@ Imports:
     stringr,
     terra
 Suggests: 
+    ggplot2,
     knitr,
     raster,
     rmarkdown,
     stars,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyterra
 Config/testthat/edition: 3
 VignetteBuilder: knitr
