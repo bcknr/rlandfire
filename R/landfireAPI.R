@@ -10,7 +10,7 @@
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
 #' @param projection Optional. A numeric value of the WKID for the output projection
 #'    Default is a localized Albers projection.
-#' @param resolution Optional. A numeric value between 31-9999 specifying the
+#' @param resolution Optional. A numeric value between 30-9999 specifying the
 #'   resample resolution in meters. Default is 30m.
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
 #'   "product", "operator", "value". Limited to fuel theme products only.
@@ -98,6 +98,27 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   # Values in range
   if(is.numeric(resolution) && resolution == 30) {
     resolution <- NULL
+  }
+
+  if(!is.null(resolution) && !all(resolution >= 30 & resolution <= 9999)) {
+    stop("argument `resolution` must be between 30 and 9999 or `NULL`")
+  }
+
+  aoi <- as.numeric(aoi)
+
+  if(length(aoi)>1) {
+    # Likely lat/lon?
+    if(!all(aoi[c(1,3)] >=-180 & aoi[c(1,3)] <=180 &
+            aoi[c(2,4)] >=-90 & aoi[c(2,4)] <=90)){
+      stop("argument `aoi` must be latitude and longitude in decimal degrees (WGS84) or a LANDFIRE map zone")
+    }
+    # Correct order?
+    if(!all(aoi[[1]] < aoi[[3]] & aoi[[2]] < aoi[[4]])) {
+      stop("argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`")
+    }
+    # Valid map zone?
+  } else if(length(aoi) == 1 & !all(aoi >= 1 & aoi <= 79)){
+    stop("argument `aoi` must be between 1 and 79 when using LANDFIRE map zones")
   }
 
   #### End Checks

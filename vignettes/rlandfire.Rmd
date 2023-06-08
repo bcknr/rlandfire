@@ -1,0 +1,142 @@
+---
+title: "Introduction to rlandfire"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to rlandfire}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+<img src="../man/figures/rlandfire.png" align="left" width="125" height="125"/>
+
+## rlandfire: Tools for Accessing and Working with LANDFIRE in R
+
+![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
+
+\
+\
+`rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners, which provides data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
+
+## Installation
+
+The package can be installed from GitHub with:
+
+```{r, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("bcknr/rlandfire")
+```
+
+This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
+
+## `rlandfire` vs LANDFIRE Product Service (LFPS)
+
+![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png){width="600"}
+
+## Using `rlandfire`
+
+To demonstrate the current functionality of `rlandfire`, we will explore how forest canopy cover in Southern Rocky Mountain Ponderosa Pine Woodland changed after the 2020 Calwood fire near Boulder, Colorado.
+
+```{r setup}
+library(rlandfire)
+library(sf)
+library(terra)
+library(ggplot2)
+library(tidyterra)
+```
+
+To start, we will load in the boundary of the Calwood Fire, which I previously downloaded from Boulder Counties' [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/). This file is compressed, so we need to first extract it before reading the shapefile.
+
+```{r, fig.align = "center", fig.height = 5, fig.width = 7}
+boundary_file <- file.path(tempdir(), "Wildfire_History")
+utils::unzip("Wildfire_History.zip", exdir = boundary_file)
+
+boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
+  sf::st_transform(crs = st_crs(32613))
+
+ggplot() +
+  geom_spatvector(data = boundary) +
+  theme_minimal()
+```
+
+We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPI()`. `getAOI()` handles several steps for us. It ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates if needed.
+
+If required for our workflow, we could extend the AOI by providing an optional numeric vector of 1, 2, or 4 elements to the `extend` argument. In this case, we will extend the AOI by 1 km in all directions to provide additional context surrounding the burned area.
+
+```{r}
+aoi <- getAOI(boundary, extend = 1000)
+aoi
+```
+
+We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html).
+
+```{r}
+products <- c("200CC_19", "220CC_22", "200EVT")
+```
+
+We can ask the API to project the data to the same CRS as our boundary data by providing the WKID code and a resolution of our choosing in meters.
+
+```{r}
+projection <- 32613
+resolution <- 90
+```
+
+We will use the `edit_rule` argument to filter out canopy cover data outside ponderosa pine woodland. Below we specify that when `220EVT`, the condition, is not equal (`ne`) to `7054` the canopy cover layers should be set equal (`st`) to `1`. (*There is some weird behavior with the API where clear value [`cv`] or setting the value outside of 0-100 doesn't work. So here we are using `1` since that value is not found in the original data*). To translate, the edit rules statement says that when existing vegetation cover is anything other than ponderosa pine woodland, the value of the canopy cover should be set to a specified value.
+
+`edit_rules` only works for fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The syntax is explained in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf), and the rules are evaluated in the order they are listed.
+
+```{r}
+edit_rule <- list(c("condition","200EVT","ne",7054),
+                  c("change", "200CC_19", "st", 1),
+                  c("change", "220CC_22", "st", 1))
+```
+
+Finally, we will provide a path to a temporary file and submit a request to the LANDFIRE Product Services API with the `landfireAPI` function.
+
+```{r}
+path <- tempfile(fileext = ".zip")
+
+resp <- landfireAPI(products = products,
+                    aoi = aoi, 
+                    projection = projection, 
+                    resolution = resolution,
+                    edit_rule = edit_rule,
+                    path = path,
+                    verbose = FALSE)
+```
+
+`landfireAPI` will automatically download your requested data into the folder provided in the path argument. If you didn't provide one, you can find the path to your data in the `$path` element of the `landfire_api` object returned by `landfireAPI()`.
+
+The downloaded files are compressed `.zip` files. We need to unzip them before reading the file ending in `.tif`. Note: all additional metadata is included in this same directory.
+
+```{r}
+lf_dir <- file.path(tempdir(), "lf")
+utils::unzip(path, exdir = lf_dir)
+
+lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
+```
+
+Now we can reclassify the canopy cover layers to remove any values which do not fall into our vegetation class of interest, calculate the change, and plot.
+
+```{r, fig.align = "center", fig.height = 5, fig.width = 7}
+lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
+lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
+
+change <- lf$US_220CC_22 - lf$US_200CC_19
+
+pal <- c("#A24936","#FAEDCA","#9EC19A", "#659B5E", "#285943")
+
+ggplot() +
+  geom_spatraster(data = change) +
+  scale_fill_gradientn(colors = pal, name = "% Change",
+                       na.value = "transparent",
+                       values = c(0,0.5, 0.75, 0.875,1)) +
+  geom_spatvector(data = boundary, alpha = 0, lwd = 1, col = "#FF2E2E") +
+  theme_minimal()
+```

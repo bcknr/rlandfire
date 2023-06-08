@@ -28,7 +28,7 @@ latitude and longitude in decimal degrees in WGS84 and ordered
 \item{projection}{Optional. A numeric value of the WKID for the output projection
 Default is a localized Albers projection.}
 
-\item{resolution}{Optional. A numeric value between 31-9999 specifying the
+\item{resolution}{Optional. A numeric value between 30-9999 specifying the
 resample resolution in meters. Default is 30m.}
 
 \item{edit_rule}{Optional. A list of character vectors ordered "operator class"

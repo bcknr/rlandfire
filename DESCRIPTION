@@ -1,7 +1,7 @@
 Package: rlandfire
 Type: Package
 Title: Tools for Accessing and Working with LANDFIRE
-Version: 0.2.1
+Version: 0.2.2
 Author:
   c(person(given = "Mark",
            family = "Buckner",
@@ -23,7 +23,12 @@ Imports:
     stringr,
     terra
 Suggests: 
+    ggplot2,
+    knitr,
     raster,
+    rmarkdown,
     stars,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyterra
 Config/testthat/edition: 3
+VignetteBuilder: knitr

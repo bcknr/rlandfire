@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img align="left" width="125" height="125" src="./img/rlandfire.png">
+<img src="man/figures/rlandfire.png" align="left" width="125" height="125"/>
 
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
@@ -20,6 +20,12 @@ You can install the development version of rlandfire from
 devtools::install_github("bcknr/rlandfire")
 ```
 
+or
+
+``` r
+devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
+```
+
 ## `landfireAPI()`
 
 The `landfireAPI()` function calls the LANDFIRE Product Services (LFPS)
@@ -27,7 +33,7 @@ API and downloads products with a user specified resolution and
 projection. The image below shows the relationship between the
 `landfireAPI()` arguments and the LFPS parameters.
 
-![Comparison of LFPS and \`landfireAPI()\`](img/lfps.png)
+![Comparison of LFPS and \`landfireAPI()\`](man/figures/lfps.png)
 
 ``` r
 library(rlandfire)
