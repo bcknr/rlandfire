@@ -14,8 +14,11 @@
 #' @export
 #'
 #' @examples
-#' r <- terra::rast(nrows = 50, ncols = 50, xmin = -30, xmax = 10, ymin = -30,
-#'   ymax = 10, crs = terra::crs("epsg:4326"), vals = rnorm(2500))
+#' r <- terra::rast(nrows = 50, ncols = 50,
+#'   xmin = -123.7835, xmax = -123.6352,
+#'   ymin = 41.7534, ymax = 41.8042,
+#'   crs = terra::crs("epsg:4326"),
+#'   vals = rnorm(2500))
 #' ext <- getAOI(r, c(10, 15))
 #'
 getAOI <- function(data, extend = NULL) {
