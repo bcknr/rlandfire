@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 \
 \
-`rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](#0) is a joint program of the USFS, DOI, and other major partners. LANDFIRE data layers have applications in wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the [LANDFIRE](#0) webpage.
+`rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners providing data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
 
 ## Installation
 
@@ -35,9 +35,9 @@ devtools::install_github("bcknr/rlandfire")
 
 This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the packages [GitHub repo](https://github.com/bcknr/rlandfire/issues).
 
-## LFPS vs `rlandfire`
+## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png)
+![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png){width="600"}
 
 ## Using `rlandfire`
 
@@ -53,7 +53,7 @@ library(tidyterra)
 
 To start, we will load in the boundary of the Calwood Fire, which I previously downloaded from Boulder Counties' [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/). This file is compressed, so we need to first extract it before reading the shapefile.
 
-```{r}
+```{r, fig.align = "center", fig.height = 6, fig.width = 8}
 boundary_file <- file.path(tempdir(), "Wildfire_History")
 utils::unzip("Wildfire_History.zip", exdir = boundary_file)
 
@@ -126,7 +126,7 @@ lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
 
 Now we can reclassify the canopy cover layers to remove any values which do not fall into our vegetation class of interest, calculate the change, and plot.
 
-```{r}
+```{r, fig.align = "center", fig.height = 6, fig.width = 8}
 lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
 lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
 
