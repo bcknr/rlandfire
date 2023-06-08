@@ -20,6 +20,12 @@ You can install the development version of rlandfire from
 devtools::install_github("bcknr/rlandfire")
 ```
 
+or
+
+``` r
+devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
+```
+
 ## `landfireAPI()`
 
 The `landfireAPI()` function calls the LANDFIRE Product Services (LFPS)
