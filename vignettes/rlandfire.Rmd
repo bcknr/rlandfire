@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 \
 \
-`rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners providing data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
+`rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners, which provides data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
 
 ## Installation
 
@@ -33,7 +33,7 @@ The package can be installed from GitHub with:
 devtools::install_github("bcknr/rlandfire")
 ```
 
-This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the packages [GitHub repo](https://github.com/bcknr/rlandfire/issues).
+This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
@@ -41,7 +41,7 @@ This package is still in development, and users may encounter bugs or unexpected
 
 ## Using `rlandfire`
 
-Here we will explore how to use `rlandfire` with a toy example. In this case, we want to explore how forest canopy cover in Southern Rocky Mountain Ponderosa Pine Woodland changed after the 2020 Calwood fire near Boulder, Colorado.
+To demonstrate the current functionality of `rlandfire`, we will explore how forest canopy cover in Southern Rocky Mountain Ponderosa Pine Woodland changed after the 2020 Calwood fire near Boulder, Colorado.
 
 ```{r setup}
 library(rlandfire)
@@ -65,14 +65,16 @@ ggplot() +
   theme_minimal()
 ```
 
-We can use the function `rlandfire::getAOI()` to extract the area of interest (AOI), with the correct format for `landfireAPI()`, from our buffered polygon. `getAOI()` will handle a couple of steps for us. First, it will ensure that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) but also convert the AOI to latitude and longitude coordinates if needed. In this case, we transformed to shape file to `r st_crs(boundary)$input`, which is incompatible with the LFPS API. If required for our workflow, we could extend the AOI by providing an optional numeric vector of 1, 2, or 4 elements to the `extend` argument. In this case we will extend the AOI by 1 km to provide some context surrounding the burned area.
+We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPI()`. `getAOI()` handles several steps for us. It ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates if needed.
+
+If required for our workflow, we could extend the AOI by providing an optional numeric vector of 1, 2, or 4 elements to the `extend` argument. In this case, we will extend the AOI by 1 km in all directions to provide additional context surrounding the burned area.
 
 ```{r}
 aoi <- getAOI(boundary, extend = 1000)
 aoi
 ```
 
-Here we are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`). We will also download the existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html).
+We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html).
 
 ```{r}
 products <- c("200CC_19", "220CC_22", "200EVT")
@@ -85,9 +87,9 @@ projection <- 32613
 resolution <- 90
 ```
 
-We will use `edit_rule` to filter out canopy cover data outside ponderosa pine woodland. `edit_rules` only works for fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The syntax is explained in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf), and the rules are evaluated in the order they are listed.
+We will use the `edit_rule` argument to filter out canopy cover data outside ponderosa pine woodland. Below we specify that when `220EVT`, the condition, is not equal (`ne`) to `7054` the canopy cover layers should be set equal (`st`) to `1`. (*There is some weird behavior with the API where clear value [`cv`] or setting the value outside of 0-100 doesn't work. So here we are using `1` since that value is not found in the original data*). To translate, the edit rules statement says that when existing vegetation cover is anything other than ponderosa pine woodland, the value of the canopy cover should be set to a specified value.
 
-Below we specify that when `220EVT`, the condition, is not equal (`ne`) to `7054` the canopy cover layers should be set equal (`st`) to `1`. (There is some weird behavior with the API where clear value [`cv`] or setting the value outside of 0-100 doesn't work. So here we are using `1` since that value is not found in the original data). To translate, the edit rules statement says that when existing vegetation cover is anything other than ponderosa pine woodland, the value of the canopy cover should be set to a specified value.
+`edit_rules` only works for fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The syntax is explained in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf), and the rules are evaluated in the order they are listed.
 
 ```{r}
 edit_rule <- list(c("condition","200EVT","ne",7054),
@@ -95,15 +97,11 @@ edit_rule <- list(c("condition","200EVT","ne",7054),
                   c("change", "220CC_22", "st", 1))
 ```
 
-We will provide a path to a temporary zip folder where the requested files will be saved.
+Finally, we will provide a path to a temporary file and submit a request to the LANDFIRE Product Services API with the `landfireAPI` function.
 
 ```{r}
 path <- tempfile(fileext = ".zip")
-```
 
-Finally, we can submit a request to the LANDFIRE Product Services API with the `landfireAPI` function.
-
-```{r}
 resp <- landfireAPI(products = products,
                     aoi = aoi, 
                     projection = projection, 
@@ -113,9 +111,9 @@ resp <- landfireAPI(products = products,
                     verbose = FALSE)
 ```
 
-`landfireAPI` will automatically download your requested data into the folder provided in the path argument. If you didn't provide one, you can find the path to your data in the `$path` element in the `landfire_api` object returned by `landfireAPI()`.
+`landfireAPI` will automatically download your requested data into the folder provided in the path argument. If you didn't provide one, you can find the path to your data in the `$path` element of the `landfire_api` object returned by `landfireAPI()`.
 
-The downloaded files are compressed `.zip` files. We need to unzip them before reading the file ending in `.tif`. Additional metadata is included in the directory.
+The downloaded files are compressed `.zip` files. We need to unzip them before reading the file ending in `.tif`. Note: all additional metadata is included in this same directory.
 
 ```{r}
 lf_dir <- file.path(tempdir(), "lf")
