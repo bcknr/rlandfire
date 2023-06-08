@@ -8,7 +8,7 @@ test_that("`landfireAPI()` recognizes arguement errors", {
   edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
   path <- tempfile(fileext = ".zip")
 
-  # Check for required arguements
+  # Check for required arguments
   expect_error(landfireAPI(aoi = aoi),
                "argument `products` is missing with no default")
 
@@ -26,6 +26,21 @@ test_that("`landfireAPI()` recognizes arguement errors", {
                "argument `verbose` must be logical")
   expect_error(landfireAPI(products, aoi, edit_rule = "edit_rule"),
                "argument `edit_rule` must be a list")
+
+  # Check `aoi` errors
+  expect_error(landfireAPI(products, aoi = 100, path = path),
+               "argument `aoi` must be between 1 and 79 when using LANDFIRE map zones")
+  expect_error(landfireAPI(products, aoi = c(-200, 43, -179, 44), path = path),
+               "argument `aoi` must be latitude and longitude in decimal degrees (WGS84) or a LANDFIRE map zone",
+               fixed = TRUE)
+  expect_error(landfireAPI(products, aoi = c(-123, 43, -124, 44), path = path),
+               "argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`")
+
+  # Check `resolution`
+  expect_error(landfireAPI(products, aoi, resolution = 20, path = path),
+               "argument `resolution` must be between 30 and 9999 or `NULL`")
+  expect_error(landfireAPI(products, aoi, resolution = 10000, path = path),
+               "argument `resolution` must be between 30 and 9999 or `NULL`")
 
   # Check edit_rule arguments
   expect_error(landfireAPI(products, aoi,
@@ -45,6 +60,16 @@ test_that("`landfireAPI()` recognizes failed call", {
 
   expect_warning(landfireAPI(products, aoi, projection, path = path),
                "Job Status:  esriJobFailed")
+})
+
+test_that("`landfireAPI()` edge cases", {
+  products <-  c("ASP2020")
+  aoi <- c("-123.65", "41.75", "-123.63", "41.83")
+  resolution <- 90
+  path <- tempfile(fileext = ".zip")
+
+  # Functions when resolution = 30
+  expect_no_error(landfireAPI(products, aoi, resolution = 30, path = path))
 })
 
 
