@@ -26,11 +26,17 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-The package can be installed from GitHub with:
+`rlandfire` can be installed from GitHub with:
 
-```{r, eval=FALSE}
+``` r
 # install.packages("devtools")
 devtools::install_github("bcknr/rlandfire")
+```
+
+Set `build_vignettes = TRUE` to access this vignette in R:
+
+``` r
+devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
 ```
 
 This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
@@ -41,38 +47,39 @@ This package is still in development, and users may encounter bugs or unexpected
 
 ## Using `rlandfire`
 
-To demonstrate the current functionality of `rlandfire`, we will explore how forest canopy cover in Southern Rocky Mountain Ponderosa Pine Woodland changed after the 2020 Calwood fire near Boulder, Colorado.
+To demonstrate `rlandfire`, we will explore how Ponderosa Pine forest canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
 ```{r setup}
 library(rlandfire)
 library(sf)
 library(terra)
-library(ggplot2)
-library(tidyterra)
 ```
 
-To start, we will load in the boundary of the Calwood Fire, which I previously downloaded from Boulder Counties' [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/). This file is compressed, so we need to first extract it before reading the shapefile.
+To start, we will load in the boundary of the Calwood Fire, which I previously downloaded from Boulder County's [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("Wildfire_History.zip", exdir = boundary_file)
+utils::unzip("../inst/extdata/Wildfire_History.zip", exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 
-ggplot() +
-  geom_spatvector(data = boundary) +
-  theme_minimal()
+plot(boundary$geometry, main = "Calwood Fire Boundary (2020)", 
+     border = "red", lwd = 1.5)
 ```
 
-We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPI()`. `getAOI()` handles several steps for us. It ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates if needed.
+### AOI
 
-If required for our workflow, we could extend the AOI by providing an optional numeric vector of 1, 2, or 4 elements to the `extend` argument. In this case, we will extend the AOI by 1 km in all directions to provide additional context surrounding the burned area.
+We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPI()`. `getAOI()` handles several steps for us, it ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates (required by the API) if needed.
+
+Using the `extend` argument, we will increase the AOI by 1 km in all directions to provide additional context surrounding the burned area. This argument takes an optional numeric vector of 1, 2, or 4 elements passed to `terra::extend()`.
 
 ```{r}
 aoi <- getAOI(boundary, extend = 1000)
 aoi
 ```
+
+### Products
 
 We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html).
 
@@ -80,16 +87,20 @@ We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`
 products <- c("200CC_19", "220CC_22", "200EVT")
 ```
 
-We can ask the API to project the data to the same CRS as our boundary data by providing the WKID code and a resolution of our choosing in meters.
+### Projection and resolution
+
+We can ask the API to project the data to the same CRS as our boundary data by providing the `WKID` for our CRS of interest and a resolution of our choosing, in meters.
 
 ```{r}
 projection <- 32613
 resolution <- 90
 ```
 
-We will use the `edit_rule` argument to filter out canopy cover data outside ponderosa pine woodland. Below we specify that when `220EVT`, the condition, is not equal (`ne`) to `7054` the canopy cover layers should be set equal (`st`) to `1`. (*There is some weird behavior with the API where clear value [`cv`] or setting the value outside of 0-100 doesn't work. So here we are using `1` since that value is not found in the original data*). To translate, the edit rules statement says that when existing vegetation cover is anything other than ponderosa pine woodland, the value of the canopy cover should be set to a specified value.
+### Edit rule
 
-`edit_rules` only works for fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The syntax is explained in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf), and the rules are evaluated in the order they are listed.
+We will use the `edit_rule` argument to filter out canopy cover data that doesn't correspond to Ponderosa Pine Woodland. To do this, we will use an `edit_rule` statement which says that when existing vegetation cover is anything other than Ponderosa Pine Woodland, the value of the canopy cover should be set to a specified value.
+
+Specifically, we specify that when `220EVT`, the condition, is not equal (`ne`) to `7054` the canopy cover layers should be set equal (`st`) to `1`. (*There is some weird behavior with the API where clear value [`cv`] or setting the value outside of 0-100 doesn't work. So here we are using `1` since it is not found in the original data*).
 
 ```{r}
 edit_rule <- list(c("condition","200EVT","ne",7054),
@@ -97,11 +108,21 @@ edit_rule <- list(c("condition","200EVT","ne",7054),
                   c("change", "220CC_22", "st", 1))
 ```
 
-Finally, we will provide a path to a temporary file and submit a request to the LANDFIRE Product Services API with the `landfireAPI` function.
+Our requested edits are a relatively simple implementation of `edit_rule`, and it is important to note that edits are limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The syntax is explained in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf), and the rules are evaluated in the order they are listed.
+
+### Path
+
+Finally, we will provide a path to a temporary zip file. Setting the path as a temp file is not strictly necessary because if `path` is left blank `landfireAPI()` will save the data to a temporary folder by default.
 
 ```{r}
 path <- tempfile(fileext = ".zip")
+```
 
+### Call `landfireAPI()`
+
+Now we are able to submit a request to the LANDFIRE Product Services API with the `landfireAPI()` function.
+
+```{r}
 resp <- landfireAPI(products = products,
                     aoi = aoi, 
                     projection = projection, 
@@ -111,9 +132,15 @@ resp <- landfireAPI(products = products,
                     verbose = FALSE)
 ```
 
-`landfireAPI` will automatically download your requested data into the folder provided in the path argument. If you didn't provide one, you can find the path to your data in the `$path` element of the `landfire_api` object returned by `landfireAPI()`.
+`landfireAPI()` will download your requested data into the folder provided in the path argument. If you didn't provide one, you can find the path to your data in the `$path` element of the `landfire_api` object returned by `landfireAPI()`.
 
-The downloaded files are compressed `.zip` files. We need to unzip them before reading the file ending in `.tif`. Note: all additional metadata is included in this same directory.
+```{r}
+resp$path
+```
+
+### Load and process LF data
+
+The files returned by the LFPS API are compressed `.zip` files. We need to unzip them before reading the file ending in `.tif`. Note: all additional metadata is included in this same directory as well.
 
 ```{r}
 lf_dir <- file.path(tempdir(), "lf")
@@ -122,7 +149,7 @@ utils::unzip(path, exdir = lf_dir)
 lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
 ```
 
-Now we can reclassify the canopy cover layers to remove any values which do not fall into our vegetation class of interest, calculate the change, and plot.
+Now we can reclassify the canopy cover layers to remove any values which are not classified as Ponderosa Pine, calculate the change, and plot.
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
@@ -130,13 +157,24 @@ lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
 
 change <- lf$US_220CC_22 - lf$US_200CC_19
 
-pal <- c("#A24936","#FAEDCA","#9EC19A", "#659B5E", "#285943")
-
-ggplot() +
-  geom_spatraster(data = change) +
-  scale_fill_gradientn(colors = pal, name = "% Change",
-                       na.value = "transparent",
-                       values = c(0,0.5, 0.75, 0.875,1)) +
-  geom_spatvector(data = boundary, alpha = 0, lwd = 1, col = "#FF2E2E") +
-  theme_minimal()
+plot(change, col = rev(terrain.colors(250)),
+     main = "Canopy Cover Loss - Calwood Fire (2020)",
+     xlab = "Easting",
+     ylab = "Northing")
+plot(boundary$geometry, add = TRUE, col = NA,
+     border = "black", lwd = 2)
 ```
+
+## License
+
+[![](https://img.shields.io/github/license/bcknr/rlandfire?color=green&logo=https%253A%252F%252Fwww.gnu.org%252Flicenses%252Fgpl-3.0.html)](https://www.gnu.org/licenses/gpl-3.0.html)
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+### Citation
+
+Visit the [LANDFIRE webpage](https://landfire.gov/landfire_citation.php) for information on citing LANDFIRE data layers. The package citation information can be viewed with `citation("rlandfire")`.
