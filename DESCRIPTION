@@ -21,7 +21,8 @@ Imports:
     httr,
     sf,
     stringr,
-    terra
+    terra,
+    utils
 Suggests: 
     knitr,
     raster,

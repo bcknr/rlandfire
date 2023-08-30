@@ -2,3 +2,5 @@
 
 export(getAOI)
 export(landfireAPI)
+export(viewProducts)
+importFrom(utils,browseURL)
