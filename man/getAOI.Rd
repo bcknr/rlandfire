@@ -17,7 +17,7 @@ Returns an extent vector ordered \code{xmin}, \code{ymin}, \code{xmax}, \code{ym
 with a lat/lon projection.
 }
 \description{
-\code{getAOI} creates and extent vector in WGS84 from spatial data
+\code{getAOI} creates an extent vector in WGS84 from spatial data
 }
 \examples{
 r <- terra::rast(nrows = 50, ncols = 50,
