@@ -74,7 +74,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
-    warning("`path` is missing. Files will be saved in temp directory:", path)
+    warning("`path` is missing. Files will be saved in temp directory: ", path)
   }
 
   # Classes
@@ -143,7 +143,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                     job_id, "/scratch/", job_id, ".zip")
 
   # Loop through up to max time
-  mt <- max_time/5
+  mt <- max_time*10
 
   for (i in 1:mt) {
     # Check status
@@ -162,7 +162,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
       cat(job_status,"\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
           "\n-------------------",
-          "\nElapsed time: ", i * 0.1, "s", "(Max time:", max_time, "s)",
+          "\nElapsed time: ", sprintf("%.1f", round(i*0.1, 1)), "s", "(Max time:", max_time, "s)",
           "\n-------------------\n")
     }
 
