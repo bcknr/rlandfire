@@ -5,8 +5,8 @@ citEntry(
   title    = "rlandfire: Tools for Accessing and Working with LANDFIRE",
   author   = "Mark A. Buckner",
   year     = 2023,
-  note     = "R Package dev. version 0.2.3",
+  note     = "R Package dev. version 0.3.0",
   url      = "https://github.com/bcknr/rlandfire",
   doi      = "10.6084/m9.figshare.22203250",
-  textVersion = "Mark A Buckner, (2023). rlandfire: Tools for Accessing and Working with LANDFIRE in R. Version 0.2.3. https://github.com/bcknr/rlandfire"
+  textVersion = "Mark A Buckner, (2023). rlandfire: Tools for Accessing and Working with LANDFIRE in R. Version 0.3.0. https://github.com/bcknr/rlandfire"
 )
