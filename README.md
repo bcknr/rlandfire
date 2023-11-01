@@ -54,7 +54,7 @@ library(rlandfire)
 library(sf)
 #> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
 library(terra)
-#> terra 1.7.29
+#> terra 1.6.53
 ```
 
 To start, we will load in the boundary of the Calwood Fire, which I
@@ -68,7 +68,7 @@ utils::unzip("./inst/extdata/Wildfire_History.zip", exdir = boundary_file)
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/Rtmp8dnmtX/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpE75w8n/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -105,11 +105,13 @@ aoi
 
 We are interested in two canopy cover products, canopy cover in 2019
 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type
-(`200EVT`). All available data products, and their abbreviated names,
-can be found in the [products
-table](https://lfps.usgs.gov/helpdocs/productstable.html).
+(`200EVT`). All available data products and their abbreviated names can
+be found in the [products
+table](https://lfps.usgs.gov/helpdocs/productstable.html), which you can
+open in your browser with `viewProducts()`.
 
 ``` r
+# viewProducts()
 products <- c("200CC_19", "220CC_22", "200EVT")
 ```
 
@@ -186,7 +188,7 @@ object returned by `landfireAPI()`.
 
 ``` r
 resp$path
-#> [1] "/tmp/Rtmp8dnmtX/file2b7c524f6b13.zip"
+#> [1] "/tmp/RtmpE75w8n/file1fe2dacf79d.zip"
 ```
 
 ### Load and process LF data

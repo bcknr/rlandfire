@@ -1,7 +1,7 @@
 #' Create extent vector for `landfireAPI()`
 #'
 #' @description
-#' `getAOI` creates and extent vector in WGS84 from spatial data
+#' `getAOI` creates an extent vector in WGS84 from spatial data
 #'
 #' @param data A SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object
 #' @param extend Optional. A numeric vector of 1, 2, or 4 elements passed to

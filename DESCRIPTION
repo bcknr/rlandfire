@@ -1,7 +1,7 @@
 Package: rlandfire
 Type: Package
 Title: Tools for Accessing and Working with LANDFIRE
-Version: 0.2.2
+Version: 0.3.0
 Author:
   c(person(given = "Mark",
            family = "Buckner",
@@ -21,7 +21,8 @@ Imports:
     httr,
     sf,
     stringr,
-    terra
+    terra,
+    utils
 Suggests: 
     knitr,
     raster,

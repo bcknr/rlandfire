@@ -83,9 +83,10 @@ aoi
 
 ### Products
 
-We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html).
+We are interested in two canopy cover products, canopy cover in 2019 (`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type (`200EVT`). All available data products and their abbreviated names can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html), which you can open in your browser with `viewProducts()`.
 
 ```{r}
+# viewProducts()
 products <- c("200CC_19", "220CC_22", "200EVT")
 ```
 
