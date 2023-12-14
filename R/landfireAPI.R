@@ -138,7 +138,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   url <- httr::build_url(base_url)
   r <- httr::GET(url)
-  job_id <- stringr::str_extract(r$url, ".{33}$") #NOTE: Assumes that job id length is always 33 characters
+  job_id <- sub(".*jobs/(.*)$", "\\1", r$url)
   dwl_url <- paste0("https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/",
                     job_id, "/scratch/", job_id, ".zip")
 
@@ -152,7 +152,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
     content <- strsplit(httr::content(r, "text"), "\r\n")[[1]]
 
     # Parse content for messaging and error reporting
-    message <- stringr::str_replace_all(content, "\\<.*?\\>", "")
+    message <- gsub("\\<.*?\\>", "", content, perl = TRUE)
     job_status <- message[grep("Job Status", message)]
     inf_msg <- message[grep("esriJobMessageType", message)]
 

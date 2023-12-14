@@ -20,14 +20,13 @@ RoxygenNote: 7.2.3
 Imports: 
     httr,
     sf,
-    stringr,
-    terra,
     utils
 Suggests: 
     knitr,
     raster,
     rmarkdown,
     stars,
+    terra,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
