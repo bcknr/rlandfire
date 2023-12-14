@@ -4,13 +4,18 @@
 \alias{getAOI}
 \title{Create extent vector for \code{landfireAPI()}}
 \usage{
-getAOI(data, extend = NULL)
+getAOI(data, extend = NULL, sf_order = FALSE)
 }
 \arguments{
 \item{data}{A SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object}
 
-\item{extend}{Optional. A numeric vector of 1, 2, or 4 elements passed to
-\code{\link[terra:extend]{terra::extend()}} by which to increase the extent by.}
+\item{extend}{Optional. A numeric vector of 1, 2, or 4 elements by which to
+increase the extent by.}
+
+\item{sf_order}{If \code{extend} != NULL, logical indicating if the order of the
+vector follows the \code{\link[sf:st_bbox]{sf::st_bbox()}} order (\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax}) or
+the \code{\link[terra:extend]{terra::extend()}} ordering scheme (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}). This
+is \code{FALSE} by default to ensure backwards compatibility with previous versions.}
 }
 \value{
 Returns an extent vector ordered \code{xmin}, \code{ymin}, \code{xmax}, \code{ymax}
