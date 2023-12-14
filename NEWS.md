@@ -1,3 +1,9 @@
+# rlandfire 0.4.0
+
+  - Removed dependencies on `terra` and `stringr`
+  - Added argument to specify order of values in the `extend` argument of `getAOI()`
+  - Added additional tests for `getAOI()`
+
 # rlandfire 0.3.0
 
 -   Added new function (`viewProducts()`) to open the LFPS products table in your web browser
