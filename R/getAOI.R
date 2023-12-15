@@ -62,3 +62,54 @@ getAOI <- function(data, extend = NULL, sf_order = FALSE) {
   as.vector(c(ext$xmin, ext$ymin, ext$xmax, ext$ymax))
 }
 
+
+
+#' Find LANDFIRE map zone for use with `landfireAPI()`
+#'
+#' @description
+#' `getZone` returns the LANDFIRE Map Zone(s) a spatial object intersects or the
+#' zone number from the zone name. Currently, only map zones within CONUS are
+#' supported.
+#'
+#' @param data An sf object or character string with the map zone name.
+#'
+#' @return Returns a numeric vector containing the map zone(s)
+#'
+#' @md
+#' @export
+#'
+#' @examples
+#'v <- sf::st_bbox(sf::st_as_sf(data.frame(x = c(-123.7835,-123.6352),
+#'                                         y = c(41.7534,41.8042)),
+#'                              coords = c("x", "y"),
+#'                              crs = 4326)) |>
+#'  sf::st_as_sfc()
+#' zone <- getZone(v)
+#'
+getZone <- function(data) {
+
+  if(inherits(data, c("sf", "sfc"))) {
+    # Extract mz
+    if(sf::st_crs(data) != sf::st_crs(mapzones)) {
+      data <- sf::st_transform(data, sf::st_crs(mapzones))
+    }
+
+    mz <- sf::st_intersects(data, mapzones)
+
+  } else if(inherits(data, "character")) {
+    mz <- which(sf::st_drop_geometry(mapzones[,"ZONE_NAME"]) == data)
+
+  } else {
+    stop("argument `data` must be sf object, or character string")
+  }
+
+  mz <- unique(unlist(mz))
+
+  stopifnot("argument `data` must be sf object or zone name within CONUS" = length(mz) != 0)
+  if(length(mz) > 1) {
+    warning("Spatial object spans more than one map zone. `landfireAPI` can only handle one zone at a time. Consider using `getAOI()` instead.")
+  }
+
+  mapzones$ZONE_NUM[mz]
+
+}
