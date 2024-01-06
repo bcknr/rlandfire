@@ -63,7 +63,8 @@ hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ``` r
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("./inst/extdata/Wildfire_History.zip", exdir = boundary_file)
+utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
+             exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
