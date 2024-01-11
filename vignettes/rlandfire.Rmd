@@ -59,7 +59,8 @@ To start, we will load in the boundary of the Calwood Fire, which I previously d
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("../inst/extdata/Wildfire_History.zip", exdir = boundary_file)
+utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
+             exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))

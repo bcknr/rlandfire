@@ -42,7 +42,12 @@ repo](https://github.com/bcknr/rlandfire/issues).
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-![Comparison of LFPS and `landfireAPI()`](./man/figures/lfps.png)
+<figure>
+<img src="./man/figures/lfps.png"
+alt="Comparison of LFPS and landfireAPI()" />
+<figcaption aria-hidden="true">Comparison of LFPS and
+<code>landfireAPI()</code></figcaption>
+</figure>
 
 ## Using `rlandfire`
 
@@ -52,9 +57,9 @@ canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 ``` r
 library(rlandfire)
 library(sf)
-#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 library(terra)
-#> terra 1.6.53
+#> terra 1.7.46
 ```
 
 To start, we will load in the boundary of the Calwood Fire, which I
@@ -63,12 +68,13 @@ hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ``` r
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("./inst/extdata/Wildfire_History.zip", exdir = boundary_file)
+utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
+             exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpE75w8n/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmphGPuPQ/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -188,7 +194,7 @@ object returned by `landfireAPI()`.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmpE75w8n/file1fe2dacf79d.zip"
+#> [1] "/tmp/RtmphGPuPQ/file3400296f7d.zip"
 ```
 
 ### Load and process LF data
