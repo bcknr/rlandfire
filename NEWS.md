@@ -1,4 +1,5 @@
 # rlandfire 0.4.1
+-   Fixed issue with license badge in README
 
 # rlandfire 0.4.0
   - Added new function (`getZone()`) which returns the LANDFIRE map zone based on a spatial object or zone name 
