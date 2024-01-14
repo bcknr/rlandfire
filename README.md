@@ -6,6 +6,7 @@
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
 ![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
+![](https://img.shields.io/github/license/bcknr/rlandfire?color=green.html)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -57,9 +58,9 @@ canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 ``` r
 library(rlandfire)
 library(sf)
-#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
 library(terra)
-#> terra 1.7.46
+#> terra 1.6.53
 ```
 
 To start, we will load in the boundary of the Calwood Fire, which I
@@ -74,7 +75,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmphGPuPQ/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpwgyavB/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -194,7 +195,7 @@ object returned by `landfireAPI()`.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmphGPuPQ/file3400296f7d.zip"
+#> [1] "/tmp/RtmpwgyavB/file213d5eddbcb.zip"
 ```
 
 ### Load and process LF data
@@ -228,23 +229,6 @@ plot(boundary$geometry, add = TRUE, col = NA,
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" />
-
-## License
-
-[![](https://img.shields.io/github/license/bcknr/rlandfire?color=green&logo=https%253A%252F%252Fwww.gnu.org%252Flicenses%252Fgpl-3.0.html)](https://www.gnu.org/licenses/gpl-3.0.html)
-
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ### Citation
 

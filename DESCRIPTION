@@ -11,7 +11,7 @@ Maintainer: Mark Buckner <mab677@cornell.edu>
 Description: An R interface to call the LANDFIRE Product Services (LFPS) API to 
     download LANDFIRE data products with a user specified resolution and 
     projection. 
-License: GPL (>= 3) 
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
 URL: https://github.com/bcknr/rlandfire
