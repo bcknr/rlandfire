@@ -6,7 +6,6 @@
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
 ![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
-![](https://img.shields.io/github/license/bcknr/rlandfire?color=green.html)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -75,7 +74,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpwgyavB/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpxbForx/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -195,7 +194,7 @@ object returned by `landfireAPI()`.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmpwgyavB/file213d5eddbcb.zip"
+#> [1] "/tmp/RtmpxbForx/file66df35331abd.zip"
 ```
 
 ### Load and process LF data
