@@ -22,7 +22,8 @@ additional resources can be found on the LANDFIRE webpage.
 
 ## Installation
 
-`rlandfire` can be installed from GitHub with:
+The development version of `rlandfire` can be installed from GitHub
+with:
 
 ``` r
 # install.packages("devtools")
@@ -43,7 +44,7 @@ repo](https://github.com/bcknr/rlandfire/issues).
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
 <figure>
-<img src="./man/figures/lfps.png"
+<img src="man/figures/lfps.png"
 alt="Comparison of LFPS and landfireAPI()" />
 <figcaption aria-hidden="true">Comparison of LFPS and
 <code>landfireAPI()</code></figcaption>
@@ -51,7 +52,7 @@ alt="Comparison of LFPS and landfireAPI()" />
 
 ## Using `rlandfire`
 
-To demonstrate `rlandfire`, we will explore how Ponderosa Pine forest
+To demonstrate `rlandfire`, we will explore how ponderosa pine forest
 canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
 ``` r
@@ -62,8 +63,8 @@ library(terra)
 #> terra 1.6.53
 ```
 
-To start, we will load in the boundary of the Calwood Fire, which I
-previously downloaded from Boulder County’s [geospatial data
+First, we will load the Calwood Fire perimeter data which was downloaded
+from Boulder County’s [geospatial data
 hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ``` r
@@ -74,7 +75,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpxbForx/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/Rtmp6l8ZkD/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -93,13 +94,12 @@ We can use the function `rlandfire::getAOI()` to create an area of
 interest (AOI) vector with the correct format for `landfireAPI()`.
 `getAOI()` handles several steps for us, it ensures that the AOI is
 returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and
-converts the AOI to latitude and longitude coordinates (required by the
-API) if needed.
+converts the AOI to latitude and longitude coordinates (as required by
+the API) if needed.
 
 Using the `extend` argument, we will increase the AOI by 1 km in all
 directions to provide additional context surrounding the burned area.
-This argument takes an optional numeric vector of 1, 2, or 4 elements
-passed to `terra::extend()`.
+This argument takes an optional numeric vector of 1, 2, or 4 elements.
 
 ``` r
 aoi <- getAOI(boundary, extend = 1000)
@@ -107,25 +107,29 @@ aoi
 #> [1] -105.40207   40.11224 -105.23526   40.19613
 ```
 
+Alternatively, you can supply a LANDFIRE map zone number in place of the
+AOI vector. The function `getZone()` returns the zone number containing
+an `sf` object or which corresponds to the supplied zone name. See
+`help("getZone")` for more information and an example.
+
 ### Products
 
-We are interested in two canopy cover products, canopy cover in 2019
-(`200CC_19`) and 2022 (`220CC_22`), and the existing vegetation type
-(`200EVT`). All available data products and their abbreviated names can
-be found in the [products
-table](https://lfps.usgs.gov/helpdocs/productstable.html), which you can
-open in your browser with `viewProducts()`.
+For this example, we are interested in canopy cover data for two years,
+2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type
+(`200EVT`). All available data products, and their abbreviated names,
+can be found in the [products
+table](https://lfps.usgs.gov/helpdocs/productstable.html) which can be
+opened by calling `viewProducts()`.
 
 ``` r
-# viewProducts()
 products <- c("200CC_19", "220CC_22", "200EVT")
 ```
 
 ### Projection and resolution
 
-We can ask the API to project the data to the same CRS as our boundary
-data by providing the `WKID` for our CRS of interest and a resolution of
-our choosing, in meters.
+We can ask the API to project the data to the same CRS as our fire
+perimeter data by providing the `WKID` for our CRS of interest and a
+resolution of our choosing, in meters.
 
 ``` r
 projection <- 32613
@@ -135,16 +139,21 @@ resolution <- 90
 ### Edit rule
 
 We will use the `edit_rule` argument to filter out canopy cover data
-that doesn’t correspond to Ponderosa Pine Woodland. To do this, we will
-use an `edit_rule` statement which says that when existing vegetation
-cover is anything other than Ponderosa Pine Woodland, the value of the
-canopy cover should be set to a specified value.
+that does not correspond to Ponderosa Pine Woodland. The `edit_rule`
+statement should tell the API that when existing vegetation cover is
+anything other than Ponderosa Pine Woodland (`7054`), the value of the
+canopy cover layers should be set to a specified value.
 
-Specifically, we specify that when `220EVT`, the condition, is not equal
-(`ne`) to `7054` the canopy cover layers should be set equal (`st`) to
-`1`. (*There is some weird behavior with the API where clear value
-\[`cv`\] or setting the value outside of 0-100 doesn’t work. So here we
-are using `1` since it is not found in the original data*).
+To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`,
+the “condition,” the canopy cover layers should be set equal (`st`) to
+`1`, the “change.” The edit rule syntax is explained in more depth in
+the [LFPS
+guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf).
+
+*(How the API applies edit rules can be unintuitive. For example, if we
+used ‘clear value’ \[`cv`\] or set the value outside of 0-100 the edits
+we want would not work. To work around this behavior, we set the values
+to `1` since it is not found in the original data set.*)
 
 ``` r
 edit_rule <- list(c("condition","200EVT","ne",7054),
@@ -152,14 +161,10 @@ edit_rule <- list(c("condition","200EVT","ne",7054),
                   c("change", "220CC_22", "st", 1))
 ```
 
-Our requested edits are a relatively simple implementation of
-`edit_rule`, and it is important to note that edits are limited to fuel
-theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel
-Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest
-Canopy Cover, and Forest Canopy Height). The syntax is explained in the
-[LFPS
-guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf),
-and the rules are evaluated in the order they are listed.
+Note: Edits are performed in the order that they are listed and are
+limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire
+Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk
+Density, Forest Canopy Cover, and Forest Canopy Height).
 
 ### Path
 
@@ -188,20 +193,20 @@ resp <- landfireAPI(products = products,
 ```
 
 `landfireAPI()` will download your requested data into the folder
-provided in the path argument. If you didn’t provide one, you can find
+provided in the path argument. If you did not provide one, you can find
 the path to your data in the `$path` element of the `landfire_api`
-object returned by `landfireAPI()`.
+object.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmpxbForx/file66df35331abd.zip"
+#> [1] "/tmp/Rtmp6l8ZkD/file24ce493f8861.zip"
 ```
 
 ### Load and process LF data
 
 The files returned by the LFPS API are compressed `.zip` files. We need
-to unzip them before reading the file ending in `.tif`. Note: all
-additional metadata is included in this same directory as well.
+to unzip the directory before reading the `.tif` file. Note: all
+additional metadata is included in this same directory.
 
 ``` r
 lf_dir <- file.path(tempdir(), "lf")
@@ -211,7 +216,8 @@ lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
 ```
 
 Now we can reclassify the canopy cover layers to remove any values which
-are not classified as Ponderosa Pine, calculate the change, and plot.
+are not classified as Ponderosa Pine, calculate the change, and plot our
+results.
 
 ``` r
 lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA

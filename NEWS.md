@@ -1,5 +1,7 @@
 # rlandfire 1.0.0
 -   CRAN submission
+-   Modified `CITATION` and `DESCRIPTION` files
+-   Minor edits to vignette and documentation
 
 # rlandfire 0.4.1
 -   Fixed issue with license badge in README
