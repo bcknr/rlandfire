@@ -6,6 +6,7 @@
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
 ![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
+![](https://img.shields.io/github/license/bcknr/rlandfire?color=green.html)
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -42,7 +43,12 @@ repo](https://github.com/bcknr/rlandfire/issues).
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-![Comparison of LFPS and `landfireAPI()`](./man/figures/lfps.png)
+<figure>
+<img src="./man/figures/lfps.png"
+alt="Comparison of LFPS and landfireAPI()" />
+<figcaption aria-hidden="true">Comparison of LFPS and
+<code>landfireAPI()</code></figcaption>
+</figure>
 
 ## Using `rlandfire`
 
@@ -63,12 +69,13 @@ hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ``` r
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("./inst/extdata/Wildfire_History.zip", exdir = boundary_file)
+utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
+             exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpE75w8n/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpwgyavB/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -188,7 +195,7 @@ object returned by `landfireAPI()`.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmpE75w8n/file1fe2dacf79d.zip"
+#> [1] "/tmp/RtmpwgyavB/file213d5eddbcb.zip"
 ```
 
 ### Load and process LF data
@@ -222,23 +229,6 @@ plot(boundary$geometry, add = TRUE, col = NA,
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" />
-
-## License
-
-[![](https://img.shields.io/github/license/bcknr/rlandfire?color=green&logo=https%253A%252F%252Fwww.gnu.org%252Flicenses%252Fgpl-3.0.html)](https://www.gnu.org/licenses/gpl-3.0.html)
-
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ### Citation
 

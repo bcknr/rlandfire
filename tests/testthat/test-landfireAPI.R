@@ -73,6 +73,28 @@ test_that("`landfireAPI()` edge cases", {
 })
 
 
+test_that("`landfireAPI()` works with `getAOI()` and `getZone()`", {
+  products <-  c("ASP2020")
+  resolution <- 90
+  path <- tempfile(fileext = ".zip")
+
+  r <- terra::rast(nrows = 50, ncols = 50,
+                   xmin = -2261174.94, xmax = -2247816.36,
+                   ymin = 2412704.65, ymax = 2421673.98,
+                   crs = terra::crs("epsg:5070"),
+                   vals = rnorm(2500))
+
+  aoi <- getAOI(r)
+  zone <- getZone("Northern California Coastal Range")
+
+
+  expect_no_error(landfireAPI(products = products, aoi = aoi,
+                              resolution = resolution, path = path))
+  expect_no_error(landfireAPI(products = products, aoi = zone,
+                              resolution = resolution, path = path))
+})
+
+
 # Tests for .fmt_editrules (internal)
 
 test_that("`.fmt_editrules` correctly formats requests",{

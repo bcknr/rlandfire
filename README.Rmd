@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
-![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
+![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)    ![](https://img.shields.io/github/license/bcknr/rlandfire?color=green.html)
 
 <!-- badges: start -->
 
@@ -25,6 +25,8 @@ knitr::opts_chunk$set(
 
 \
 `rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners, which provides data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
+
+
 
 ## Installation
 
@@ -61,7 +63,8 @@ To start, we will load in the boundary of the Calwood Fire, which I previously d
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
 boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip("./inst/extdata/Wildfire_History.zip", exdir = boundary_file)
+utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
+             exdir = boundary_file)
 
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
@@ -167,16 +170,6 @@ plot(change, col = rev(terrain.colors(250)),
 plot(boundary$geometry, add = TRUE, col = NA,
      border = "black", lwd = 2)
 ```
-
-## License
-
-[![](https://img.shields.io/github/license/bcknr/rlandfire?color=green&logo=https%253A%252F%252Fwww.gnu.org%252Flicenses%252Fgpl-3.0.html)](https://www.gnu.org/licenses/gpl-3.0.html)
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ### Citation
 
