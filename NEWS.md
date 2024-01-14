@@ -1,3 +1,5 @@
+# rlandfire 0.4.1
+
 # rlandfire 0.4.0
   - Added new function (`getZone()`) which returns the LANDFIRE map zone based on a spatial object or zone name 
   - Removed dependencies on `terra` and `stringr`
