@@ -1,4 +1,5 @@
 # rlandfire 1.0.0
+-   CRAN submission
 
 # rlandfire 0.4.1
 -   Fixed issue with license badge in README
