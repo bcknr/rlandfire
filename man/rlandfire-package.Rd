@@ -4,9 +4,9 @@
 \name{rlandfire-package}
 \alias{rlandfire}
 \alias{rlandfire-package}
-\title{rlandfire: Tools for Accessing and Working with LANDFIRE}
+\title{rlandfire: Interface to LANDFIRE Product Services API}
 \description{
-An R interface to call the LANDFIRE Product Services (LFPS) API to download LANDFIRE data products.
+Provides access to a suite of geo-spatial data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc., via the LANDFIRE (\url{https://www.landfire.gov/index.php}) Product Services (LFPS) API.
 }
 \seealso{
 Useful links:

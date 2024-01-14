@@ -1,6 +1,6 @@
 Package: rlandfire
 Type: Package
-Title: Tools for Accessing and Working with LANDFIRE
+Title: Interface to LANDFIRE Product Services API
 Version: 1.0.0
 Authors@R:
   c(person(given = "Mark",
@@ -9,8 +9,7 @@ Authors@R:
            email = "mab677@cornell.edu",
            comment = c(ORCID = "0000-0002-9692-7454")))
 Maintainer: Mark Buckner <mab677@cornell.edu>
-Description: An R interface to call the LANDFIRE Product Services (LFPS) API to 
-    download LANDFIRE data products. 
+Description: Provides access to a suite of geo-spatial data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc., via the LANDFIRE (<https://www.landfire.gov/index.php>) Product Services (LFPS) API.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: false
