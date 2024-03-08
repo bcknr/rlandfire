@@ -28,6 +28,12 @@ knitr::opts_chunk$set(
 
 ## Installation
 
+Install `rlandfire` from CRAN:
+
+``` r
+install.packages("rlandfire")
+```
+
 The development version of `rlandfire` can be installed from GitHub with:
 
 ``` r
