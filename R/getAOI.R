@@ -107,7 +107,7 @@ getZone <- function(data) {
 
   stopifnot("argument `data` must be sf object or zone name within CONUS" = length(mz) != 0)
   if(length(mz) > 1) {
-    warning("Spatial object spans more than one map zone. `landfireAPI` can only handle one zone at a time. Consider using `getAOI()` instead.")
+    warning("Spatial object intersects more than one map zone. `landfireAPI` only accepts one zone at a time!\nConsider using `getAOI()` instead")
   }
 
   mapzones$ZONE_NUM[mz]
