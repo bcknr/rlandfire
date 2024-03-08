@@ -223,6 +223,8 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 #'
 #' @return Character vector (length = 1) with formated edit rules call
 #'
+#' @noRd
+#'
 #' @examples
 #' \dontrun{
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))

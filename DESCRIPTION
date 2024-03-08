@@ -5,7 +5,7 @@ Version: 1.0.0
 Authors@R:
   c(person(given = "Mark",
            family = "Buckner",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            email = "mab677@cornell.edu",
            comment = c(ORCID = "0000-0002-9692-7454")))
 Maintainer: Mark Buckner <mab677@cornell.edu>
