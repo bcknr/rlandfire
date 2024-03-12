@@ -80,6 +80,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   # Classes
   stopifnot("argument `products` must be a character vector" = inherits(products, "character"))
   stopifnot("argument `aoi` must be a character or numeric vector" = inherits(aoi, c("character", "numeric")))
+  stopifnot("argument `aoi` must be vector of coordinates with length == 4 or a single map zone" = length(aoi) == 1 | length(aoi) == 4)
   stopifnot("argument `max_time` must be numeric" = inherits(max_time, c("numeric")))
 
   stopifnot(
@@ -106,7 +107,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   aoi <- as.numeric(aoi)
 
-  if(length(aoi)>1) {
+  if(length(aoi) == 4) {
     # Likely lat/lon?
     if(!all(aoi[c(1,3)] >=-180 & aoi[c(1,3)] <=180 &
             aoi[c(2,4)] >=-90 & aoi[c(2,4)] <=90)){

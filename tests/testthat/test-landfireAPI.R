@@ -35,6 +35,8 @@ test_that("`landfireAPI()` recognizes arguement errors", {
                fixed = TRUE)
   expect_error(landfireAPI(products, aoi = c(-123, 43, -124, 44), path = path),
                "argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`")
+  expect_error(landfireAPI(products, aoi = c(65,66), path = path),
+               "argument `aoi` must be vector of coordinates with length == 4 or a single map zone")
 
   # Check `resolution`
   expect_error(landfireAPI(products, aoi, resolution = 20, path = path),
