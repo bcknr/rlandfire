@@ -22,6 +22,12 @@ additional resources can be found on the LANDFIRE webpage.
 
 ## Installation
 
+Install `rlandfire` from CRAN:
+
+``` r
+install.packages("rlandfire")
+```
+
 The development version of `rlandfire` can be installed from GitHub
 with:
 
@@ -58,9 +64,9 @@ canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 ``` r
 library(rlandfire)
 library(sf)
-#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 library(terra)
-#> terra 1.6.53
+#> terra 1.7.46
 ```
 
 First, we will load the Calwood Fire perimeter data which was downloaded
@@ -75,7 +81,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/Rtmp6l8ZkD/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpJTFdUC/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -199,7 +205,7 @@ object.
 
 ``` r
 resp$path
-#> [1] "/tmp/Rtmp6l8ZkD/file24ce493f8861.zip"
+#> [1] "/tmp/RtmpJTFdUC/filec6e17ac18871.zip"
 ```
 
 ### Load and process LF data
