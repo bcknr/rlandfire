@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Mark Buckner \email{mab677@cornell.edu} (\href{https://orcid.org/0000-0002-9692-7454}{ORCID})
+\strong{Maintainer}: Mark Buckner \email{mab677@cornell.edu} (\href{https://orcid.org/0000-0002-9692-7454}{ORCID}) [copyright holder]
 
 }
 \keyword{internal}
