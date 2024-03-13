@@ -1,3 +1,9 @@
+# rlandfire 1.0.0
+-   CRAN submission
+-   Modified `CITATION` and `DESCRIPTION` files
+-   Minor edits to vignette and documentation
+-   Improved error reporting in `landfireAPI()` if multiple map zones are supplied
+
 # rlandfire 0.4.1
 -   Fixed issue with license badge in README
 

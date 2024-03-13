@@ -6,6 +6,9 @@
 \usage{
 viewProducts()
 }
+\value{
+NULL. Opens the LF products table in your default browser.
+}
 \description{
 \code{viewProducts()} opens the LFPS products table in your web browser
 }

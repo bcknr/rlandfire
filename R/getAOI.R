@@ -4,11 +4,11 @@
 #' `getAOI` creates an extent vector in WGS84 from spatial data
 #'
 #' @param data A SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object
-#' @param extend Optional. A numeric vector of 1, 2, or 4 elements by which to
+#' @param extend Optional. A numeric vector of 1, 2, or 4 elements to
 #'   increase the extent by.
-#' @param sf_order If `extend` != NULL, logical indicating if the order of the
-#'   vector follows the [sf::st_bbox()] order (`xmin`, `ymin`, `xmax`, `ymax`) or
-#'   the [terra::extend()] ordering scheme (`xmin`, `xmax`, `ymin`, `ymax`). This
+#' @param sf_order If `extend` != NULL, logical indicating that the order of the
+#'   `extend` vector follows [sf::st_bbox()] (`xmin`, `ymin`, `xmax`, `ymax`) when TRUE or
+#'   [terra::extend()] (`xmin`, `xmax`, `ymin`, `ymax`) when FALSE. This
 #'   is `FALSE` by default to ensure backwards compatibility with previous versions.
 #'
 #' @return Returns an extent vector ordered `xmin`, `ymin`, `xmax`, `ymax`
@@ -107,7 +107,7 @@ getZone <- function(data) {
 
   stopifnot("argument `data` must be sf object or zone name within CONUS" = length(mz) != 0)
   if(length(mz) > 1) {
-    warning("Spatial object spans more than one map zone. `landfireAPI` can only handle one zone at a time. Consider using `getAOI()` instead.")
+    warning("Spatial object intersects more than one map zone. `landfireAPI` only accepts one zone at a time!\nConsider using `getAOI()` instead")
   }
 
   mapzones$ZONE_NUM[mz]

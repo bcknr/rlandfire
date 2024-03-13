@@ -9,12 +9,12 @@ getAOI(data, extend = NULL, sf_order = FALSE)
 \arguments{
 \item{data}{A SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object}
 
-\item{extend}{Optional. A numeric vector of 1, 2, or 4 elements by which to
+\item{extend}{Optional. A numeric vector of 1, 2, or 4 elements to
 increase the extent by.}
 
-\item{sf_order}{If \code{extend} != NULL, logical indicating if the order of the
-vector follows the \code{\link[sf:st_bbox]{sf::st_bbox()}} order (\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax}) or
-the \code{\link[terra:extend]{terra::extend()}} ordering scheme (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}). This
+\item{sf_order}{If \code{extend} != NULL, logical indicating that the order of the
+\code{extend} vector follows \code{\link[sf:st_bbox]{sf::st_bbox()}} (\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax}) when TRUE or
+\code{\link[terra:extend]{terra::extend()}} (\code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}) when FALSE. This
 is \code{FALSE} by default to ensure backwards compatibility with previous versions.}
 }
 \value{

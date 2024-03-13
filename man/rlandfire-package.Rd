@@ -4,9 +4,9 @@
 \name{rlandfire-package}
 \alias{rlandfire}
 \alias{rlandfire-package}
-\title{rlandfire: Tools for Accessing and Working with LANDFIRE}
+\title{rlandfire: Interface to LANDFIRE Product Services API}
 \description{
-An R interface to call the LANDFIRE Product Services (LFPS) API to download LANDFIRE data products with a user specified resolution and projection.
+Provides access to a suite of geo-spatial data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc., via the LANDFIRE (\url{https://www.landfire.gov/index.php}) Product Services (LFPS) API.
 }
 \seealso{
 Useful links:
@@ -14,6 +14,10 @@ Useful links:
   \item \url{https://github.com/bcknr/rlandfire}
   \item Report bugs at \url{https://github.com/bcknr/rlandfire/issues}
 }
+
+}
+\author{
+\strong{Maintainer}: Mark Buckner \email{mab677@cornell.edu} (\href{https://orcid.org/0000-0002-9692-7454}{ORCID}) [copyright holder]
 
 }
 \keyword{internal}
