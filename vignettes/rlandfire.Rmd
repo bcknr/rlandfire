@@ -17,8 +17,7 @@ knitr::opts_chunk$set(
 <img src="../man/figures/rlandfire.png" align="left" width="125" height="125"/>
 
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
-
-![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)\
+\
 \
 `rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners, which provides data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
 
