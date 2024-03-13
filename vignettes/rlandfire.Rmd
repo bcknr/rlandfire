@@ -131,7 +131,7 @@ path <- tempfile(fileext = ".zip")
 
 Now we are able to submit a request to the LANDFIRE Product Services API with the `landfireAPI()` function.
 
-```{r}
+```{r, eval=FALSE}
 resp <- landfireAPI(products = products,
                     aoi = aoi, 
                     projection = projection, 
@@ -143,11 +143,16 @@ resp <- landfireAPI(products = products,
 
 `landfireAPI()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
 
-```{r}
+```{r, eval=FALSE}
 resp$path
 ```
 
 ### Load and process LF data
+
+```{r,include=FALSE}
+path <- system.file("extdata/LFPS_Return.zip", package = "rlandfire")
+```
+
 
 The files returned by the LFPS API are compressed `.zip` files. We need to unzip the directory before reading the `.tif` file. Note: all additional metadata is included in this same directory.
 
@@ -155,7 +160,9 @@ The files returned by the LFPS API are compressed `.zip` files. We need to unzip
 lf_dir <- file.path(tempdir(), "lf")
 utils::unzip(path, exdir = lf_dir)
 
-lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
+lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", 
+                             full.names = TRUE, 
+                             recursive = TRUE))
 ```
 
 Now we can reclassify the canopy cover layers to remove any values which are not classified as Ponderosa Pine, calculate the change, and plot our results.

@@ -81,7 +81,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpJTFdUC/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/Rtmpb77426/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -205,7 +205,6 @@ object.
 
 ``` r
 resp$path
-#> [1] "/tmp/RtmpJTFdUC/filec6e17ac18871.zip"
 ```
 
 ### Load and process LF data
@@ -218,7 +217,9 @@ additional metadata is included in this same directory.
 lf_dir <- file.path(tempdir(), "lf")
 utils::unzip(path, exdir = lf_dir)
 
-lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", full.names = TRUE))
+lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", 
+                             full.names = TRUE, 
+                             recursive = TRUE))
 ```
 
 Now we can reclassify the canopy cover layers to remove any values which
@@ -239,7 +240,7 @@ plot(boundary$geometry, add = TRUE, col = NA,
      border = "black", lwd = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" />
 
 ### Citation
 
