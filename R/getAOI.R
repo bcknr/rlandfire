@@ -79,12 +79,14 @@ getAOI <- function(data, extend = NULL, sf_order = FALSE) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #'v <- sf::st_bbox(sf::st_as_sf(data.frame(x = c(-123.7835,-123.6352),
 #'                                         y = c(41.7534,41.8042)),
 #'                              coords = c("x", "y"),
 #'                              crs = 4326)) |>
 #'  sf::st_as_sfc()
 #' zone <- getZone(v)
+#'}
 #'
 getZone <- function(data) {
 
