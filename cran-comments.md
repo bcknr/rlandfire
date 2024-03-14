@@ -1,6 +1,8 @@
 ## Resubmission
 This is a resubmission. Changes:
 
+* Added single quotes around API name in title
+
 * Reduced test timings by conditionally skipping tests requiring API access
 
 ## R CMD check results
