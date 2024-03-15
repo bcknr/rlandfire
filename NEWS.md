@@ -1,3 +1,5 @@
+# rlandfire (development version)
+
 # rlandfire 1.0.0
 -   CRAN submission
 -   Modified `CITATION` and `DESCRIPTION` files
