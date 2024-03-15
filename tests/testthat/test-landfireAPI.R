@@ -55,6 +55,9 @@ test_that("`landfireAPI()` recognizes arguement errors", {
 
 
 test_that("`landfireAPI()` recognizes failed call", {
+
+  skip_on_cran()
+
   products <-  "NotAProduct"
   aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
   projection <- 123456
@@ -65,6 +68,9 @@ test_that("`landfireAPI()` recognizes failed call", {
 })
 
 test_that("`landfireAPI()` edge cases", {
+
+  skip_on_cran()
+
   products <-  c("ASP2020")
   aoi <- c("-123.65", "41.75", "-123.63", "41.83")
   resolution <- 90
@@ -76,6 +82,9 @@ test_that("`landfireAPI()` edge cases", {
 
 
 test_that("`landfireAPI()` works with `getAOI()` and `getZone()`", {
+
+  skip_on_cran()
+
   products <-  c("ASP2020")
   resolution <- 90
   path <- tempfile(fileext = ".zip")
@@ -88,7 +97,6 @@ test_that("`landfireAPI()` works with `getAOI()` and `getZone()`", {
 
   aoi <- getAOI(r)
   zone <- getZone("Northern California Coastal Range")
-
 
   expect_no_error(landfireAPI(products = products, aoi = aoi,
                               resolution = resolution, path = path))
