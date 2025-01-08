@@ -3,14 +3,16 @@
 
 <img src="man/figures/rlandfire.png" align="left" width="125" height="125"/>
 
+<br><br>
+
 ## rlandfire: Tools for Accessing and Working with LANDFIRE in R
 
-![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
-
 <!-- badges: start -->
+
+![](https://img.shields.io/github/r-package/v/bcknr/rlandfire)
+[![R-CMD-check](https://github.com/bcknr/rlandfire/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bcknr/rlandfire/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-  
 `rlandfire` provides access to a diverse suite of spatial data layers
 via the LANDFIRE Product Services
 ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer))
@@ -49,12 +51,7 @@ repo](https://github.com/bcknr/rlandfire/issues).
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-<figure>
-<img src="man/figures/lfps.png"
-alt="Comparison of LFPS and landfireAPI()" />
-<figcaption aria-hidden="true">Comparison of LFPS and
-<code>landfireAPI()</code></figcaption>
-</figure>
+![Comparison of LFPS and `landfireAPI()`](man/figures/lfps.png)
 
 ## Using `rlandfire`
 
@@ -66,7 +63,7 @@ library(rlandfire)
 library(sf)
 #> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 library(terra)
-#> terra 1.7.46
+#> terra 1.7.83
 ```
 
 First, we will load the Calwood Fire perimeter data which was downloaded
@@ -81,7 +78,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/Rtmpb77426/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/Rtmp6oLHbw/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
