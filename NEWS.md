@@ -1,4 +1,5 @@
 # rlandfire (development version)
+-   Updated links to LFPS products table
 
 # rlandfire 1.0.0
 -   CRAN submission
