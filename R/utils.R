@@ -14,5 +14,5 @@
 #'
 
 viewProducts <- function() {
-  utils::browseURL("https://lfps.usgs.gov/helpdocs/productstable.html")
+  utils::browseURL("https://lfps.usgs.gov/lfps/helpdocs/productstable.html")
 }
