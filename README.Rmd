@@ -60,6 +60,7 @@ To demonstrate `rlandfire`, we will explore how ponderosa pine forest canopy cov
 library(rlandfire)
 library(sf)
 library(terra)
+library(foreign)
 ```
 
 First, we will load the Calwood Fire perimeter data which was downloaded from Boulder County's [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/).
@@ -182,6 +183,73 @@ plot(change, col = rev(terrain.colors(250)),
      ylab = "Northing")
 plot(boundary$geometry, add = TRUE, col = NA,
      border = "black", lwd = 2)
+```
+
+### Working with Categorical Products
+
+The LFPS REST API now embeds attributes in the GeoTIFF files for some variables 
+and returns a database file (`.dbf`) containing the full attribute table.
+
+To demonstrate, we will download the Existing Vegetation Cover product from LF 2.4.0 
+(`240EVC`). Unlike in the example above we will submit a minimal request with 
+the default projection and resolution. We will also allow `rlandfire` to 
+save the files to a temporary directory automatically. As mentioned above, we 
+can find the path to the temporary directory in the `$path` element of the 
+`landfire_api` object returned by `landfireAPI()`.
+
+```{r}
+resp <- landfireAPI(products = "240EVC",
+                    aoi = aoi,
+                    verbose = FALSE)
+```
+
+```{r,include=FALSE}
+resp$path <- system.file("extdata/LFPS_cat_Return.zip", package = "rlandfire")
+```
+
+When we read in and plot the EVC layer the legend will now list the `classnames`
+ for each vegetation type.
+
+```{r}
+lf_cat <- file.path(tempdir(), "lf_cat")
+utils::unzip(resp$path, exdir = lf_cat)
+
+evc <- terra::rast(list.files(lf_cat, pattern = ".tif$", 
+                             full.names = TRUE, 
+                             recursive = TRUE))
+
+plot(evc)
+```
+
+To access the values each `classname` is assigned to we can uses the `levels()` 
+function. This returns a simple two column data frame containing both the index 
+and active category, in our case the vegetation cover classes.
+
+```{r}
+head(levels(evc)[[1]])
+```
+
+Alternatively, we can access the full attribute table using two methods. 
+We can use the function `cats()` which works similarly to `levels()` but 
+returns the full attribute table as a data frame. Alternatively, we can read the 
+database file using  `foreign::read.dbf()`. Both methods return similar results,
+although in this case, we see that the `.dbf` file includes an additional `Count`
+column not included in the data frame returned from `cats()`.
+
+```{r}
+# cats
+attr_tbl <- cats(evc)
+
+# Find path to database file
+dbf <- list.files(lf_cat, pattern = ".dbf$",
+                  full.names = TRUE,
+                  recursive = TRUE)
+
+# Read file
+dbf_tbl  <- foreign::read.dbf(dbf)
+
+head(attr_tbl[[1]])
+head(dbf_tbl)
 ```
 
 ### Citation

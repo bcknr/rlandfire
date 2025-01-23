@@ -21,6 +21,7 @@ Imports:
     sf,
     utils
 Suggests: 
+    foreign,
     knitr,
     raster,
     rmarkdown,
