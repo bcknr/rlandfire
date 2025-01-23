@@ -64,6 +64,7 @@ library(sf)
 #> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 library(terra)
 #> terra 1.7.83
+library(foreign)
 ```
 
 First, we will load the Calwood Fire perimeter data which was downloaded
@@ -78,7 +79,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/Rtmp6oLHbw/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmpxbYn2L/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -238,6 +239,113 @@ plot(boundary$geometry, add = TRUE, col = NA,
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" />
+
+### Working with Categorical Products
+
+The LFPS REST API now embeds attributes in the GeoTIFF files for some
+variables and returns a database file (`.dbf`) containing the full
+attribute table.
+
+To demonstrate, we will download the Existing Vegetation Cover product
+from LF 2.4.0 (`240EVC`). Unlike in the example above we will submit a
+minimal request with the default projection and resolution. We will also
+allow `rlandfire` to save the files to a temporary directory
+automatically. As mentioned above, we can find the path to the temporary
+directory in the `$path` element of the `landfire_api` object returned
+by `landfireAPI()`.
+
+``` r
+resp <- landfireAPI(products = "240EVC",
+                    aoi = aoi,
+                    verbose = FALSE)
+#> Warning in landfireAPI(products = "240EVC", aoi = aoi, verbose = FALSE): `path`
+#> is missing. Files will be saved in temp directory:
+#> /tmp/RtmpxbYn2L/file19829a239b8a25.zip
+```
+
+When we read in and plot the EVC layer the legend will now list the
+`classnames` for each vegetation type.
+
+``` r
+lf_cat <- file.path(tempdir(), "lf_cat")
+utils::unzip(resp$path, exdir = lf_cat)
+
+evc <- terra::rast(list.files(lf_cat, pattern = ".tif$", 
+                             full.names = TRUE, 
+                             recursive = TRUE))
+
+plot(evc)
+```
+
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+
+To access the values each `classname` is assigned to we can uses the
+`levels()` function. This returns a simple two column data frame
+containing both the index and active category, in our case the
+vegetation cover classes.
+
+``` r
+head(levels(evc)[[1]])
+#>   Value                        CLASSNAMES
+#> 1    11                        Open Water
+#> 2    13 Developed-Upland Deciduous Forest
+#> 3    14 Developed-Upland Evergreen Forest
+#> 4    15     Developed-Upland Mixed Forest
+#> 5    16       Developed-Upland Herbaceous
+#> 6    17        Developed-Upland Shrubland
+```
+
+Alternatively, we can access the full attribute table using two methods.
+We can use the function `cats()` which works similarly to `levels()` but
+returns the full attribute table as a data frame. Alternatively, we can
+read the database file using `foreign::read.dbf()`. Both methods return
+similar results, although in this case, we see that the `.dbf` file
+includes an additional `Count` column not included in the data frame
+returned from `cats()`.
+
+``` r
+# cats
+attr_tbl <- cats(evc)
+
+# Find path to database file
+dbf <- list.files(lf_cat, pattern = ".dbf$",
+                  full.names = TRUE,
+                  recursive = TRUE)
+
+# Read file
+dbf_tbl  <- foreign::read.dbf(dbf)
+
+head(attr_tbl[[1]])
+#>   Value                        CLASSNAMES   R   G   B      RED    GREEN
+#> 1    11                        Open Water   0   0 255 0.000000 0.000000
+#> 2    13 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
+#> 3    14 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
+#> 4    15     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
+#> 5    16       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
+#> 6    17        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
+#>       BLUE
+#> 1 1.000000
+#> 2 0.658824
+#> 3 0.537255
+#> 4 0.803922
+#> 5 0.960784
+#> 6 0.843137
+head(dbf_tbl)
+#>   Value Count                        CLASSNAMES   R   G   B      RED    GREEN
+#> 1    11   229                        Open Water   0   0 255 0.000000 0.000000
+#> 2    13   119 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
+#> 3    14   337 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
+#> 4    15   198     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
+#> 5    16   365       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
+#> 6    17   181        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
+#>       BLUE
+#> 1 1.000000
+#> 2 0.658824
+#> 3 0.537255
+#> 4 0.803922
+#> 5 0.960784
+#> 6 0.843137
+```
 
 ### Citation
 
