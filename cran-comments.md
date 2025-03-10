@@ -1,3 +1,15 @@
+## Update (v1.0.1)
+
+0 errors | 0 warnings | 0 notes
+
+This is a minor update to the existing `rlandfire` package. Changes include:
+
+* Fixed LFPS resource links broken by LFPS website update
+
+* Updated documentation to reflect/warn users of ongoing product name changes
+
+* Added documentation to `README.md` and the vignette on working with categorical data
+
 ## Resubmission
 This is a resubmission. Changes:
 
