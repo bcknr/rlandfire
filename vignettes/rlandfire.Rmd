@@ -46,7 +46,7 @@ This package is still in development, and users may encounter bugs or unexpected
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-![Comparison of LFPS and `landfireAPI()`](man/figures/lfps.png){alt="Comparison of LFPS and landfireAPI()"}
+![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png){alt="Comparison of LFPS and landfireAPI()"}
 
 ## Using `rlandfire`
 

@@ -6,7 +6,7 @@
 \alias{rlandfire-package}
 \title{rlandfire: Interface to 'LANDFIRE Product Service' API}
 \description{
-Provides access to a suite of geospatial data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc., via the 'LANDFIRE' (\url{https://www.landfire.gov/index.php}) Product Service ('LFPS') API.
+Provides access to a suite of geospatial data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc., via the 'LANDFIRE' (\url{https://www.landfire.gov/}) Product Service ('LFPS') API.
 }
 \seealso{
 Useful links:
