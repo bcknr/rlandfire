@@ -1,6 +1,7 @@
-# rlandfire (development version)
+# rlandfire 1.0.1
 -   Created startup message with warning about potential/upcoming product name changes
 -   Updated links to LFPS products table in documentation and `viewProducts()`
+-   Updated documentation to reflect product name changes
 -   Added documentation to `README.md` and the vignette on working with categorical data
 -   Added `foreign` to suggests
 
