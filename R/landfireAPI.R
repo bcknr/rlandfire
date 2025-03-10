@@ -35,11 +35,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "140CC")
+#' products <-  c("ASP2020", "ELEV2020", "230CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' projection <- 6414
 #' resolution <- 90
-#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
+#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
 #' resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }
@@ -228,7 +228,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
+#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
 #' .fmt_editrules(edit_rule)
 #' }
 .fmt_editrules <- function(rules) {
