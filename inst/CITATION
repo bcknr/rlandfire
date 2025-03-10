@@ -6,6 +6,6 @@ bibentry(
     author   = person("Mark A. Buckner", role = "aut"),
     year     = 2023,
     note     = "R Package version 1.0.1",
-    url      = "https://cran.r-project.org/web/packages/rlandfire",
+    url      = "https://cran.r-project.org/web/packages/rlandfire/",
     doi      = "10.6084/m9.figshare.22203250"
 )

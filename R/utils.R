@@ -10,8 +10,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' viewProducts()
-#'
+#' }
 
 viewProducts <- function() {
   utils::browseURL("https://lfps.usgs.gov/lfps/helpdocs/productstable.html")

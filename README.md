@@ -5,7 +5,7 @@
 
 <br><br>
 
-## rlandfire: Tools for Accessing and Working with LANDFIRE in R
+## rlandfire: Interface to ‘LANDFIRE Product Service’ API
 
 <!-- badges: start -->
 
@@ -60,10 +60,31 @@ canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
 ``` r
 library(rlandfire)
+#> [38;5;208m                           
+#>          _           _ ___ _         
+#>      ___| |___ ___ _| |  _|_|___ ___ 
+#>     |  _| | .'|   | . |  _| |  _| -_|
+#>     |_| |_|__,|_|_|___|_| |_|_| |___|
+#>                                  
+#>     [0mversion:1.0.1[38;5;160m
+#> 
+#> WARNING:[0m
+#> The LFPS API product names are changing!
+#> Type 'viewProducts()' to view the current names.
+#> 
+#> New product names may require previous workflows to be updated
 library(sf)
-#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.11.1, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
+#> WARNING: different compile-time and runtime versions for GEOS found:
+#> Linked against: 3.11.1-CAPI-1.17.1 compiled against: 3.10.2-CAPI-1.16.0
+#> It is probably a good idea to reinstall sf (and maybe lwgeom too)
 library(terra)
 #> terra 1.7.83
+#> WARNING: different compile-time and run-time versions of GEOS
+#> Compiled with:3.10.2-CAPI-1.16.0
+#>  Running with:3.11.1-CAPI-1.17.1
+#> 
+#> You should reinstall package 'terra'
 library(foreign)
 ```
 
@@ -79,7 +100,7 @@ utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
 boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 #> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmpxbYn2L/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#>   `/tmp/RtmprznwZB/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -122,8 +143,8 @@ For this example, we are interested in canopy cover data for two years,
 2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type
 (`200EVT`). All available data products, and their abbreviated names,
 can be found in the [products
-table](https://lfps.usgs.gov/helpdocs/productstable.html) which can be
-opened by calling `viewProducts()`.
+table](https://lfps.usgs.gov/lfps/helpdocs/productstable.html) which can
+be opened by calling `viewProducts()`.
 
 ``` r
 products <- c("200CC_19", "220CC_22", "200EVT")
@@ -152,7 +173,7 @@ To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`,
 the “condition,” the canopy cover layers should be set equal (`st`) to
 `1`, the “change.” The edit rule syntax is explained in more depth in
 the [LFPS
-guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf).
+guide](https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf).
 
 *(How the API applies edit rules can be unintuitive. For example, if we
 used ‘clear value’ \[`cv`\] or set the value outside of 0-100 the edits
@@ -260,7 +281,7 @@ resp <- landfireAPI(products = "240EVC",
                     verbose = FALSE)
 #> Warning in landfireAPI(products = "240EVC", aoi = aoi, verbose = FALSE): `path`
 #> is missing. Files will be saved in temp directory:
-#> /tmp/RtmpxbYn2L/file19829a239b8a25.zip
+#> /tmp/RtmprznwZB/file2e86ea178975f4.zip
 ```
 
 When we read in and plot the EVC layer the legend will now list the
@@ -349,6 +370,6 @@ head(dbf_tbl)
 
 ### Citation
 
-Visit the [LANDFIRE webpage](https://landfire.gov/landfire_citation.php)
-for information on citing LANDFIRE data layers. The package citation
+Visit the [LANDFIRE webpage](https://landfire.gov/data/citation) for
+information on citing LANDFIRE data layers. The package citation
 information can be viewed with `citation("rlandfire")`.

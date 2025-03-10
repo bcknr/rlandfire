@@ -46,7 +46,7 @@ This package is still in development, and users may encounter bugs or unexpected
 
 ## `rlandfire` vs LANDFIRE Product Service (LFPS)
 
-![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png){width="600"}
+![Comparison of LFPS and `landfireAPI()`](man/figures/lfps.png){alt="Comparison of LFPS and landfireAPI()"}
 
 ## Using `rlandfire`
 
@@ -88,7 +88,7 @@ Alternatively, you can supply a LANDFIRE map zone number in place of the AOI vec
 
 ### Products
 
-For this example, we are interested in canopy cover data for two years, 2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/helpdocs/productstable.html) which can be opened by calling `viewProducts()`.
+For this example, we are interested in canopy cover data for two years, 2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type (`200EVT`). All available data products, and their abbreviated names, can be found in the [products table](https://lfps.usgs.gov/lfps/helpdocs/productstable.html) which can be opened by calling `viewProducts()`.
 
 ```{r}
 products <- c("200CC_19", "220CC_22", "200EVT")
@@ -107,7 +107,7 @@ resolution <- 90
 
 We will use the `edit_rule` argument to filter out canopy cover data that does not correspond to Ponderosa Pine Woodland. The `edit_rule` statement should tell the API that when existing vegetation cover is anything other than Ponderosa Pine Woodland (`7054`), the value of the canopy cover layers should be set to a specified value.
 
-To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`, the "condition," the canopy cover layers should be set equal (`st`) to `1`, the "change." The edit rule syntax is explained in more depth in the [LFPS guide](https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf).
+To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`, the "condition," the canopy cover layers should be set equal (`st`) to `1`, the "change." The edit rule syntax is explained in more depth in the [LFPS guide](https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf).
 
 *(How the API applies edit rules can be unintuitive. For example, if we used 'clear value' [`cv`] or set the value outside of 0-100 the edits we want would not work. To work around this behavior, we set the values to `1` since it is not found in the original data set.*)
 
@@ -131,7 +131,7 @@ path <- tempfile(fileext = ".zip")
 
 Now we are able to submit a request to the LANDFIRE Product Services API with the `landfireAPI()` function.
 
-```{r, eval=FALSE}
+```{r,eval=FALSE}
 resp <- landfireAPI(products = products,
                     aoi = aoi, 
                     projection = projection, 
@@ -143,7 +143,7 @@ resp <- landfireAPI(products = products,
 
 `landfireAPI()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
 
-```{r, eval=FALSE}
+```{r,eval=FALSE}
 resp$path
 ```
 
@@ -250,4 +250,4 @@ head(dbf_tbl)
 
 ### Citation
 
-Visit the [LANDFIRE webpage](https://landfire.gov/landfire_citation.php) for information on citing LANDFIRE data layers. The package citation information can be viewed with `citation("rlandfire")`.
+Visit the [LANDFIRE webpage](https://landfire.gov/data/citation) for information on citing LANDFIRE data layers. The package citation information can be viewed with `citation("rlandfire")`.
