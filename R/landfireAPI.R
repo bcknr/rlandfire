@@ -8,6 +8,10 @@
 #' @param aoi Area of interest as character or numeric vector defined by
 #'   latitude and longitude in decimal degrees in WGS84 and ordered
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
+#' @param email Email address as character string. This is a required argument
+#'   for the LFPS v2 API. See the \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide} 
+#'   for more information. Outside of the LFPS API request, this email address
+#'   is not used for any other purpose, stored, or shared by `rlandfire`.
 #' @param projection Optional. A numeric value of the WKID for the output projection
 #'    Default is a localized Albers projection.
 #' @param resolution Optional. A numeric value between 30-9999 specifying the
@@ -16,6 +20,8 @@
 #'   "product", "operator", "value". Limited to fuel theme products only.
 #'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
 #' @param edit_mask Optional. **Not currently functional**
+#' @param priority_code Optional. Priority code for wildland fire systems and users. 
+#'   Contact the LANDFIRE help desk for more information (<helpdesk@landfire.gov>)
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
@@ -44,12 +50,15 @@
 #' resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }
 
-landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
-                        edit_rule = NULL, edit_mask = NULL, path = NULL,
-                        max_time = 10000, method = "curl", verbose = TRUE) {
+landfireAPI <- function(products, aoi, email, projection = NULL,
+                        resolution = NULL, edit_rule = NULL, edit_mask = NULL,
+                        priority_code = NULL, path = NULL, max_time = 10000,
+                        method = "curl", verbose = TRUE) {
 
   #### Checks
   # Missing
+  stopifnot("A valid `email` address is required. (See `?rlandfire::landfireAPI` for more information)" 
+            = grepl("@", email) && !missing(email))
   stopifnot("argument `products` is missing with no default" = !missing(products))
   stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
 
@@ -74,14 +83,17 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
-    warning("`path` is missing. Files will be saved in temp directory: ", path)
+    warning("`path` is missing. Files will be saved in temporary directory: ", 
+            path)
   }
 
   # Classes
+  # stopifnot("argument `email` must be a character string" = inherits(email, "character")) # TODO: should be captured above?
   stopifnot("argument `products` must be a character vector" = inherits(products, "character"))
   stopifnot("argument `aoi` must be a character or numeric vector" = inherits(aoi, c("character", "numeric")))
   stopifnot("argument `aoi` must be vector of coordinates with length == 4 or a single map zone" = length(aoi) == 1 | length(aoi) == 4)
   stopifnot("argument `max_time` must be numeric" = inherits(max_time, c("numeric")))
+  stopifnot("argument `priority_code` must be a character string" = inherits(priority_code, c("character", "NULL")))
 
   stopifnot(
     "`method` is invalid. See `?download.file`" =
@@ -124,33 +136,48 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
   #### End Checks
 
-  if(!is.null(edit_rule)) {
-    edit_rule <- .fmt_editrules(edit_rule)
-  }
-
-  base_url <- httr::parse_url("https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/submitJob?")
-  base_url$query <- list(Layer_List = paste(products, collapse = ";"),
-                         Area_of_Interest = paste(aoi, collapse = " "),
-                         Output_Projection = projection,
-                         Resample_Resolution = resolution,
-                         Edit_Rule = edit_rule #,
-                         #Edit_Mask = edit_mask
+  # Define Parameters
+  params <- list(
+    Email = email,
+    Layer_List = paste(products, collapse = ";"),
+    Area_of_Interest = paste(aoi, collapse = " "),
+    Output_Projection = projection,
+    Resample_Resolution = resolution,
+    Edit_Rule = .fmt_editrules(edit_rule),
+    Edit_Mask = edit_mask,
+    Priority_Code = priority_code
   )
 
-  url <- httr::build_url(base_url)
-  r <- httr::GET(url)
-  job_id <- sub(".*jobs/(.*)$", "\\1", r$url)
-  dwl_url <- paste0("https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/",
-                    job_id, "/scratch/", job_id, ".zip")
+  purpose <- "submitJob"
 
-  # Loop through up to max time
+  # Construct request URL
+  request  <- httr2::request("https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/") |>
+    httr2::req_url_path_append(purpose) |>
+    httr2::req_url_query(!!!params) |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")
+
+  # TODO: Set so returns json
+  
+  # Submit job
+  req <- httr2::req_perform(request)
+
   mt <- max_time*10
 
   for (i in 1:mt) {
     # Check status
-    r <- httr::GET(r$url)
-    status <- httr::status_code(r) #API always returns a successful status code (200)
-    content <- strsplit(httr::content(r, "text"), "\r\n")[[1]]
+
+    response <- httr2::request(httr2::resp_url(req)) |>
+      # httr2::req_url_query("f"="pjson") |>
+      httr2::req_perform()
+
+    if (i == 1) {
+      job_id <- sub(".*jobs/(.*)$", "\\1", response$url)
+    }
+
+    # API always returns a successful status code (200) for LFPS v1
+    status <- httr2::resp_status(response)
+
+    content <- strsplit(httr2::resp_body_string(response), "\r\n")[[1]]
 
     # Parse content for messaging and error reporting
     message <- gsub("\\<.*?\\>", "", content, perl = TRUE)
@@ -175,7 +202,14 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 
       # If success report success and download file
     } else if(grepl("Succeeded",job_status)) {
-      utils::download.file(dwl_url, path, method = method, quiet = !verbose)
+      dwl_req <- httr2::request(response$url) |>
+        httr2::req_url_path_append("/results/Output_File?f=pjson") |>
+        httr2::req_perform()
+
+      dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
+
+      utils::download.file(dwl_url$value$url, path,
+                           method = method, quiet = !verbose)
       status <- "Succeeded"
       break
 
@@ -197,13 +231,13 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   # construct landfire_api object
   structure(
     list(
-      request = list(query = base_url$query,
+      request = list(query = params,
                      date = Sys.time(),
-                     url = url,
+                     url = request$url,
                      job_id = job_id,
-                     dwl_url = dwl_url),
+                     dwl_url = dwl_url$value$url),
       content = inf_msg, # currently just returns a vector
-      response = r,
+      response = response,
       status = status,
       path = path
     ),
@@ -232,6 +266,12 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
 #' .fmt_editrules(edit_rule)
 #' }
 .fmt_editrules <- function(rules) {
+  
+  # Check for NULL
+  if(is.null(rules)) {
+    return(NULL)
+  }
+
   class <- sapply(rules, `[`, 1)
 
   params <- lapply(rules, function(x) {
