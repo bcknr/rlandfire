@@ -3,5 +3,6 @@
 export(getAOI)
 export(getZone)
 export(landfireAPI)
+export(landfireAPIv2)
 export(viewProducts)
 importFrom(utils,browseURL)
