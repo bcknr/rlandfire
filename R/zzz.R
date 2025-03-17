@@ -9,6 +9,8 @@
                                  
     )", "\033[0m"), "version:", utils::packageVersion("rlandfire"),
 "\033[38;5;160m\n\nWARNING:\033[0m\n",
-"The LFPS API product names are changing!\nType 'viewProducts()' to view the current names.\n\n",
-"New product names may require previous workflows to be updated")
+"The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.\n",
+"To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`\n",
+"Product names may have changed. Type 'viewProducts()' to view the current names\n\n",
+"\033[38;5;160mThe updates to LFPSv2 will require previous workflows to be updated\033[0m")
 }
