@@ -57,10 +57,10 @@ landfireAPI <- function(products, aoi, email, projection = NULL,
 
   #### Checks
   # Missing
-  stopifnot("A valid `email` address is required. (See `?rlandfire::landfireAPI` for more information)" 
-            = grepl("@", email) && !missing(email))
   stopifnot("argument `products` is missing with no default" = !missing(products))
   stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
+  stopifnot("A valid `email` address is required. (See `?rlandfire::landfireAPI` for more information)" = grepl("@", email) && !missing(email))
+  stopifnot("argument `email` is missing with no default" = !missing(aoi))
 
   if(!is.null(edit_rule)){
     stopifnot("argument `edit_rule` must be a list" = inherits(edit_rule, "list"))
@@ -83,7 +83,7 @@ landfireAPI <- function(products, aoi, email, projection = NULL,
 
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
-    warning("`path` is missing. Files will be saved in temporary directory: ", 
+    message("`path` is missing. Files will be saved in temporary directory: ", 
             path)
   }
 
