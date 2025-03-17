@@ -130,7 +130,7 @@ landfireAPI <- function(products, aoi, email, projection = NULL,
       stop("argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`")
     }
     # Valid map zone?
-  } else if(length(aoi) == 1 & !all(aoi >= 1 & aoi <= 79)){
+  } else if(length(aoi) == 1 && !all(aoi >= 1 & aoi <= 79)){
     stop("argument `aoi` must be between 1 and 79 when using LANDFIRE map zones")
   }
 
@@ -167,22 +167,22 @@ landfireAPI <- function(products, aoi, email, projection = NULL,
     # Check status
 
     response <- httr2::request(httr2::resp_url(req)) |>
-      # httr2::req_url_query("f"="pjson") |>
+      httr2::req_url_query("f"="pjson") |>
       httr2::req_perform()
 
+    resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
+
     if (i == 1) {
-      job_id <- sub(".*jobs/(.*)$", "\\1", response$url)
+      job_id <- resp_body$jobId
     }
 
     # API always returns a successful status code (200) for LFPS v1
     status <- httr2::resp_status(response)
 
-    content <- strsplit(httr2::resp_body_string(response), "\r\n")[[1]]
-
     # Parse content for messaging and error reporting
-    message <- gsub("\\<.*?\\>", "", content, perl = TRUE)
-    job_status <- message[grep("Job Status", message)]
-    inf_msg <- message[grep("esriJobMessageType", message)]
+    job_status <- resp_body$jobStatus
+    inf_msg  <- paste(resp_body$messages$type,
+                      resp_body$message$description, sep = ": ")
 
     if(verbose == TRUE) {
       # There is a better way to do this but for now...clear console each loop:
@@ -203,7 +203,8 @@ landfireAPI <- function(products, aoi, email, projection = NULL,
       # If success report success and download file
     } else if(grepl("Succeeded",job_status)) {
       dwl_req <- httr2::request(response$url) |>
-        httr2::req_url_path_append("/results/Output_File?f=pjson") |>
+        httr2::req_url_path_append(resp_body$results$Output_File$paramUrl) |>
+        # httr2::req_url_path_append("?f=pjson") |>
         httr2::req_perform()
 
       dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
