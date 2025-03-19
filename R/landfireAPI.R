@@ -48,7 +48,9 @@
 #' resolution <- 90
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
-#' resp <- landfireAPIv2(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
+#' resp <- landfireAPIv2(products, aoi, email, projection,
+#'                       resolution, edit_rule = edit_rule,
+#'                       path = save_file)
 #' }
 
 landfireAPIv2 <- function(products, aoi, email, projection = NULL,
@@ -189,7 +191,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
       # There is a better way to do this but for now...clear console each loop:
       cat("\014")
 
-      cat(job_status,"\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
+      cat(job_status, "\nJob ID: ", job_id,
+          "\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
           "\n-------------------",
           "\nElapsed time: ", sprintf("%.1f", round(i*0.1, 1)), "s", "(Max time:", max_time, "s)",
           "\n-------------------\n")
