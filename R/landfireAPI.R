@@ -254,7 +254,116 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #TODO Get edit_mask running
 #TODO Overwrite the console instead of clearing
 
+#' Cancel an active LANDFIRE Product Service (LFPS) API job
+#'
+#' @description
+#' `cancelJob()` sends a request to cancel a LFPS API request
+#'
+#' @param job_id The job ID of the LFPS API request as a character string
+#'
+#' @return
+#' Returns a `landfire_api` object with named elements:
+#' * `request` - list with elements `query`, `date`, `url`, `job_id`,`dwl_url`
+#' * `content` - Informative messages passed from API
+#' * `response` - Full response
+#' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
+#' * `path` - path to save directory
+#'
+#' @md
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+#' email <- "email@@example.com>"
+#'
+#' resp <- landfireAPIv2(products, aoi, email)
+#'
+#' job_id <- resp$request$job_id #Get job_id from a previous request
+#' cancelJob("job_id")
+#' }
 
+cancelJob <- function(job_id) {
+
+  #### Checks
+  # Missing
+  stopifnot("argument `job_id` is missing with no default" = !missing(job_id))
+  
+  # Classes
+  stopifnot("argument `job_id` must be a character string" = inherits(job_id, "character"))
+
+  #### End Checks
+
+  # Define Parameters
+  params <- list(
+    jobId = job_id
+  )
+
+  purpose <- "cancel"
+
+  # Construct request URL
+  request  <- httr2::request("https://lfps.usgs.gov/api/job/") |>
+    httr2::req_url_path_append(purpose) |>
+    httr2::req_url_query(!!!params) |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")
+
+  # Submit job
+  response <- httr2::req_perform(request)
+
+  # construct landfire_api object
+  structure(
+    list(
+      request = list(query = params,
+                     date = Sys.time(),
+                     url = request$url,
+                     job_id = job_id,
+                     dwl_url = NULL),
+      content = NULL,
+      response = response,
+      status = "Canceled", # TODO: Response status?
+      path = NULL
+    ),
+    class = "landfire_api"
+  )
+}
+
+#' Check if the LFPS API is available
+#'
+#' @description
+#' `healthCheck()` checks if the LPFS API is available
+#'
+#'
+#' @return NULL. Prints a message to the console about the current status of LFPS.
+#'
+#' @md
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' healthCheck()
+#' }
+
+healthCheck <- function() {
+
+  # Construct request URL
+  request  <- httr2::request("https://lfps.usgs.gov/api/healthCheck") |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")
+
+  # Submit job
+  response <- httr2::req_perform(request)
+
+  # Parse content for messaging and error reporting
+  resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
+
+  if (resp_body$success == TRUE) {
+    message("The LFPS API is available")
+  } else {
+    warning("The LFPS API is currently down.\n",
+            "Please notify the LANDFIRE helpdesk at <helpdesk@landfire.gov> of the following error:\n",
+            resp_body$message)
+  }
+}
 
 #' Internal: Format edit_rule for API call
 #'
