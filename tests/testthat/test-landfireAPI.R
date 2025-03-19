@@ -156,6 +156,18 @@ test_that("`landfireAPIv2()` works with `getAOI()` and `getZone()`", {
                               resolution = resolution, path = path))
 })
 
+# Tests for cancelJob()
+test_that("`cancelJob()` recognizes arguement errors", {
+  expect_error(cancelJob(),
+               "argument `job_id` is missing with no default")
+
+  expect_error(cancelJob(job_id = "notanid"),
+               "argument `job_id` must be a valid job ID")
+})
+
+# Tests for healthCheck()
+# TODO: Test that healthCheck() returns a message/warning
+
 
 # Tests for .fmt_editrules (internal)
 test_that("`.fmt_editrules` correctly formats requests",{
