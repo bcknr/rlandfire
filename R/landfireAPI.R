@@ -27,6 +27,7 @@
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param verbose If FALSE suppress all status messages
+#' @param background If TRUE, the function will return immediately and the job will run in the background.
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
@@ -56,7 +57,7 @@
 landfireAPIv2 <- function(products, aoi, email, projection = NULL,
                         resolution = NULL, edit_rule = NULL, edit_mask = NULL,
                         priority_code = NULL, path = NULL, max_time = 10000,
-                        method = "curl", verbose = TRUE) {
+                        method = "curl", verbose = TRUE, background = FALSE) {
 
   #### Checks
   # Missing
@@ -171,13 +172,17 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
   for (i in 1:mt) {
     # Check status
-    lfps_return  <- .checkStatus_internal(landfire_api = lfps, verbose = verbose,
+    lfps_return <- .checkStatus_internal(landfire_api = lfps, verbose = verbose,
                                 method = method, i = i, max_time = max_time)
 
     # If failed exit and report
-    if (lfps_return$status == "Failed") {
+    if (background == TRUE) {
+      message("Job submitted in background.\n",
+              "Call `checkStatus()` to check the current status and download if completed.\n",
+              "Or visit URL to check status and download manually:\n   ",
+              httr2::resp_url(lfps_return$request$request))
       break
-    } else if (lfps_return$status == "Succeeded") {
+    } else if (lfps_return$status %in% c("Failed","Succeeded")) {
       break
     }
 
@@ -203,7 +208,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
 #' Internal: Check the status of an existing LANDFIRE Product Service (LFPS) request
 #'
-#' @param lfps `landfire_api` object returned from `landfireAPIv2()`
+#' @param landfire_api `landfire_api` object returned from `landfireAPIv2()`
 #' @param verbose If FALSE suppress all status messages
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param i Current iteration
@@ -215,14 +220,14 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' .checkStatus_internal(lfps, verbose = TRUE, method = "curl", i = 1, max_time = 10000)
+#' .checkStatus_internal(landfire_api, verbose = TRUE, method = "curl", i = 1, max_time = 10000)
 #' }
 
-.checkStatus_internal  <- function(lfps, verbose = TRUE, method = "curl",
+.checkStatus_internal  <- function(landfire_api, verbose = TRUE, method = "curl",
                                    i, max_time) {
 
   # Check status
-  response <- httr2::request(httr2::resp_url(lfps$request$request)) |>
+  response <- httr2::request(httr2::resp_url(landfire_api$request$request)) |>
     httr2::req_url_query("f"="pjson") |>
     httr2::req_perform()
 
@@ -260,20 +265,20 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
       httr2::req_perform()
 
     dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
-    utils::download.file(dwl_url$value$url, lfps$path,
+    utils::download.file(dwl_url$value$url, landfire_api$path,
                          method = method, quiet = !verbose)
     status <- "Succeeded"
+    landfire_api$request$dwl_url <- dwl_url$value$url
   }
 
   # Update landfire_api object
-  lfps$request$date <- Sys.time()
-  lfps$request$job_id <- job_id
-  lfps$request$dwl_url <- dwl_url$value$url
-  lfps$content <- inf_msg
-  lfps$response <- response
-  lfps$status <- status
+  landfire_api$request$date <- Sys.time()
+  landfire_api$request$job_id <- job_id
+  landfire_api$content <- inf_msg
+  landfire_api$response <- response
+  landfire_api$status <- status
 
-  return(lfps)
+  return(landfire_api)
 
 }
 
@@ -283,7 +288,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' @description
 #' `checkStatus` checks if a previous request is complete and downloads available data
 #'
-#' @param LFPS `landfire_api` object returned from `landfireAPIv2()`
+#' @param landfire_api `landfire_api` object returned from `landfireAPIv2()`
 #' @param verbose If FALSE suppress all status messages
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #'
@@ -306,8 +311,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' resp <- landfireAPIv2(products, aoi, email, background = TRUE)
 #' checkStatus(resp)
 #' }
-checkStatus <- function(lfps, verbose = TRUE, method = "curl") {
-  .checkStatus_internal(lfps, verbose = verbose, method = method,
+checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
+  .checkStatus_internal(landfire_api, verbose = verbose, method = method,
                         i = 1, max_time = 0)
 }
 
@@ -349,7 +354,7 @@ cancelJob <- function(job_id) {
   #### Checks
   # Missing
   stopifnot("argument `job_id` is missing with no default" = !missing(job_id))
-  
+
   # Classes
   stopifnot("argument `job_id` must be a character string" = inherits(job_id, "character"))
 
@@ -371,21 +376,9 @@ cancelJob <- function(job_id) {
   # Submit job
   response <- httr2::req_perform(request)
 
-  # construct landfire_api object
-  structure(
-    list(
-      request = list(query = params,
-                     date = Sys.time(),
-                     url = request$url,
-                     job_id = job_id,
-                     dwl_url = NULL),
-      content = NULL,
-      response = response,
-      status = "Canceled", # TODO: Response status?
-      path = NULL
-    ),
-    class = "landfire_api"
-  )
+  # Construct landfire_api object
+  .build_landfire_api(params = params, request = request, init_resp = response,
+                      job_id = job_id, status = "Canceled")
 }
 
 #' Check if the LFPS API is available
