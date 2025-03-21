@@ -59,7 +59,7 @@ If NULL, a temporary directory is created.}
 \value{
 Returns a \code{landfire_api} object with named elements:
 \itemize{
-\item \code{request} - list with elements \code{query}, \code{date}, \code{url}, \code{job_id},\code{dwl_url}
+\item \code{request} - list with elements \code{query}, \code{date}, \code{url}, \code{job_id}, \code{request},\code{dwl_url}
 \item \code{content} - Informative messages passed from API
 \item \code{response} - Full response
 \item \code{status} - Final API status, one of "Failed", "Succeeded", or "Timed out"

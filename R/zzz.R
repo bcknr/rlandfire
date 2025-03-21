@@ -12,5 +12,5 @@
 "The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.\n",
 "To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`\n",
 "Product names may have changed. Type 'viewProducts()' to view the current names\n\n",
-"\033[38;5;160mWorkflows built before May 2025 or with `rlandfire` v1.0.0 will need to be updated.\033[0m")
+"\033[38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.\033[0m")
 }
