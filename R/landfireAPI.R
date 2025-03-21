@@ -30,7 +30,7 @@
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
-#' * `request` - list with elements `query`, `date`, `url`, `job_id`,`dwl_url`
+#' * `request` - list with elements `query`, `date`, `url`, `job_id`, `request`,`dwl_url`
 #' * `content` - Informative messages passed from API
 #' * `response` - Full response
 #' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
@@ -164,91 +164,151 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   # Submit job
   req <- httr2::req_perform(request)
 
+  lfps <- .build_landfire_api(params = params, request = request,
+                              init_resp = req, path = path)
+
   mt <- max_time*10
 
   for (i in 1:mt) {
     # Check status
-
-    response <- httr2::request(httr2::resp_url(req)) |>
-      httr2::req_url_query("f"="pjson") |>
-      httr2::req_perform()
-
-    resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
-
-    if (i == 1) {
-      job_id <- resp_body$jobId
-    }
-
-    # API always returns a successful status code (200) for LFPS v1
-    status <- httr2::resp_status(response)
-
-    # Parse content for messaging and error reporting
-    job_status <- resp_body$jobStatus
-    inf_msg  <- paste(resp_body$messages$type,
-                      resp_body$message$description, sep = ": ")
-
-    if(verbose == TRUE) {
-      # There is a better way to do this but for now...clear console each loop:
-      cat("\014")
-
-      cat(job_status, "\nJob ID: ", job_id,
-          "\nJob Messages:\n",paste(inf_msg, collapse = "\n"),
-          "\n-------------------",
-          "\nElapsed time: ", sprintf("%.1f", round(i*0.1, 1)), "s", "(Max time:", max_time, "s)",
-          "\n-------------------\n")
-    }
+    lfps_return  <- .checkStatus_internal(landfire_api = lfps, verbose = verbose,
+                                method = method, i = i, max_time = max_time)
 
     # If failed exit and report
-    if(status != 200 | grepl("Failed",job_status)) {
-      warning(job_status)
-      status <- "Failed"
+    if (lfps_return$status == "Failed") {
       break
-
-      # If success report success and download file
-    } else if(grepl("Succeeded",job_status)) {
-      dwl_req <- httr2::request(response$url) |>
-        httr2::req_url_path_append(resp_body$results$Output_File$paramUrl) |>
-        # httr2::req_url_path_append("?f=pjson") |>
-        httr2::req_perform()
-
-      dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
-
-      utils::download.file(dwl_url$value$url, path,
-                           method = method, quiet = !verbose)
-      status <- "Succeeded"
+    } else if (lfps_return$status == "Succeeded") {
       break
-
-      # Print current status, wait, and check again
-    } else {
-      Sys.sleep(0.1)
     }
 
     # Max time error
     if(i == mt) {
       cat("\n")
-      warning("Job status: Incomplete and max_time reached\nVisit URL to check status and download manually:\n   ", r$url)
-      status <- "Timed out"
+      warning("Job status: Incomplete and `max_time` reached\n",
+              "Call: `checkStatus()` to check the current status\n",
+              "      `cancelJob()` to cancel.\n",
+              "Or visit URL to check status and download manually:\n   ",
+              httr2::resp_url(lfps$request$request))
+      lfps_return$status <- "Timed out"
       break
+    } else {
+      Sys.sleep(0.1)
     }
-
   }
 
-  # construct landfire_api object
-  structure(
-    list(
-      request = list(query = params,
-                     date = Sys.time(),
-                     url = request$url,
-                     job_id = job_id,
-                     dwl_url = dwl_url$value$url),
-      content = inf_msg, # currently just returns a vector
-      response = response,
-      status = status,
-      path = path
-    ),
-    class = "landfire_api"
-  )
+  return(lfps_return)
 
+}
+
+
+#' Internal: Check the status of an existing LANDFIRE Product Service (LFPS) request
+#'
+#' @param lfps `landfire_api` object returned from `landfireAPIv2()`
+#' @param verbose If FALSE suppress all status messages
+#' @param method Passed to [utils::download.file()]. See `?download.file`
+#' @param i Current iteration
+#' @param max_time Maximum time, in seconds, to wait for job to be completed.
+#'
+#' @return Character vector (length = 1) with formated edit rules call
+#'
+#' @noRd
+#'
+#' @examples
+#' \dontrun{
+#' .checkStatus_internal(lfps, verbose = TRUE, method = "curl", i = 1, max_time = 10000)
+#' }
+
+.checkStatus_internal  <- function(lfps, verbose = TRUE, method = "curl",
+                                   i, max_time) {
+
+  # Check status
+  response <- httr2::request(httr2::resp_url(lfps$request$request)) |>
+    httr2::req_url_query("f"="pjson") |>
+    httr2::req_perform()
+
+  resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
+  job_id <- resp_body$jobId
+
+  # API always returns a successful status code (200) for LFPS v1
+  status <- httr2::resp_status(response)
+
+  # Parse content for messaging and error reporting
+  job_status <- resp_body$jobStatus
+  inf_msg  <- paste(resp_body$messages$type,
+                    resp_body$message$description, sep = ": ")
+
+  if (verbose == TRUE) {
+    # There is a better way to do this but for now...clear console each loop:
+    cat("\014")
+    cat(job_status, "\nJob ID: ", job_id,
+        "\nJob Messages:\n", paste(inf_msg, collapse = "\n"),
+        "\n-------------------",
+        "\nElapsed time: ", sprintf("%.1f", round(i*0.1, 1)), "s", "(Max time:", max_time, "s)",
+        "\n-------------------\n")
+  }
+
+  # If failed exit and report
+  if(status != 200 | grepl("Failed",job_status)) {
+    warning(job_status)
+    status <- "Failed"
+
+    # If success report success and download file
+  } else if (grepl("Succeeded",job_status)) {
+    dwl_req <- httr2::request(response$url) |>
+      httr2::req_url_path_append(resp_body$results$Output_File$paramUrl) |>
+      # httr2::req_url_path_append("?f=pjson") |>
+      httr2::req_perform()
+
+    dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
+    utils::download.file(dwl_url$value$url, lfps$path,
+                         method = method, quiet = !verbose)
+    status <- "Succeeded"
+  }
+
+  # Update landfire_api object
+  lfps$request$date <- Sys.time()
+  lfps$request$job_id <- job_id
+  lfps$request$dwl_url <- dwl_url$value$url
+  lfps$content <- inf_msg
+  lfps$response <- response
+  lfps$status <- status
+
+  return(lfps)
+
+}
+
+
+#' Check the status of an existing LANDFIRE Product Service (LFPS) request
+#'
+#' @description
+#' `checkStatus` checks if a previous request is complete and downloads available data
+#'
+#' @param LFPS `landfire_api` object returned from `landfireAPIv2()`
+#' @param verbose If FALSE suppress all status messages
+#' @param method Passed to [utils::download.file()]. See `?download.file`
+#'
+#' @return
+#' Returns a `landfire_api` object with named elements:
+#' * `request` - list with elements `query`, `date`, `url`, `job_id`, `request`,`dwl_url`
+#' * `content` - Informative messages passed from API
+#' * `response` - Full response
+#' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
+#' * `path` - path to save directory
+#'
+#' @md
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+#' email <- "email@@example.com>"
+#' resp <- landfireAPIv2(products, aoi, email, background = TRUE)
+#' checkStatus(resp)
+#' }
+checkStatus <- function(lfps, verbose = TRUE, method = "curl") {
+  .checkStatus_internal(lfps, verbose = verbose, method = method,
+                        i = 1, max_time = 0)
 }
 
 #TODO Get edit_mask running
