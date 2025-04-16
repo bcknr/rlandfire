@@ -156,18 +156,32 @@ test_that("`landfireAPIv2()` works with `getAOI()` and `getZone()`", {
                               resolution = resolution, path = path))
 })
 
-# Tests for cancelJob()
-test_that("`cancelJob()` recognizes arguement errors", {
-  expect_error(cancelJob(),
-               "argument `job_id` is missing with no default")
+# Tests for .post_request (internal)
+test_that("`.post_request` catches file issues", {
+  expect_error(.post_editmask("notafile.zip"),
+               "`edit_mask` file not found")
 
-  expect_error(cancelJob(job_id = "notanid"),
-               "argument `job_id` must be a valid job ID")
+  # Check for file extension
+  tmp_file <- tempfile(fileext = ".txt")
+  writeBin(raw(32 * 32), tmp_file)
+  expect_error(.post_editmask(tmp_file),
+               "`edit_mask` file must be a zipped shapefile (.zip)",
+               fixed = TRUE)
+
+  # Check for file size
+  writeBin(raw(1024 * 1024 + 1), tmp_file)
+  expect_error(.post_editmask(tmp_file),
+               "`edit_mask` file exceeds maximum allowable size (1MB)",
+               fixed = TRUE)
+  unlink(tmp_file)
+
+  # Check for shapefile
+  expect_error(.post_editmask(testthat::test_path("testdata", "editmask_noshp.zip")),
+               "`edit_mask` file does not contain a shapefile")
+
+  # Returns NULL if no file is provided
+  expect_null(.post_editmask(NULL))
 })
-
-# Tests for healthCheck()
-# TODO: Test that healthCheck() returns a message/warning
-
 
 # Tests for .fmt_editrules (internal)
 test_that("`.fmt_editrules` correctly formats requests",{
@@ -184,4 +198,7 @@ test_that("`.fmt_editrules` correctly formats requests",{
                    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}]}]}")
   expect_identical(.fmt_editrules(multi_rule),
                    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"ge\",\"value\":600}],\"change\":[{\"product\":\"230CC\",\"operator\":\"db\",\"value\":20}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":550}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":0}]}]}")
+
+  # Returns NULL if no file is provided
+  expect_null(.fmt_editrules(NULL))
 })
