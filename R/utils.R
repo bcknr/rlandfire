@@ -44,9 +44,9 @@ viewProducts <- function() {
                                 response = NULL, status = NULL, path = NULL) {
   structure(
     list(
-      request = list(query = params,
+      request = list(query = params, # User input in rlandfire formats
                      date = Sys.time(),
-                     url = ifelse(is.null(request), NULL, request$url),
+                     url = if (!is.null(request)) request$url else NULL,
                      job_id = job_id,
                      request = init_resp,
                      dwl_url = dwl_url),
