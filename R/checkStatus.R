@@ -98,7 +98,7 @@
 #' \dontrun{
 #' products <-  c("ASP2020", "ELEV2020", "230CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-#' email <- "email@@example.com>"
+#' email <- "email@@example.com"
 #' resp <- landfireAPIv2(products, aoi, email, background = TRUE)
 #' checkStatus(resp)
 #' }
@@ -188,15 +188,16 @@ healthCheck <- function() {
 
   # Construct request URL
   request  <- httr2::request("https://lfps.usgs.gov/api/healthCheck") |>
-    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")  |>
+    httr2::req_headers("Accept" = "application/json")
 
   # Submit job
   response <- httr2::req_perform(request)
 
   # Parse content for messaging and error reporting
-  resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
+  resp_body  <- httr2::resp_body_json(response)
 
-  if (resp_body$success == TRUE) {
+  if (resp_body$success) {
     message("The LFPS API is available")
   } else {
     warning("The LFPS API is currently down.\n",

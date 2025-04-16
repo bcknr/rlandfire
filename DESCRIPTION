@@ -2,7 +2,7 @@ Package: rlandfire
 Type: Package
 Title: Interface to 'LANDFIRE Product Service' API
 Version: 1.0.1
-Authors@R:
+Authors@R: 
   c(person(given = "Mark",
            family = "Buckner",
            role = c("aut", "cre", "cph"),
@@ -23,6 +23,7 @@ Imports:
     utils
 Suggests: 
     foreign,
+    httptest2,
     knitr,
     raster,
     rmarkdown,

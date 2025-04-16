@@ -27,7 +27,9 @@
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param verbose If FALSE suppress all status messages
-#' @param background If TRUE, the function will return immediately and the job will run in the background.
+#' @param background If TRUE, the function will return immediately and the job 
+#'   will run in the background. User will need to check the status of the job 
+#'   manually with `checkStatus()`.
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
@@ -44,7 +46,7 @@
 #' \dontrun{
 #' products <-  c("ASP2020", "ELEV2020", "230CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-#' email <- "email@@example.com>"
+#' email <- "email@@example.com"
 #' projection <- 6414
 #' resolution <- 90
 #' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
