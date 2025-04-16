@@ -154,20 +154,28 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     Priority_Code = priority_code
   )
 
-  purpose <- "submitJob"
+  purpose <- "submit"
 
   # Construct request URL
-  request  <- httr2::request("https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/") |>
+  request  <- httr2::request("https://lfps.usgs.gov/api/job/") |>
     httr2::req_url_path_append(purpose) |>
     httr2::req_url_query(!!!params) |>
-    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
+    httr2::req_headers("Accept" = "application/json")
 
-  # TODO: Set so returns json
+  # Submit job and get initial response
+  req <- httr2::req_error(request, is_error = \(req) FALSE) |>
+         httr2::req_perform()
   
-  # Submit job
-  req <- httr2::req_perform(request)
+  req_response <- httr2::resp_body_json(req, simplifyVector = TRUE)
+
+  if(req$status != 200) {
+    stop("\tAPI request failed with status code: ", req$status,
+         "\n\tLFPS Error message: ", req_response$message)
+  }
 
   lfps <- .build_landfire_api(params = params, request = request,
+                              job_id = req_response$jobId,
                               init_resp = req, path = path)
 
   mt <- max_time*10
@@ -177,7 +185,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     lfps_return <- .checkStatus_internal(landfire_api = lfps, verbose = verbose,
                                 method = method, i = i, max_time = max_time)
 
-    # If failed exit and report
+    # Set early exit if background is TRUE or status is "Failed" or "Succeeded"
     if (background == TRUE) {
       message("Job submitted in background.\n",
               "Call `checkStatus()` to check the current status and download if completed.\n",
