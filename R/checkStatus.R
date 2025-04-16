@@ -19,25 +19,44 @@
                                    i, max_time) {
 
   # Check status
-  response <- httr2::request(httr2::resp_url(landfire_api$request$request)) |>
-    httr2::req_url_query("f"="pjson") |>
-    httr2::req_perform()
+  purpose <- "status"
 
-  resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
-  job_id <- resp_body$jobId
+  job_id <- landfire_api$request$job_id
+
+  # Construct request URL
+  response  <- httr2::request("https://lfps.usgs.gov/api/job/") |>
+    httr2::req_url_path_append(purpose) |>
+    httr2::req_url_query("JobId" = job_id) |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
+    httr2::req_headers("Accept" = "application/json") |>
+    httr2::req_error(is_error = \(response) FALSE) |>
+    httr2::req_perform()
+  # response <- httr2::request(httr2::resp_url(landfire_api$request$request)) |>
+  #   httr2::req_url_query("f"="pjson") |>
+  #   httr2::req_perform()
+
+  # resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
+  resp_body  <- httr2::resp_body_json(response)
 
   # API always returns a successful status code (200) for LFPS v1
   status <- httr2::resp_status(response)
 
+  if(status != 200) {
+    stop("\tAPI request failed with status code: ", status,
+         "\n\tLFPS Error message: ", resp_body$message)
+  }
+
   # Parse content for messaging and error reporting
-  job_status <- resp_body$jobStatus
-  inf_msg  <- paste(resp_body$messages$type,
-                    resp_body$message$description, sep = ": ")
+  job_status <- resp_body$status
+  inf_msg <- sapply(resp_body$messages,
+                    function(msg) paste(msg[[1]], msg[[2]],
+                                        sep = ": "))
 
   if (verbose == TRUE) {
     # There is a better way to do this but for now...clear console each loop:
     cat("\014")
-    cat(job_status, "\nJob ID: ", job_id,
+    cat("Job Status: ", job_status, "\nJob ID: ", job_id,
+        "\nQueue Position: ", resp_body$queuePosition,
         "\nJob Messages:\n", paste(inf_msg, collapse = "\n"),
         "\n-------------------",
         "\nElapsed time: ", sprintf("%.1f", round(i*0.1, 1)), "s", "(Max time:", max_time, "s)",
@@ -45,26 +64,21 @@
   }
 
   # If failed exit and report
-  if(status != 200 | grepl("Failed",job_status)) {
+  if(grepl("Failed",job_status)) {
     warning(job_status)
     status <- "Failed"
 
     # If success report success and download file
   } else if (grepl("Succeeded",job_status)) {
-    dwl_req <- httr2::request(response$url) |>
-      httr2::req_url_path_append(resp_body$results$Output_File$paramUrl) |>
-      # httr2::req_url_path_append("?f=pjson") |>
-      httr2::req_perform()
-
-    dwl_url <- jsonlite::fromJSON(httr2::resp_body_string(dwl_req))
-    utils::download.file(dwl_url$value$url, landfire_api$path,
+    dwl_url <- resp_body$outputFile
+    utils::download.file(dwl_url, landfire_api$path,
                          method = method, quiet = !verbose)
     status <- "Succeeded"
-    landfire_api$request$dwl_url <- dwl_url$value$url
+    landfire_api$request$dwl_url <- dwl_url
   }
 
   # Update landfire_api object
-  landfire_api$request$date <- Sys.time()
+  # landfire_api$request$date <- Sys.time()
   landfire_api$request$job_id <- job_id
   landfire_api$content <- inf_msg
   landfire_api$response <- response
@@ -131,7 +145,7 @@ checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' email <- "email@@example.com>"
 #'
-#' resp <- landfireAPIv2(products, aoi, email)
+#' resp <- landfireAPIv2(products, aoi, email, background = TRUE)
 #'
 #' job_id <- resp$request$job_id #Get job_id from a previous request
 #' cancelJob("job_id")
@@ -150,7 +164,7 @@ cancelJob <- function(job_id) {
 
   # Define Parameters
   params <- list(
-    jobId = job_id
+    JobId = job_id
   )
 
   purpose <- "cancel"
@@ -188,7 +202,7 @@ healthCheck <- function() {
 
   # Construct request URL
   request  <- httr2::request("https://lfps.usgs.gov/api/healthCheck") |>
-    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)")  |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
     httr2::req_headers("Accept" = "application/json")
 
   # Submit job
