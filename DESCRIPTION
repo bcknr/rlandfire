@@ -17,13 +17,15 @@ URL: https://github.com/bcknr/rlandfire
 BugReports: https://github.com/bcknr/rlandfire/issues
 RoxygenNote: 7.3.2
 Imports: 
+    curl,
     httr2,
-    jsonlite,
+    lifecycle,
     sf,
     utils
 Suggests: 
     foreign,
     httptest2,
+    httr,
     knitr,
     raster,
     rmarkdown,

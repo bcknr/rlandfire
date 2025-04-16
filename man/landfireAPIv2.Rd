@@ -16,7 +16,8 @@ landfireAPIv2(
   path = NULL,
   max_time = 10000,
   method = "curl",
-  verbose = TRUE
+  verbose = TRUE,
+  background = FALSE
 )
 }
 \arguments{
@@ -42,10 +43,11 @@ resample resolution in meters. Default is 30m.}
 "product", "operator", "value". Limited to fuel theme products only.
 (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
 
-\item{edit_mask}{Optional. \strong{Not currently functional}}
+\item{edit_mask}{Optional. Path to a compressed shapefile (.zip) to be used
+as an edit mask. The shapefile must be less than 1MB in size.}
 
-\item{priority_code}{Optional. Priority code for wildland fire systems and users.
-Contact the LANDFIRE help desk for more information (\href{mailto:helpdesk@landfire.gov}{helpdesk@landfire.gov})}
+\item{priority_code}{Optional. Priority code for wildland fire systems/users.
+Contact the LANDFIRE help desk for information (\href{mailto:helpdesk@landfire.gov}{helpdesk@landfire.gov})}
 
 \item{path}{Path to \code{.zip} directory. Passed to \code{\link[utils:download.file]{utils::download.file()}}.
 If NULL, a temporary directory is created.}
@@ -55,6 +57,10 @@ If NULL, a temporary directory is created.}
 \item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
 
 \item{verbose}{If FALSE suppress all status messages}
+
+\item{background}{If TRUE, the function will return immediately and the job
+will run in the background. User will need to check the status of the job
+manually with \code{checkStatus()}.}
 }
 \value{
 Returns a \code{landfire_api} object with named elements:
@@ -73,10 +79,11 @@ Returns a \code{landfire_api} object with named elements:
 \dontrun{
 products <-  c("ASP2020", "ELEV2020", "230CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-email <- "email@example.com>"
+email <- "email@example.com"
 projection <- 6414
 resolution <- 90
-edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
+edit_rule <- list(c("condition","ELEV2020","lt",500),
+                  c("change", "230CC", "st", 181))
 save_file <- tempfile(fileext = ".zip")
 resp <- landfireAPIv2(products, aoi, email, projection,
                       resolution, edit_rule = edit_rule,
