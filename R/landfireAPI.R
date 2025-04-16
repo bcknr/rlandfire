@@ -28,8 +28,8 @@
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
 #' @param verbose If FALSE suppress all status messages
-#' @param background If TRUE, the function will return immediately and the job 
-#'   will run in the background. User will need to check the status of the job 
+#' @param background If TRUE, the function will return immediately and the job
+#'   will run in the background. User will need to check the status of the job
 #'   manually with `checkStatus()`.
 #'
 #' @return
@@ -50,7 +50,8 @@
 #' email <- "email@@example.com"
 #' projection <- 6414
 #' resolution <- 90
-#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
+#' edit_rule <- list(c("condition","ELEV2020","lt",500),
+#'                   c("change", "230CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
 #' resp <- landfireAPIv2(products, aoi, email, projection,
 #'                       resolution, edit_rule = edit_rule,
@@ -66,11 +67,13 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   # Missing
   stopifnot("argument `products` is missing with no default" = !missing(products))
   stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
-  stopifnot("A valid `email` address is required. (See `?rlandfire::landfireAPIv2` for more information)" = grepl("@", email) && !missing(email))
+  stopifnot("A valid `email` address is required. (See `?rlandfire::landfireAPIv2` for more information)"
+            = grepl("@", email) && !missing(email))
   stopifnot("argument `email` is missing with no default" = !missing(aoi))
 
   if(!is.null(edit_rule)){
-    stopifnot("argument `edit_rule` must be a list" = inherits(edit_rule, "list"))
+    stopifnot("argument `edit_rule` must be a list"
+              = inherits(edit_rule, "list"))
 
     class <- sapply(edit_rule, `[`, 1)
 
@@ -80,12 +83,12 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     )
 
     stopifnot(
-      '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"' =
-        all(sapply(edit_rule, `[`, 3)[class == "condition"] %in% c("eq","ge","gt","le","lt","ne")))
+      '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"'
+      = all(sapply(edit_rule, `[`, 3)[class == "condition"] %in% c("eq","ge","gt","le","lt","ne")))
 
     stopifnot(
-      '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"' =
-        all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st")))
+      '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"'
+      = all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st")))
   }
 
   if(is.null(path)){
@@ -96,11 +99,20 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
   # Classes
   # stopifnot("argument `email` must be a character string" = inherits(email, "character")) # TODO: should be captured above?
-  stopifnot("argument `products` must be a character vector" = inherits(products, "character"))
-  stopifnot("argument `aoi` must be a character or numeric vector" = inherits(aoi, c("character", "numeric")))
-  stopifnot("argument `aoi` must be vector of coordinates with length == 4 or a single map zone" = length(aoi) == 1 | length(aoi) == 4)
-  stopifnot("argument `max_time` must be numeric" = inherits(max_time, c("numeric")))
-  stopifnot("argument `priority_code` must be a character string" = inherits(priority_code, c("character", "NULL")))
+  stopifnot("argument `products` must be a character vector"
+            = inherits(products, "character"))
+  stopifnot("argument `aoi` must be a character or numeric vector"
+            = inherits(aoi, c("character", "numeric")))
+  stopifnot("argument `aoi` must be vector of coordinates with length == 4 or a single map zone"
+            = length(aoi) == 1 | length(aoi) == 4)
+  stopifnot("argument `max_time` must be numeric"
+            = inherits(max_time, c("numeric")))
+  stopifnot("argument `priority_code` must be a character string"
+            = inherits(priority_code, c("character", "NULL")))
+  stopifnot("argument `edit_mask` must be a character string"
+            = inherits(edit_mask, c("character", "NULL")))
+  stopifnot("argument `background` must be a logical"
+            = inherits(background, "logical"))
 
   stopifnot(
     "`method` is invalid. See `?download.file`" =
@@ -134,7 +146,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     }
     # Valid map zone?
   } else if(length(aoi) == 1 && !all(aoi >= 1 & aoi <= 79)){
-    stop("argument `aoi` must be between 1 and 79 when using LANDFIRE map zones")
+    stop("argument `aoi` must be between 1 and 79 if using LANDFIRE map zones")
   }
 
   #### End Checks
@@ -185,9 +197,10 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     # Set early exit if background is TRUE or status is "Failed" or "Succeeded"
     if (background == TRUE) {
       message("Job submitted in background.\n",
-              "Call `checkStatus()` to check the current status and download if completed.\n",
+              "Call `checkStatus()` to check the current status and download",
+              " if completed.\n",
               "Or visit URL to check status and download manually:\n   ",
-              httr2::resp_url(lfps_return$request$request))
+              lfps_return$response$url)
       break
     } else if (lfps_return$status %in% c("Failed","Succeeded")) {
       break
@@ -279,7 +292,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
+#' edit_rule <- list(c("condition","ELEV2020","lt",500),
+#'                   c("change", "230CC", "st", 181))
 #' .fmt_editrules(edit_rule)
 #' }
 .fmt_editrules <- function(rules) {
@@ -300,16 +314,22 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   # Condition - ID groups with same class and build request
   cnd <- which(class == "condition")
   breaks <- c(0, which(diff(cnd) != 1), length(cnd))
-  cnd_grp <- lapply(seq(length(breaks) - 1), function(i) cnd[(breaks[i] + 1):breaks[i+1]])
+  cnd_grp <- lapply(seq(length(breaks) - 1),
+                    function(i) cnd[(breaks[i] + 1):breaks[i+1]])
 
-  cnd <- lapply(cnd_grp, function(i) paste0('"condition":[{', paste0(params[i], collapse = '},{'),'}]'))
+  cnd <- lapply(cnd_grp, function(i) paste0('"condition":[{',
+                                            paste0(params[i],
+                                            collapse = '},{'),'}]'))
 
   # Change - ID groups with same class and build request
   chng <- which(class == "change")
   breaks <- c(0, which(diff(chng) != 1), length(chng))
-  chng_grp <- lapply(seq(length(breaks) - 1), function(i) chng[(breaks[i] + 1):breaks[i+1]])
+  chng_grp <- lapply(seq(length(breaks) - 1),
+                     function(i) chng[(breaks[i] + 1):breaks[i+1]])
 
-  chng <- lapply(chng_grp, function(i) paste0('"change":[{', paste0(params[i], collapse = '},{'),'}]'))
+  chng <- lapply(chng_grp, function(i) paste0('"change":[{',
+                                              paste0(params[i],
+                                              collapse = '},{'),'}]'))
 
   # Retain original order
   order_cnd <- sapply(cnd_grp, `[`, 1)
