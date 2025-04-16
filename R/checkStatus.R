@@ -12,11 +12,23 @@
 #'
 #' @examples
 #' \dontrun{
-#' .checkStatus_internal(landfire_api, verbose = TRUE, method = "curl", i = 1, max_time = 10000)
+#' .checkStatus_internal(landfire_api, verbose = TRUE,
+#'                       method = "curl", i = 1, max_time = 10000)
 #' }
 
 .checkStatus_internal  <- function(landfire_api, verbose = TRUE, method = "curl",
                                    i, max_time) {
+  
+  # Checks
+  stopifnot("argument `landfire_api` must be a landfire_api object"
+            = inherits(landfire_api, "landfire_api"))
+  stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
+  stopifnot("argument `method` must be a character string"
+            = inherits(method, "character"))
+  stopifnot("argument `i` must be an integer" = is.numeric(i))
+  stopifnot("argument `max_time` must be numeric" = is.numeric(max_time))
+  # End Checks
+
 
   # Check status
   purpose <- "status"
@@ -31,9 +43,6 @@
     httr2::req_headers("Accept" = "application/json") |>
     httr2::req_error(is_error = \(response) FALSE) |>
     httr2::req_perform()
-  # response <- httr2::request(httr2::resp_url(landfire_api$request$request)) |>
-  #   httr2::req_url_query("f"="pjson") |>
-  #   httr2::req_perform()
 
   # resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
   resp_body  <- httr2::resp_body_json(response)
@@ -65,8 +74,11 @@
 
   # If failed exit and report
   if(grepl("Failed",job_status)) {
-    warning(job_status)
     status <- "Failed"
+
+    warning("Job ", job_id, " has failed with:\n\t",
+            inf_msg[grepl("ERROR", inf_msg)],
+            "\nPlease check the LFPS API documentation for more information.")
 
     # If success report success and download file
   } else if (grepl("Succeeded",job_status)) {
@@ -78,7 +90,6 @@
   }
 
   # Update landfire_api object
-  # landfire_api$request$date <- Sys.time()
   landfire_api$request$job_id <- job_id
   landfire_api$content <- inf_msg
   landfire_api$response <- response
@@ -117,6 +128,17 @@
 #' checkStatus(resp)
 #' }
 checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
+  # Checks
+  # Missing
+  stopifnot("argument `landfire_api` is missing with no default"
+            = !missing(landfire_api))
+  # Classes
+  stopifnot("argument `landfire_api` must be a landfire_api object"
+            = inherits(landfire_api, "landfire_api"))
+  stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
+  stopifnot("argument `method` must be a character string"
+            = inherits(method, "character"))
+  # End Checks
   .checkStatus_internal(landfire_api, verbose = verbose, method = method,
                         i = 1, max_time = 0)
 }
@@ -158,7 +180,8 @@ cancelJob <- function(job_id) {
   stopifnot("argument `job_id` is missing with no default" = !missing(job_id))
 
   # Classes
-  stopifnot("argument `job_id` must be a character string" = inherits(job_id, "character"))
+  stopifnot("argument `job_id` must be a character string"
+            = inherits(job_id, "character"))
 
   #### End Checks
 
@@ -178,6 +201,10 @@ cancelJob <- function(job_id) {
   # Submit job
   response <- httr2::req_perform(request)
 
+  # Report status
+  resp_body  <- httr2::resp_body_json(response)
+  message(resp_body$message)
+
   # Construct landfire_api object
   .build_landfire_api(params = params, request = request, init_resp = response,
                       job_id = job_id, status = "Canceled")
@@ -188,7 +215,7 @@ cancelJob <- function(job_id) {
 #' @description
 #' `healthCheck()` checks if the LPFS API is available
 #'
-#' @return NULL. Prints a message to the console about the current status of LFPS.
+#' @return NULL. Prints a message to the console about the current LFPS status.
 #'
 #' @md
 #' @export
