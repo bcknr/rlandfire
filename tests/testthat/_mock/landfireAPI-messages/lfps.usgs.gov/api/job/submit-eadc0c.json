@@ -1,0 +1,14 @@
+{
+    "jobId": "94a19477-bdfe-407d-9409-28aecbda9a3c",
+    "status": "Pending",
+    "job": {
+        "email": "example@domain.com",
+        "layerList": "ELEV2020;SLPD2020;ASP2020;230FBFM40;230CC;230CH;230CBH;230CBD",
+        "areaOfInterest": "-113.79 42.148 -113.56 42.29",
+        "editRule": "",
+        "editMask": "",
+        "ip": "73.243.41.73",
+        "aoiSize": 73897,
+        "geoArea": "NW"
+    }
+}

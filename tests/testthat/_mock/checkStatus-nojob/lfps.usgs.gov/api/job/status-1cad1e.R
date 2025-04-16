@@ -1,0 +1,10 @@
+structure(list(method = "GET", url = "https://lfps.usgs.gov/api/job/status?JobId=123456", 
+    status_code = 500L, headers = structure(list(date = "Wed, 16 Apr 2025 20:35:38 GMT", 
+        server = "Apache", `x-frame-options` = "SAMEORIGIN", 
+        `strict-transport-security` = "max-age=31536000; includeSubDomains", 
+        `content-type` = "application/json", vary = "Accept-Encoding", 
+        `content-encoding` = "br", `access-control-allow-origin` = "*", 
+        `Set-Cookie` = "REDACTED", `Set-Cookie` = "REDACTED", 
+        `Content-Length` = "50"), redact = character(0), class = "httr2_headers"), 
+    body = charToRaw("{\"message\":\"JobId not found.\",\"success\":false}"), 
+    cache = new.env(parent = emptyenv())), class = "httr2_response")
