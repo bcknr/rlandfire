@@ -19,9 +19,10 @@
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
 #'   "product", "operator", "value". Limited to fuel theme products only.
 #'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
-#' @param edit_mask Optional. **Not currently functional**
-#' @param priority_code Optional. Priority code for wildland fire systems and users. 
-#'   Contact the LANDFIRE help desk for more information (<helpdesk@landfire.gov>)
+#' @param edit_mask Optional. Path to a compressed shapefile (.zip) to be used
+#'   as an edit mask. The shapefile must be less than 1MB in size.
+#' @param priority_code Optional. Priority code for wildland fire systems/users.
+#'   Contact the LANDFIRE help desk for information (<helpdesk@landfire.gov>)
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
@@ -110,10 +111,6 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
   stopifnot("argument `max_time` must be >= 5" = max_time >= 5)
 
-  #check for special characters in edit mask
-  # grepl('[^[:alnum:]]', val)
-  # Check it is sf or spatvector
-
   # Values in range
   if(is.numeric(resolution) && resolution == 30) {
     resolution <- NULL
@@ -150,7 +147,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     Output_Projection = projection,
     Resample_Resolution = resolution,
     Edit_Rule = .fmt_editrules(edit_rule),
-    Edit_Mask = edit_mask,
+    Edit_Mask = .post_editmask(edit_mask),
     Priority_Code = priority_code
   )
 
@@ -215,8 +212,60 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
 }
 
-#TODO Get edit_mask running
 #TODO Overwrite the console instead of clearing
+
+#' Internal: Submit edit_mask POST request
+#'
+#' @param file Path to the zipped shape file to be uploaded
+#'
+#' @return JSON array returned by POST request
+#'
+#' @noRd
+#'
+#' @examples
+#' \dontrun{
+#' edit_mask <- system.file("extdata", "Wildfire_History.zip",
+#'                          package = "rlandfire")
+#' .post_editmask(edit_mask)
+#' }
+.post_editmask <- function(file) {
+
+  if(is.null(file)) {
+    return(NULL)
+  }
+
+  # Checks
+  stopifnot("`edit_mask` file not found" = file.exists(file))
+  stopifnot("`edit_mask` file exceeds maximum allowable size (1MB)"
+            = file.info(file)$size < 1000000)
+  stopifnot("`edit_mask` file must be a zipped shapefile (.zip)"
+            = grepl("\\.zip$", file))
+  stopifnot("`edit_mask` file does not contain a shapefile"
+            = any(grepl("\\.shp$", unzip(file, list=T)$Name)))
+  # End Checks
+
+  req <- httr2::request("https://lfps.usgs.gov/api/upload/shapefile") |>
+         httr2::req_method("POST") |>
+         httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
+         httr2::req_headers("Accept" = "application/json") |>
+         httr2::req_body_multipart(file = curl::form_file(file),
+                                   type = "application/zip")
+
+  # Perform the request
+  upload_resp <- httr2::req_error(req, is_error = \(upload_resp) FALSE) |>
+                 httr2::req_perform()
+
+  upload_body <- httr2::resp_body_json(upload_resp)
+
+  # Check for errors
+  if (upload_resp$status != 200) {
+    stop("\t`edit_mask` upload failed with status code: ", upload_resp$status,
+         "\n\tLFPS Error message: ", upload_body$message)
+  }
+
+  return(httr2::resp_body_string(upload_resp))
+
+}
 
 
 #' Internal: Format edit_rule for API call
