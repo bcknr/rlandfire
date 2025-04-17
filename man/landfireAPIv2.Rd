@@ -44,7 +44,8 @@ resample resolution in meters. Default is 30m.}
 (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
 
 \item{edit_mask}{Optional. Path to a compressed shapefile (.zip) to be used
-as an edit mask. The shapefile must be less than 1MB in size.}
+as an edit mask. The shapefile must be less than 1MB in size and the
+shapefile must comply with ESRI shapefile naming rules.}
 
 \item{priority_code}{Optional. Priority code for wildland fire systems/users.
 Contact the LANDFIRE help desk for information (\href{mailto:helpdesk@landfire.gov}{helpdesk@landfire.gov})}
