@@ -227,22 +227,18 @@ test_that("`.post_request` catches file issues", {
   expect_null(.post_editmask(NULL)$item_name)
 })
 
+# Tests for .post_editmask (internal)
+test_that("`.post_editmask` returns expected response", {
 
-# test_that("`.post_editmask` returns expected response", {
+  skip_on_cran()
 
-#   skip_on_cran()
+  shapefile <- testthat::test_path("testdata", "wildfire.zip")
+  result <- .post_editmask(shapefile)
 
-#   shapefile <- testthat::test_path("testdata", "wildfire.zip")
-#   result <- .post_editmask(shapefile)
+  expect_match(result$item_id, "[{\"itemID\":\".*\"}]")
+  expect_match(result$item_name, "wildfire.shp$")
 
-#   expect_match(result, '\"itemName\":\"wildfire.zip\"')
-#   expect_match(result, '\"description\":null')
-#   expect_match(result, '\"committed\":true')
-#   expect_match(result, '\"success\":true')
-
-# })
-
-
+})
 
 # Tests for .fmt_editrules (internal)
 test_that("`.fmt_editrules` correctly formats requests",{

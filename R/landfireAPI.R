@@ -287,7 +287,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   }
 
   return(list(item_id = sprintf('[{"itemID":"%s"}]', upload_body$itemId),
-              item_name = upload_body$itemName))
+              item_name = gsub("\\.zip$", ".shp", upload_body$itemName)))
 
 }
 
