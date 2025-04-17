@@ -44,10 +44,6 @@ devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
 
 This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
 
-## `rlandfire` vs LANDFIRE Product Service (LFPS)
-
-![Comparison of LFPS and `landfireAPI()`](../man/figures/lfps.png){alt="Comparison of LFPS and landfireAPI()"}
-
 ## Using `rlandfire`
 
 To demonstrate `rlandfire`, we will explore how ponderosa pine forest canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
@@ -62,11 +58,11 @@ library(foreign)
 First, we will load the Calwood Fire perimeter data which was downloaded from Boulder County's [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
-boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
-             exdir = boundary_file)
+boundary_file <- file.path(tempdir(), "wildfire")
+utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
+             exdir = tempdir())
 
-boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
+boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
 
 plot(boundary$geometry, main = "Calwood Fire Boundary (2020)", 
@@ -75,7 +71,7 @@ plot(boundary$geometry, main = "Calwood Fire Boundary (2020)",
 
 ### AOI
 
-We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPI()`. `getAOI()` handles several steps for us, it ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates (as required by the API) if needed.
+We can use the function `rlandfire::getAOI()` to create an area of interest (AOI) vector with the correct format for `landfireAPIv2()`. `getAOI()` handles several steps for us, it ensures that the AOI is returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and converts the AOI to latitude and longitude coordinates (as required by the API) if needed.
 
 Using the `extend` argument, we will increase the AOI by 1 km in all directions to provide additional context surrounding the burned area. This argument takes an optional numeric vector of 1, 2, or 4 elements.
 
@@ -92,6 +88,12 @@ For this example, we are interested in canopy cover data for two years, 2019 (`2
 
 ```{r}
 products <- c("200CC_19", "220CC_22", "200EVT")
+```
+
+### Email
+
+```{r}
+email <- "rlandfire@example.com"
 ```
 
 ### Projection and resolution
@@ -119,21 +121,30 @@ edit_rule <- list(c("condition","200EVT","ne",7054),
 
 Note: Edits are performed in the order that they are listed and are limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height).
 
+If we wanted to restrict these edits to a certain area we could pass the path to a zip archive (`.zip`) containing a shapefile to `edit_mask`:
+
+```{r, eval=FALSE}
+edit_mask <- "path/to/wildfire.zip"
+```
+
+Note: The file must follow ESRI shapefile naming standards (e.g., no special characters) and be less than 1MB in size.
+
 ### Path
 
-Finally, we will provide a path to a temporary zip file. Setting the path as a temp file is not strictly necessary because if `path` is left blank `landfireAPI()` will save the data to a temporary folder by default.
+Finally, we will provide a path to a temporary zip file. Setting the path as a temp file is not strictly necessary because if `path` is left blank `landfireAPIv2()` will save the data to a temporary folder by default.
 
 ```{r}
 path <- tempfile(fileext = ".zip")
 ```
 
-### Call `landfireAPI()`
+### Call `landfireAPIv2()`
 
-Now we are able to submit a request to the LANDFIRE Product Services API with the `landfireAPI()` function.
+Now we are able to submit a request to the LANDFIRE Product Services API with the `landfireAPIv2()` function.
 
 ```{r,eval=FALSE}
-resp <- landfireAPI(products = products,
+resp <- landfireAPIv2(products = products,
                     aoi = aoi, 
+                    email = email,
                     projection = projection, 
                     resolution = resolution,
                     edit_rule = edit_rule,
@@ -141,7 +152,7 @@ resp <- landfireAPI(products = products,
                     verbose = FALSE)
 ```
 
-`landfireAPI()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
+`landfireAPIv2()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
 
 ```{r,eval=FALSE}
 resp$path
@@ -191,15 +202,17 @@ To demonstrate, we will download the Existing Vegetation Cover product from LF 2
 the default projection and resolution. We will also allow `rlandfire` to 
 save the files to a temporary directory automatically. As mentioned above, we 
 can find the path to the temporary directory in the `$path` element of the 
-`landfire_api` object returned by `landfireAPI()`.
+`landfire_api` object returned by `landfireAPIv2()`.
 
-```{r}
-resp <- landfireAPI(products = "240EVC",
+```{r,eval=FALSE}
+resp <- landfireAPIv2(products = "240EVC",
                     aoi = aoi,
+                    email = email,
                     verbose = FALSE)
 ```
 
 ```{r,include=FALSE}
+resp <- c()
 resp$path <- system.file("extdata/LFPS_cat_Return.zip", package = "rlandfire")
 ```
 

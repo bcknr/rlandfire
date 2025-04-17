@@ -49,10 +49,6 @@ unexpected behavior. Please report any issues, feature requests, or
 suggestions in the package’s [GitHub
 repo](https://github.com/bcknr/rlandfire/issues).
 
-## `rlandfire` vs LANDFIRE Product Service (LFPS)
-
-![Comparison of LFPS and `landfireAPI()`](man/figures/lfps.png)
-
 ## Using `rlandfire`
 
 To demonstrate `rlandfire`, we will explore how ponderosa pine forest
@@ -69,22 +65,18 @@ library(rlandfire)
 #>     [0mversion:1.0.1[38;5;160m
 #> 
 #> WARNING:[0m
-#> The LFPS API product names are changing!
-#> Type 'viewProducts()' to view the current names.
+#> The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.
+#> To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`
+#> Product names may have changed. Type 'viewProducts()' to view the current names
 #> 
-#> New product names may require previous workflows to be updated
+#> [38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.[0m
 library(sf)
 #> Linking to GEOS 3.11.1, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 #> WARNING: different compile-time and runtime versions for GEOS found:
 #> Linked against: 3.11.1-CAPI-1.17.1 compiled against: 3.10.2-CAPI-1.16.0
 #> It is probably a good idea to reinstall sf (and maybe lwgeom too)
 library(terra)
-#> terra 1.7.83
-#> WARNING: different compile-time and run-time versions of GEOS
-#> Compiled with:3.10.2-CAPI-1.16.0
-#>  Running with:3.11.1-CAPI-1.17.1
-#> 
-#> You should reinstall package 'terra'
+#> terra 1.8.29
 library(foreign)
 ```
 
@@ -93,14 +85,13 @@ from Boulder County’s [geospatial data
 hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ``` r
-boundary_file <- file.path(tempdir(), "Wildfire_History")
-utils::unzip(system.file("extdata/Wildfire_History.zip", package = "rlandfire"),
-             exdir = boundary_file)
+boundary_file <- file.path(tempdir(), "wildfire")
+utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
+             exdir = tempdir())
 
-boundary <- st_read(file.path(boundary_file, "Wildfire_History.shp")) %>% 
+boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `Wildfire_History' from data source 
-#>   `/tmp/RtmprznwZB/Wildfire_History/Wildfire_History.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpooCGYq/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -116,7 +107,7 @@ plot(boundary$geometry, main = "Calwood Fire Boundary (2020)",
 ### AOI
 
 We can use the function `rlandfire::getAOI()` to create an area of
-interest (AOI) vector with the correct format for `landfireAPI()`.
+interest (AOI) vector with the correct format for `landfireAPIv2()`.
 `getAOI()` handles several steps for us, it ensures that the AOI is
 returned in the correct order (`xmin`, `ymin`, `xmax`, `ymax`) and
 converts the AOI to latitude and longitude coordinates (as required by
@@ -148,6 +139,12 @@ be opened by calling `viewProducts()`.
 
 ``` r
 products <- c("200CC_19", "220CC_22", "200EVT")
+```
+
+### Email
+
+``` r
+email <- "rlandfire@example.com"
 ```
 
 ### Projection and resolution
@@ -191,25 +188,36 @@ limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire
 Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk
 Density, Forest Canopy Cover, and Forest Canopy Height).
 
+If we wanted to restrict these edits to a certain area we could pass the
+path to a zip archive (`.zip`) containing a shapefile to `edit_mask`:
+
+``` r
+edit_mask <- "path/to/wildfire.zip"
+```
+
+Note: The file must follow ESRI shapefile naming standards (e.g., no
+special characters) and be less than 1MB in size.
+
 ### Path
 
 Finally, we will provide a path to a temporary zip file. Setting the
 path as a temp file is not strictly necessary because if `path` is left
-blank `landfireAPI()` will save the data to a temporary folder by
+blank `landfireAPIv2()` will save the data to a temporary folder by
 default.
 
 ``` r
 path <- tempfile(fileext = ".zip")
 ```
 
-### Call `landfireAPI()`
+### Call `landfireAPIv2()`
 
 Now we are able to submit a request to the LANDFIRE Product Services API
-with the `landfireAPI()` function.
+with the `landfireAPIv2()` function.
 
 ``` r
-resp <- landfireAPI(products = products,
+resp <- landfireAPIv2(products = products,
                     aoi = aoi, 
+                    email = email,
                     projection = projection, 
                     resolution = resolution,
                     edit_rule = edit_rule,
@@ -217,7 +225,7 @@ resp <- landfireAPI(products = products,
                     verbose = FALSE)
 ```
 
-`landfireAPI()` will download your requested data into the folder
+`landfireAPIv2()` will download your requested data into the folder
 provided in the path argument. If you did not provide one, you can find
 the path to your data in the `$path` element of the `landfire_api`
 object.
@@ -259,7 +267,7 @@ plot(boundary$geometry, add = TRUE, col = NA,
      border = "black", lwd = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" />
 
 ### Working with Categorical Products
 
@@ -273,15 +281,13 @@ minimal request with the default projection and resolution. We will also
 allow `rlandfire` to save the files to a temporary directory
 automatically. As mentioned above, we can find the path to the temporary
 directory in the `$path` element of the `landfire_api` object returned
-by `landfireAPI()`.
+by `landfireAPIv2()`.
 
 ``` r
-resp <- landfireAPI(products = "240EVC",
+resp <- landfireAPIv2(products = "240EVC",
                     aoi = aoi,
+                    email = email,
                     verbose = FALSE)
-#> Warning in landfireAPI(products = "240EVC", aoi = aoi, verbose = FALSE): `path`
-#> is missing. Files will be saved in temp directory:
-#> /tmp/RtmprznwZB/file2e86ea178975f4.zip
 ```
 
 When we read in and plot the EVC layer the legend will now list the
@@ -298,7 +304,7 @@ evc <- terra::rast(list.files(lf_cat, pattern = ".tif$",
 plot(evc)
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
 To access the values each `classname` is assigned to we can uses the
 `levels()` function. This returns a simple two column data frame
