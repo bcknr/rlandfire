@@ -28,6 +28,15 @@ test_that("`checkStatus()` recognizes argument errors", {
 
   expect_error(checkStatus(landfire_api = list()),
                "argument `landfire_api` must be a landfire_api object")
+  
+  expect_error(checkStatus(landfire_api = .build_landfire_api(),
+                           verbose = "not logical"),
+               "argument `verbose` must be logical")
+  
+  expect_error(checkStatus(landfire_api = .build_landfire_api(),
+                           method = "not a method"),
+               "`method` is invalid. See `?download.file`",
+               fixed = TRUE)
 })
 
 # Tests for cancelJob()

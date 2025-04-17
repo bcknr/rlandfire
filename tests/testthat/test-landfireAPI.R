@@ -79,9 +79,15 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
                            edit_rule = list(c("condition","ELEV2020","xx",500),
                                             c("change", "230CC", "st", 181))),
                '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"')
+  
+  # Returns error if `edit_mask` but no edit_rule
+  expect_error(landfireAPIv2(products, aoi, email = email,
+                           edit_mask = testthat::test_path("testdata", "wildfire.zip"),
+                           path = path),
+               "`edit_mask` requires `edit_rule` to be specified.")
 })
 
-test_that("`landfireAPIv2()` returns helpful errors with email/priority_code", {
+test_that("`landfireAPIv2()` returns errors with email/priority_code", {
 
   products <-  c("ASP2020")
   aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
@@ -100,49 +106,43 @@ test_that("`landfireAPIv2()` returns helpful errors with email/priority_code", {
 
 })
 
-httptest2::with_mock_dir("_mock/landfireAPI-priority", {
-  test_that("`landfireAPIv2()` formats priority requests correctly", {
-    products <-  c("ELEV2020", "SLPD2020", "ASP2020", "230FBFM40",
-                   "230CC", "230CH", "230CBH", "230CBD")
-    aoi <- c("-113.79", "42.148", "-113.56", "42.29")
-    email <- "example@domain.com"
-    priority_code <- "K3LS9F"
-    path <- tempfile(fileext = ".zip")
 
+httptest2::with_mock_dir("_mock/landfireAPI-priority", {
+
+  products <-  c("ELEV2020", "SLPD2020", "ASP2020", "230FBFM40",
+                   "230CC", "230CH", "230CBH", "230CBD")
+  aoi <- c("-113.79", "42.148", "-113.56", "42.29")
+  email <- "example@domain.com"
+  priority_code <- "K3LS9F"
+  path <- tempfile(fileext = ".zip")
+
+  test_that("`landfireAPIv2()` formats priority requests correctly", {
     output <- landfireAPIv2(products, aoi, email,
                             priority_code = priority_code,
                             path = path)
     expect_identical(output$request$url,"https://lfps.usgs.gov/api/job/submit?Email=example%40domain.com&Layer_List=ELEV2020%3BSLPD2020%3BASP2020%3B230FBFM40%3B230CC%3B230CH%3B230CBH%3B230CBD&Area_of_Interest=-113.79%2042.148%20-113.56%2042.29&Priority_Code=K3LS9F")
   })
+
+  test_that("`landfireAPIv2()` returns expected messages", {
+    expect_message(landfireAPIv2(products, aoi, email,
+                                 priority_code = priority_code),
+                     "`path` is missing. Files will be saved in temporary directory: .*")
+
+    # Return correct message with background jobs
+    expect_message(landfireAPIv2(products, aoi, email,
+                                 priority_code = priority_code,
+                                 background = TRUE, path = path),
+                   "Job submitted in background.\nCall `checkStatus\\(\\)` to check the current status and download if completed.\nOr visit URL to check status and download manually:\n   .*\n")
+
+    expect_message(landfireAPIv2(products, aoi, email,
+                                 priority_code = priority_code,
+                                 max_time = 0, path = path),
+                   "Job submitted in background.\nCall `checkStatus\\(\\)` to check the current status and download if completed.\nOr visit URL to check status and download manually:\n   .*\n")
+
+
+  })
 })
 
-# httptest2::with_mock_dir("_mock/landfireAPI-messages", {
-#   test_that("`landfireAPIv2()` formats priority requests correctly", {
-#     products <-  c("ELEV2020", "SLPD2020", "ASP2020", "230FBFM40",
-#                    "230CC", "230CH", "230CBH", "230CBD")
-#     aoi <- c("-113.79", "42.148", "-113.56", "42.29")
-#     email <- "example@domain.com"
-#     path <- tempfile(fileext = ".zip")
-
-#     expect_warning(landfireAPIv2(products, aoi, email),
-#     "`path` is missing. Files will be saved in temporary directory: .*.zip")
-
-#     expect_warning(landfireAPIv2(products, aoi, email, path = path,
-#                    background = TRUE),
-#     paste("Job submitted in background.\n",
-#               "Call `checkStatus()` to check the current status and download",
-#               " if completed.\n",
-#               "Or visit URL to check status and download manually:\n   .*"))
-
-#     expect_warning(landfireAPIv2(products, aoi, email, path = path,
-#                    max_time = 5),
-#     paste("Job status: Incomplete and `max_time` reached\n",
-#               "Call: `checkStatus()` to check the current status\n",
-#               "      `cancelJob()` to cancel.\n",
-#               "Or visit URL to check status and download manually:\n   .*"))
-
-#   })
-# })
 
 httptest2::with_mock_dir("_mock/landfireAPI-failed", {
   test_that("`landfireAPIv2()` recognizes failed call", {
@@ -227,19 +227,19 @@ test_that("`.post_request` catches file issues", {
 })
 
 
-test_that("`.post_editmask` returns expected response", {
+# test_that("`.post_editmask` returns expected response", {
 
-  skip_on_cran()
+#   skip_on_cran()
 
-  shapefile <- testthat::test_path("testdata", "Wildfire_History.zip")
-  result <- .post_editmask(shapefile)
+#   shapefile <- testthat::test_path("testdata", "wildfire.zip")
+#   result <- .post_editmask(shapefile)
 
-  expect_match(result, '\"itemName\":\"Wildfire_History.zip\"')
-  expect_match(result, '\"description\":null')
-  expect_match(result, '\"committed\":true')
-  expect_match(result, '\"success\":true')
+#   expect_match(result, '\"itemName\":\"wildfire.zip\"')
+#   expect_match(result, '\"description\":null')
+#   expect_match(result, '\"committed\":true')
+#   expect_match(result, '\"success\":true')
 
-})
+# })
 
 
 

@@ -20,7 +20,8 @@
 #'   "product", "operator", "value". Limited to fuel theme products only.
 #'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
 #' @param edit_mask Optional. Path to a compressed shapefile (.zip) to be used
-#'   as an edit mask. The shapefile must be less than 1MB in size.
+#'   as an edit mask. The shapefile must be less than 1MB in size and the 
+#'   shapefile must comply with ESRI shapefile naming rules.
 #' @param priority_code Optional. Priority code for wildland fire systems/users.
 #'   Contact the LANDFIRE help desk for information (<helpdesk@landfire.gov>)
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
@@ -97,8 +98,11 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             path)
   }
 
+  if (!is.null(edit_mask) && is.null(edit_rule)) {
+    stop("`edit_mask` requires `edit_rule` to be specified.")
+  }
+
   # Classes
-  # stopifnot("argument `email` must be a character string" = inherits(email, "character")) # TODO: should be captured above?
   stopifnot("argument `products` must be a character vector"
             = inherits(products, "character"))
   stopifnot("argument `aoi` must be a character or numeric vector"
@@ -121,7 +125,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
 
-  stopifnot("argument `max_time` must be >= 5" = max_time >= 5)
+  # stopifnot("argument `max_time` must be >= 5" = max_time >= 5)
 
   # Values in range
   if(is.numeric(resolution) && resolution == 30) {
@@ -151,6 +155,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
   #### End Checks
 
+  # Edit mask
+  mask <- .post_editmask(edit_mask)
+
   # Define Parameters
   params <- list(
     Email = email,
@@ -158,8 +165,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     Area_of_Interest = paste(aoi, collapse = " "),
     Output_Projection = projection,
     Resample_Resolution = resolution,
-    Edit_Rule = .fmt_editrules(edit_rule),
-    Edit_Mask = .post_editmask(edit_mask),
+    Edit_Rule = .fmt_editrules(edit_rule, mask = mask),
+    Edit_Mask = mask$item_id,
     Priority_Code = priority_code
   )
 
@@ -195,7 +202,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
                                 method = method, i = i, max_time = max_time)
 
     # Set early exit if background is TRUE or status is "Failed" or "Succeeded"
-    if (background == TRUE) {
+    if (background == TRUE || max_time == 0) {
       message("Job submitted in background.\n",
               "Call `checkStatus()` to check the current status and download",
               " if completed.\n",
@@ -213,7 +220,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
               "Call: `checkStatus()` to check the current status\n",
               "      `cancelJob()` to cancel.\n",
               "Or visit URL to check status and download manually:\n   ",
-              httr2::resp_url(lfps$request$request))
+              lfps_return$response$url)
       lfps_return$status <- "Timed out"
       break
     } else {
@@ -224,8 +231,6 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   return(lfps_return)
 
 }
-
-#TODO Overwrite the console instead of clearing
 
 #' Internal: Submit edit_mask POST request
 #'
@@ -244,7 +249,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 .post_editmask <- function(file) {
 
   if(is.null(file)) {
-    return(NULL)
+    return(list(item_id = NULL,
+                item_name = NULL))
   }
 
   # Checks
@@ -255,6 +261,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             = grepl("\\.zip$", file))
   stopifnot("`edit_mask` file does not contain a shapefile"
             = any(grepl("\\.shp$", unzip(file, list=T)$Name)))
+
+  stopifnot("`edit_mask` file name must not contain special characters"
+            = !grepl("[^[:alnum:]]", basename(file)))
   # End Checks
 
   req <- httr2::request("https://lfps.usgs.gov/api/upload/shapefile") |>
@@ -276,7 +285,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
          "\n\tLFPS Error message: ", upload_body$message)
   }
 
-  return(httr2::resp_body_string(upload_resp))
+  return(list(item_id = sprintf('[{"itemID":"%s"}]', upload_body$itemId),
+              item_name = upload_body$itemName))
 
 }
 
@@ -296,10 +306,10 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'                   c("change", "230CC", "st", 181))
 #' .fmt_editrules(edit_rule)
 #' }
-.fmt_editrules <- function(rules) {
-  
+.fmt_editrules <- function(rules, mask = NULL) {
+
   # Check for NULL
-  if(is.null(rules)) {
+  if (is.null(rules)) {
     return(NULL)
   }
 
@@ -338,6 +348,12 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   edit_rule <- c()
   edit_rule[order_cnd] <- unlist(cnd)
   edit_rule[order_chng] <- unlist(chng)
+
+  # Add edit mask if provided
+  if(!is.null(mask)) {
+    mask_file  <- sprintf('"mask":"%s"', mask$item_name)
+    edit_rule <- c(mask_file, edit_rule)
+  }
 
   # Assemble final string
   paste0('{"edit":[{',

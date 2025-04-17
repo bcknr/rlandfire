@@ -13,6 +13,10 @@ test_that("`getAOI` works with supported object classes", {
   expect_equal(getAOI(raster::raster(r)), ext)
   expect_equal(getAOI(stars::st_as_stars(r)), ext)
 
+  expect_error(getAOI(matrix()),
+  "`data` must be SpatRaster, SpatVector, sf, stars, or RasterLayer (raster) object",
+  fixed = TRUE)
+
 })
 
 
@@ -103,11 +107,11 @@ test_that("`getZone` recognizes arguement errors", {
                                 crs = 4326)) |>
     sf::st_as_sfc()
 
-  # v_mult <- sf::st_bbox(sf::st_as_sf(data.frame(x = c(-114.77,-114.57),
-  #                                          y = c(33.26,33.37)),
-  #                               coords = c("x", "y"),
-  #                               crs = 4326)) |>
-  #   sf::st_as_sfc()
+  v_mult <- sf::st_bbox(sf::st_as_sf(data.frame(x = c(-114.77,-114.57),
+                                           y = c(33.26,33.37)),
+                                coords = c("x", "y"),
+                                crs = 4326)) |>
+    sf::st_as_sfc()
 
   expect_error(getZone(v),
                "argument `data` must be sf object or zone name within CONUS")
@@ -117,4 +121,8 @@ test_that("`getZone` recognizes arguement errors", {
 
   expect_error(getZone(terra::vect(v)),
                "argument `data` must be sf object, or character string")
+
+  expect_warning(getZone(v_mult),
+               "Spatial object intersects more than one map zone. `landfireAPI` only accepts one zone at a time!
+Consider using `getAOI()` instead", fixed = TRUE)
 })

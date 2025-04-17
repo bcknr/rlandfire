@@ -23,8 +23,10 @@
   stopifnot("argument `landfire_api` must be a landfire_api object"
             = inherits(landfire_api, "landfire_api"))
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
-  stopifnot("argument `method` must be a character string"
-            = inherits(method, "character"))
+  stopifnot(
+    "`method` is invalid. See `?download.file`" =
+      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto")
+  )
   stopifnot("argument `i` must be an integer" = is.numeric(i))
   stopifnot("argument `max_time` must be numeric" = is.numeric(max_time))
   # End Checks
@@ -136,8 +138,10 @@ checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
   stopifnot("argument `landfire_api` must be a landfire_api object"
             = inherits(landfire_api, "landfire_api"))
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
-  stopifnot("argument `method` must be a character string"
-            = inherits(method, "character"))
+  stopifnot(
+    "`method` is invalid. See `?download.file`" =
+      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto")
+  )
   # End Checks
   .checkStatus_internal(landfire_api, verbose = verbose, method = method,
                         i = 1, max_time = 0)
