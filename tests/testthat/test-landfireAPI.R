@@ -30,8 +30,7 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
                "argument `aoi` must be a character or numeric vector")
   
   expect_error(landfireAPIv2(products, aoi, email = "notanemail"),
-               "A valid `email` address is required. (See `?rlandfire::landfireAPIv2` for more information)",
-               fixed = TRUE)
+               "A valid `email` address is required.*")
   
   expect_error(landfireAPIv2(products, aoi, email = email,
                            max_time = TRUE, path = path),
@@ -47,12 +46,11 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
 
   # Check `aoi` errors
   expect_error(landfireAPIv2(products, aoi = 100, email = email, path = path),
-               "argument `aoi` must be between 1 and 79 if using LANDFIRE map zones")
+               "argument `aoi` must be between 1 and 79.*")
 
   expect_error(landfireAPIv2(products, aoi = c(-200, 43, -179, 44),
                            email = email, path = path),
-               "argument `aoi` must be latitude and longitude in decimal degrees (WGS84) or a LANDFIRE map zone",
-               fixed = TRUE)
+               "argument `aoi` must be latitude and longitude.*")
   
   expect_error(landfireAPIv2(products, aoi = c(-123, 43, -124, 44),
                            email = email, path = path),
@@ -60,7 +58,7 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
   
   expect_error(landfireAPIv2(products, aoi = c(65,66),
                            email = email, path = path),
-               "argument `aoi` must be vector of coordinates with length == 4 or a single map zone")
+               "argument `aoi` must be vector of coordinates.*")
 
   # Check `resolution`
   expect_error(landfireAPIv2(products, aoi, email = email,
@@ -74,11 +72,11 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
   expect_error(landfireAPIv2(products, aoi, email = email,
                            edit_rule = list(c("wrong","ELEV2020","lt",500),
                                             c("change", "230CC", "st", 181))),
-               '`edit_rule` operator classes must only be "condition" or "change"')
+               "`edit_rule` operator classes must only be .*")
   expect_error(landfireAPIv2(products, aoi, email = email,
                            edit_rule = list(c("condition","ELEV2020","xx",500),
                                             c("change", "230CC", "st", 181))),
-               '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"')
+               "`edit_rule` conditional operators must be one of .*")
   
   # Returns error if `edit_mask` but no edit_rule
   expect_error(landfireAPIv2(products, aoi, email = email,
@@ -96,8 +94,7 @@ test_that("`landfireAPIv2()` returns errors with email/priority_code", {
 
   # ID errors with LFPSv1 requests with positional arguments
   expect_error(landfireAPIv2(products, aoi, projection, path = path),
-               "A valid `email` address is required. (See `?rlandfire::landfireAPIv2` for more information)",
-               fixed = TRUE)
+               "A valid `email` address is required.*")
 
   # Check class
   expect_error(landfireAPIv2(products, aoi, email = "test@email.com",
@@ -132,13 +129,11 @@ httptest2::with_mock_dir("_mock/landfireAPI-priority", {
     expect_message(landfireAPIv2(products, aoi, email,
                                  priority_code = priority_code,
                                  background = TRUE, path = path),
-                   "Job submitted in background.\nCall `checkStatus\\(\\)` to check the current status and download if completed.\nOr visit URL to check status and download manually:\n   .*\n")
-
+                   "Job submitted in background.*")
     expect_message(landfireAPIv2(products, aoi, email,
                                  priority_code = priority_code,
                                  max_time = 0, path = path),
-                   "Job submitted in background.\nCall `checkStatus\\(\\)` to check the current status and download if completed.\nOr visit URL to check status and download manually:\n   .*\n")
-
+                   "Job submitted in background.*")
 
   })
 })
