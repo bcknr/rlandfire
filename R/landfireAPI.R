@@ -242,8 +242,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' edit_mask <- system.file("extdata", "Wildfire_History.zip",
-#'                          package = "rlandfire")
+#' edit_mask <- system.file("extdata", "wildfire.zip", package = "rlandfire")
 #' .post_editmask(edit_mask)
 #' }
 .post_editmask <- function(file) {
@@ -263,15 +262,17 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             = any(grepl("\\.shp$", unzip(file, list=T)$Name)))
 
   stopifnot("`edit_mask` file name must not contain special characters"
-            = !grepl("[^[:alnum:]]", basename(file)))
+            = !grepl("[^[:alnum:].]", basename(file)))
   # End Checks
 
   req <- httr2::request("https://lfps.usgs.gov/api/upload/shapefile") |>
-         httr2::req_method("POST") |>
-         httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
-         httr2::req_headers("Accept" = "application/json") |>
-         httr2::req_body_multipart(file = curl::form_file(file),
-                                   type = "application/zip")
+    httr2::req_method("POST") |>
+    httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
+    httr2::req_headers("Accept" = "application/json") |>
+    httr2::req_body_multipart(
+      file = curl::form_file(file, type = "application/zip"),
+      description = "string"
+    )
 
   # Perform the request
   upload_resp <- httr2::req_error(req, is_error = \(upload_resp) FALSE) |>

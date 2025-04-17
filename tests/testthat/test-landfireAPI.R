@@ -223,7 +223,8 @@ test_that("`.post_request` catches file issues", {
                "`edit_mask` file does not contain a shapefile")
   
   # Returns NULL if no file is provided
-  expect_null(.post_editmask(NULL))
+  expect_null(.post_editmask(NULL)$item_id)
+  expect_null(.post_editmask(NULL)$item_name)
 })
 
 
