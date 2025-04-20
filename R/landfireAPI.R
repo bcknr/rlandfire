@@ -80,12 +80,12 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
     stopifnot(
       '`edit_rule` operator classes must only be "condition" or "change"' =
-        all(class %in% c("condition", "change"))
+        all(class %in% c("condition", "change", "ORcondition"))
     )
 
     stopifnot(
       '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"'
-      = all(sapply(edit_rule, `[`, 3)[class == "condition"] %in% c("eq","ge","gt","le","lt","ne")))
+      = all(sapply(edit_rule, `[`, 3)[class %in% c("condition","ORcondition")] %in% c("eq","ge","gt","le","lt","ne")))
 
     stopifnot(
       '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"'
@@ -325,7 +325,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   })
 
   # Condition - ID groups with same class and build request
-  cnd <- which(class == "condition")
+  cnd <- grep(".*condition", class)
   breaks <- c(0, which(diff(cnd) != 1), length(cnd))
   cnd_grp <- lapply(seq(length(breaks) - 1),
                     function(i) cnd[(breaks[i] + 1):breaks[i+1]])
@@ -334,13 +334,35 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
                                             paste0(params[i],
                                             collapse = '},{'),'}]'))
 
+  # Check for OR condition
+  or_cnd <- grep("OR.*", class)
+  stopifnot("`edit_rule` contains a `condition` without an associated `change`."
+            = or_cnd %in% sapply(cnd_grp, `[`, 1))
+
+  # Add edit mask if provided
+  if(!is.null(mask)) {
+
+    mask_file  <- sprintf('"mask":"%s"', mask$item_name)
+
+    # Edit groups
+    ed_grp  <- c(1, which(do.call("c", cnd_grp) %in% or_cnd))
+
+    if (length(mask$item_name) == 1 ||
+        length(mask$item_name) == length(cnd_grp)) {
+      cnd[ed_grp]  <- paste(mask_file, cnd[ed_grp], sep = ",")
+    } else {
+      stop("The number of `edit_mask` count should match the number of", 
+           "`edit_rules` condition groups when using multiple shapefiles.")
+    }
+  }
+
   # Change - ID groups with same class and build request
   chng <- which(class == "change")
   breaks <- c(0, which(diff(chng) != 1), length(chng))
   chng_grp <- lapply(seq(length(breaks) - 1),
                      function(i) chng[(breaks[i] + 1):breaks[i+1]])
 
-  chng <- lapply(chng_grp, function(i) paste0('"change":[{',
+  chng <- lapply(chng_grp, function(i) paste0(',"change":[{',
                                               paste0(params[i],
                                               collapse = '},{'),'}]'))
 
@@ -351,17 +373,33 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   edit_rule <- c()
   edit_rule[order_cnd] <- unlist(cnd)
   edit_rule[order_chng] <- unlist(chng)
+  edit_rule <- edit_rule[!is.na(edit_rule)]
 
-  # Add edit mask if provided
-  if(!is.null(mask)) {
-    mask_file  <- sprintf('"mask":"%s"', mask$item_name)
-    edit_rule <- c(mask_file, edit_rule)
+  # Check for OR condition and move to end
+  
+  and_cnd  <- which(setdiff(seq_along(edit_rule), or_cnd) %% 2 == 1)
+
+  out_rules  <- paste0(
+    sapply(and_cnd, function(i) {
+      paste0(edit_rule[i], edit_rule[i + 1])
+    }), collapse = ","
+  )
+
+  out_rules  <- sprintf('"edit":[{%s}]', out_rules)
+
+  if (length(or_cnd) != 0) {
+    or_rules <- sprintf('"edit":[{%s}]',
+      sapply(or_cnd, function(i) {
+        paste0(edit_rule[i], edit_rule[i + 1])
+      })
+    )
+
+    out_rules <- c(out_rules, or_rules)
   }
 
   # Assemble final string
-  paste0('{"edit":[{',
-         paste0(edit_rule[!is.na(edit_rule)], collapse = ','),
-         '}]}'
+  sprintf("{%s}",
+    paste0(out_rules[!is.na(out_rules)], collapse = ",")
   )
 }
 
