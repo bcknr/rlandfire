@@ -85,11 +85,18 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
     stopifnot(
       '`edit_rule` conditional operators must be one of "eq","ge","gt","le","lt","ne"'
-      = all(sapply(edit_rule, `[`, 3)[class %in% c("condition","ORcondition")] %in% c("eq","ge","gt","le","lt","ne")))
+      = all(sapply(edit_rule, `[`, 3)[class %in% c("condition","ORcondition")] %in% c("eq","ge","gt","le","lt","ne"))
+    )
 
     stopifnot(
       '`edit_rule` change operators must be one of "cm","cv","cx","bd","ib","mb","st"'
-      = all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st")))
+      = all(sapply(edit_rule, `[`, 3)[class == "change"] %in% c("cm","cv","cx","db","ib","mb","st"))
+    )
+
+    stopifnot(
+      "all products used in argument `edit_rule` must be included in argument `products`"
+      = all(sapply(edit_rule, `[`, 2) %in% products)
+    )
   }
 
   if(is.null(path)){
@@ -152,9 +159,6 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   } else if(length(aoi) == 1 && !all(aoi >= 1 & aoi <= 79)){
     stop("argument `aoi` must be between 1 and 79 if using LANDFIRE map zones")
   }
-
-  stopifnot("all products used in argument `edit_rule` must be included in argument `products`"
-            = all(sapply(edit_rule, `[`, 2) %in% products))
 
   #### End Checks
 
@@ -347,12 +351,12 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 
     mask_file  <- sprintf('"mask":"%s"', mask$item_name)
 
-    # Edit groups
-    ed_grp  <- c(1, which(do.call("c", cnd_grp) %in% or_cnd))
+    # mask groups
+    mask_grp  <- c(1, which(do.call("c", cnd_grp) %in% or_cnd))
 
     if (length(mask$item_name) == 1 ||
         length(mask$item_name) == length(cnd_grp)) {
-      cnd[ed_grp]  <- paste(mask_file, cnd[ed_grp], sep = ",")
+      cnd[mask_grp]  <- paste(mask_file, cnd[mask_grp], sep = ",")
     } else {
       stop("The number of `edit_mask` count should match the number of", 
            "`edit_rules` condition groups when using multiple shapefiles.")
@@ -365,7 +369,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   chng_grp <- lapply(seq(length(breaks) - 1),
                      function(i) chng[(breaks[i] + 1):breaks[i+1]])
 
-  chng <- lapply(chng_grp, function(i) paste0(',"change":[{',
+  chng <- lapply(chng_grp, function(i) paste0('"change":[{',
                                               paste0(params[i],
                                               collapse = '},{'),'}]'))
 
@@ -376,28 +380,20 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   edit_rule <- c()
   edit_rule[order_cnd] <- unlist(cnd)
   edit_rule[order_chng] <- unlist(chng)
-  edit_rule <- edit_rule[!is.na(edit_rule)]
 
-  # Check for OR condition and move to end
-  
-  and_cnd  <- which(setdiff(seq_along(edit_rule), or_cnd) %% 2 == 1)
+  # Check if multiple "Edit" groups needed
+  ed_grp <- edit_rule[c(1, or_cnd)]
+  out_rules <- edit_rule[!is.na(edit_rule)]
 
-  out_rules  <- paste0(
-    sapply(and_cnd, function(i) {
-      paste0(edit_rule[i], edit_rule[i + 1])
-    }), collapse = ","
-  )
-
-  out_rules  <- sprintf('"edit":[{%s}]', out_rules)
-
-  if (length(or_cnd) != 0) {
-    or_rules <- sprintf('"edit":[{%s}]',
-      sapply(or_cnd, function(i) {
-        paste0(edit_rule[i], edit_rule[i + 1])
-      })
-    )
-
-    out_rules <- c(out_rules, or_rules)
+  # If OR condition
+  if (length(ed_grp) > 1) {
+    out_rules <- lapply(which(out_rules %in% ed_grp), function(i) {
+    sprintf('"edit":[{%s,%s}]', out_rules[i], out_rules[i + 1])
+  })
+  } else {
+    out_rules <- paste0('"edit":[{', 
+                       paste(out_rules, collapse = ','),
+                        '}]')
   }
 
   # Assemble final string

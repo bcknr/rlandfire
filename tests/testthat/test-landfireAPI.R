@@ -254,20 +254,51 @@ test_that("`.post_editmask` returns expected response", {
 
 # Tests for .fmt_editrules (internal)
 test_that("`.fmt_editrules` correctly formats requests",{
+
+  # One condition, one change
   single_rule <- list(c("condition", "ELEV2020", "lt", 500),
                       c("change", "230CC", "st", 181))
+  expect_identical(.fmt_editrules(single_rule),
+                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}]}]}")
+
+  # Multiple conditions
   multi_rule <- list(c("condition", "ELEV2020", "lt", 500),
                      c("change", "230CC", "st", 181),
                      c("condition", "ELEV2020", "ge", 600),
                      c("change", "230CC", "db", 20),
                      c("condition", "ELEV2020", "eq", 550),
                      c("change", "230CC", "st", 0))
-
-  expect_identical(.fmt_editrules(single_rule),
-                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}]}]}")
   expect_identical(.fmt_editrules(multi_rule),
                    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"ge\",\"value\":600}],\"change\":[{\"product\":\"230CC\",\"operator\":\"db\",\"value\":20}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":550}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":0}]}]}")
 
+  
+  # Single condition with multiple changes (Pulled from documentation)
+  multi_change  <- list(c("condition", "ELEV2020", "lt", 500),
+                        c("change", "140FBFM", "st", 181),
+                        c("change", "140CBH", "ib", 5))
+    expect_identical(.fmt_editrules(multi_change),
+                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}]}")
+  
+  # Multiple conditions with OR (Pulled from documentation)
+  or_rule  <- list(c("condition", "ELEV2020", "", 0),
+                  c("change", "140FBFM", "st", 181),
+                  c("change", "140CBH", "ib", 5),
+                  c("ORcondition", "ELEV2020", "gt", 500),
+                  c("condition", "ELEV2020", "lt", 600),
+                  c("change", "140FBFM", "st", 181),
+                  c("change", "140CBH", "ib", 5))
+  expect_identical(.fmt_editrules(or_rule),
+                   "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"\",\"value\":0}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}],\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"gt\",\"value\":500},{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":600}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}]}")
+
+  # Single `edit_mask` with simple edit rules
+  single_mask  <- list(c("condition", "ELEV2020", "eq", 593),
+                      c("change", "140CC", "st", 500),
+                      c("change", "140CH", "ib", 50))
+  mask  <- list(item_id = "{\"itemID\":\"i5ce09134-4e57-41fe-bcaa-0c38879bc3fc\"}]",
+                item_name = "wildfire.shp")
+  expect_identical(.fmt_editrules(single_mask, mask),
+                   "{\"edit\":[{\"mask\":\"wildfire.shp\",\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":593}],\"change\":[{\"product\":\"140CC\",\"operator\":\"st\",\"value\":500},{\"product\":\"140CH\",\"operator\":\"ib\",\"value\":50}]}]}")
+  
   # Returns NULL if no file is provided
   expect_null(.fmt_editrules(NULL))
 })
