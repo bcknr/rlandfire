@@ -153,6 +153,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     stop("argument `aoi` must be between 1 and 79 if using LANDFIRE map zones")
   }
 
+  stopifnot("all products used in argument `edit_rule` must be included in argument `products`"
+            = all(sapply(edit_rule, `[`, 2) %in% products))
+
   #### End Checks
 
   # Edit mask
