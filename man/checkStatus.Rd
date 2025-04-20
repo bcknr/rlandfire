@@ -11,7 +11,8 @@ checkStatus(landfire_api, verbose = TRUE, method = "curl")
 
 \item{verbose}{If FALSE suppress all status messages}
 
-\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
+\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file} or
+use "none" to skip download and use \code{landfire_vsi()}}
 }
 \value{
 Returns a \code{landfire_api} object with named elements:

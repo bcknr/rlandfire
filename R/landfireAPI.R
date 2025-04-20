@@ -100,7 +100,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     )
   }
 
-  if(is.null(path)){
+  if(is.null(path) && method != "none") {
     path = tempfile(fileext = ".zip")
     message("`path` is missing. Files will be saved in temporary directory: ", 
             path)
@@ -127,8 +127,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             = inherits(background, "logical"))
 
   stopifnot(
-    "`method` is invalid. See `?download.file`" =
-      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto")
+    "`method` is invalid. See `?download.file` or use \"none\" to skip download"
+    = method %in% c("internal", "libcurl", "wget",
+                    "curl", "wininet", "auto", "none")
   )
 
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
@@ -430,7 +431,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
-#' @param method Passed to [utils::download.file()]. See `?download.file`
+#' @param method Passed to [utils::download.file()]. See `?download.file` or
+#'   use "none" to skip download and use `landfire_vsi()`
 #' @param verbose If FALSE suppress all status messages
 #'
 #' @return
@@ -474,7 +476,7 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   stopifnot("argument `aoi` is missing with no default" = !missing(aoi))
 
   if(!is.null(edit_rule)){
-    stopifnot("argument `edit_rule` must be a list" = inherits(edit_rule, "list"))
+    stopifnot("`edit_rule` must be a list" = inherits(edit_rule, "list"))
 
     class <- sapply(edit_rule, `[`, 1)
 
@@ -495,6 +497,10 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
   if(is.null(path)){
     path = tempfile(fileext = ".zip")
     warning("`path` is missing. Files will be saved in temp directory: ", path)
+  }
+
+  if (method == "none") {
+    path <- NULL
   }
 
   # Classes

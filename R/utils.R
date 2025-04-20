@@ -18,6 +18,59 @@ viewProducts <- function() {
   utils::browseURL("https://lfps.usgs.gov/products")
 }
 
+#' Read in LANDFIRE products using the GDAL `virtual file system`
+#'
+#' @description
+#' `landfire_vsi()` opens a request LANDFIRE GeoTIFF using the GDAL `virtual
+#' file system` (VSI). This allows you to read in LANDFIRE products without
+#' having to download the file to your local machine or if the file
+#' already exists on your local machine without having to unzip it.
+#'
+#'
+#' @return SpatRaster object of the requested LANDFIRE product/s
+#'
+#' @md
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' rast <- landfireAPIv2(products = "240EVC",
+#'                       aoi = aoi, email = email,
+#'                       download = FALSE)  |>
+#'         landfireVSI()
+#' }
+
+landfireVSI <- function(landfire_api) {
+  # checks
+  if (!inherits(landfire_api, "landfire_api")) {
+    stop("argument `landfire_api` must be a landfire_api object")
+  }
+  if (is.null(landfire_api$path) && is.null(landfire_api$request$dwl_url)) {
+    stop("the provided `landfire_api` object does not contain a valid `path` or `dwl_url`")
+  }
+  # end checks
+
+  #TODO: need to verify that this will work with the new naming convention
+  if (file.exists(landfire_api$path)) {
+    r <- terra::rast(
+      sprintf("/vsizip/%s/%s",
+              landfire_api$path,
+              grep("\\.tif$",unzip(landfire_api$path, list=T)$Name,
+                   value = TRUE))
+    )
+  } else if (!is.null(landfire_api$request$dwl_url)) {
+    r <- terra::rast(
+      sprintf("/vsizip/vsicurl/%s/%s",
+              landfire_api$request$dwl_url,
+              gsub("\\.zip$",".tif",basename(landfire_api$request$dwl_url)))
+    )
+  } else {
+    stop("No file associated with the provide `landfire_api` object was found")
+  }
+
+  return(r)
+}
+
 
 #' Internal: Build Landfire API object
 #'

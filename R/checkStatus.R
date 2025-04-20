@@ -85,9 +85,19 @@
     # If success report success and download file
   } else if (grepl("Succeeded",job_status)) {
     dwl_url <- resp_body$outputFile
-    utils::download.file(dwl_url, landfire_api$path,
+
+    if (method != "none"){
+      utils::download.file(dwl_url, landfire_api$path,
                          method = method, quiet = !verbose)
-    status <- "Succeeded"
+      status <- "Succeeded"
+    } else {
+      rlang::inform(message = "Download Skipped: `method` set to 'none'",
+        body = paste("The file can be accessed using `landfire_vsi()`,",
+                     "by visiting the `dwl_url`,",
+                     "or by using `checkStatus()`"),
+        frequency = "once", frequency_id = "method_none")
+      status <- "Succeeded (download skipped)"
+    }
     landfire_api$request$dwl_url <- dwl_url
   }
 
@@ -108,7 +118,8 @@
 #'
 #' @param landfire_api `landfire_api` object returned from `landfireAPIv2()`
 #' @param verbose If FALSE suppress all status messages
-#' @param method Passed to [utils::download.file()]. See `?download.file`
+#' @param method Passed to [utils::download.file()]. See `?download.file` or
+#'   use "none" to skip download and use `landfire_vsi()`
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
@@ -140,7 +151,7 @@ checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
   stopifnot(
     "`method` is invalid. See `?download.file`" =
-      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto")
+      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto", "none")
   )
   # End Checks
   .checkStatus_internal(landfire_api, verbose = verbose, method = method,

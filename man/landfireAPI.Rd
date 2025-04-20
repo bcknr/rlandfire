@@ -42,7 +42,8 @@ If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
 
-\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
+\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file} or
+use "none" to skip download and use \code{landfire_vsi()}}
 
 \item{verbose}{If FALSE suppress all status messages}
 }
