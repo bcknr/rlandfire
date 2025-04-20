@@ -10,14 +10,7 @@ cancelJob(job_id)
 \item{job_id}{The job ID of the LFPS API request as a character string}
 }
 \value{
-Returns a \code{landfire_api} object with named elements:
-\itemize{
-\item \code{request} - list with elements \code{query}, \code{date}, \code{url}, \code{job_id},\code{dwl_url}
-\item \code{content} - Informative messages passed from API
-\item \code{response} - Full response
-\item \code{status} - Final API status, one of "Failed", "Succeeded", or "Timed out"
-\item \code{path} - path to save directory
-}
+NULL. Prints a message to the console about the job status.
 }
 \description{
 \code{cancelJob()} sends a request to cancel a LFPS API request

@@ -50,15 +50,10 @@ test_that("`cancelJob()` recognizes arguement errors", {
 
 # Check functionality of `cancelJob()`
 httptest2::with_mock_dir("_mock/cancelJob", {
-  test_that("cancelJob() returns expected landfire-api object", {
-    canceled_landfire_api <- .build_landfire_api(status = "Canceled",
-                                                 job_id = "6f5ba39c-09f7-4f6d-97fa-543af185eb1b")
-    output <- cancelJob("6f5ba39c-09f7-4f6d-97fa-543af185eb1b")
+  test_that("cancelJob() returns expected response", {
 
     # Check class and values
-    expect_s3_class(output, "landfire_api")
-    expect_equal(output$status, canceled_landfire_api$status)
-    expect_equal(output$request$job_id, canceled_landfire_api$request$job_id)
+    expect_null(cancelJob("6f5ba39c-09f7-4f6d-97fa-543af185eb1b"))
 
     # Check message
     expect_message(cancelJob("6f5ba39c-09f7-4f6d-97fa-543af185eb1b"),

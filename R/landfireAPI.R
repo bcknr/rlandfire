@@ -4,12 +4,12 @@
 #' `landfireAPIv2` downloads LANDFIRE data by calling the LFPS API
 #'
 #' @param products Product names as character vector
-#'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/productstable.html}{Products Table})
+#'   (see: \href{https://lfps.usgs.gov/products}{Products Table})
 #' @param aoi Area of interest as character or numeric vector defined by
 #'   latitude and longitude in decimal degrees in WGS84 and ordered
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
 #' @param email Email address as character string. This is a required argument
-#'   for the LFPS v2 API. See the \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide} 
+#'   for the LFPS v2 API. See the \href{https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf}{LFPS Guide} 
 #'   for more information. Outside of the LFPS API request, this email address
 #'   is not used for any other purpose, stored, or shared by `rlandfire`.
 #' @param projection Optional. A numeric value of the WKID for the output projection
@@ -17,11 +17,12 @@
 #' @param resolution Optional. A numeric value between 30-9999 specifying the
 #'   resample resolution in meters. Default is 30m.
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
-#'   "product", "operator", "value". Limited to fuel theme products only.
+#'   "product", "operator", "value" where "operator class" is one of "condition",
+#'   "ORcondition", or "change". Edits are limited to fuel theme products only.
 #'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
 #' @param edit_mask Optional. Path to a compressed shapefile (.zip) to be used
-#'   as an edit mask. The shapefile must be less than 1MB in size and the 
-#'   shapefile must comply with ESRI shapefile naming rules.
+#'   as an edit mask. The shapefile must be less than 1MB in size and must 
+#'   comply with ESRI shapefile naming rules.
 #' @param priority_code Optional. Priority code for wildland fire systems/users.
 #'   Contact the LANDFIRE help desk for information (<helpdesk@landfire.gov>)
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].

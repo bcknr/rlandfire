@@ -154,13 +154,7 @@ checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
 #'
 #' @param job_id The job ID of the LFPS API request as a character string
 #'
-#' @return
-#' Returns a `landfire_api` object with named elements:
-#' * `request` - list with elements `query`, `date`, `url`, `job_id`,`dwl_url`
-#' * `content` - Informative messages passed from API
-#' * `response` - Full response
-#' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
-#' * `path` - path to save directory
+#' @return NULL. Prints a message to the console about the job status.
 #'
 #' @md
 #' @export
@@ -208,10 +202,6 @@ cancelJob <- function(job_id) {
   # Report status
   resp_body  <- httr2::resp_body_json(response)
   message(resp_body$message)
-
-  # Construct landfire_api object
-  .build_landfire_api(params = params, request = request, init_resp = response,
-                      job_id = job_id, status = "Canceled")
 }
 
 #' Check if the LFPS API is available
