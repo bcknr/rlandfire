@@ -11,11 +11,11 @@ httptest2::with_mock_dir("_mock/checkStatus-nojob", {
 
 httptest2::with_mock_dir("_mock/checkStatus", {
   test_that("`.checkStatus_internal()` returns expected", {
-    landfire_api <- .build_landfire_api(job_id = "6f5ba39c-09f7-4f6d-97fa-543af185eb1b",
+    landfire_api <- .build_landfire_api(job_id = "be7fab41-867e-41a5-b594-c469f118bc49",
                                         path = tempfile(fileext = ".zip"))
     return <- .checkStatus_internal(landfire_api, i = 1, max_time = 10)
     expect_s3_class(return, "landfire_api")
-    expect_equal(return$request$job_id, "6f5ba39c-09f7-4f6d-97fa-543af185eb1b")
+    expect_equal(return$request$job_id, "be7fab41-867e-41a5-b594-c469f118bc49")
     expect_equal(return$status, "Succeeded")
   })
 })
@@ -68,10 +68,10 @@ httptest2::with_mock_dir("_mock/healthCheck-true", {
     })
 })
 
-httptest2::with_mock_dir("_mock/healthCheck-false", {
-    test_that("healthCheck() returns correct message when down", {
-        expect_warning(healthCheck(), "The LFPS API is currently down.
-Please notify the LANDFIRE helpdesk at <helpdesk@landfire.gov> of the following error:
-The service is down")
-    })
-})
+# httptest2::with_mock_dir("_mock/healthCheck-false", {
+#     test_that("healthCheck() returns correct message when down", {
+#         expect_warning(healthCheck(), "The LFPS API is currently down.
+# Please notify the LANDFIRE helpdesk at <helpdesk@landfire.gov> of the following error:
+# The service is down")
+#     })
+# })

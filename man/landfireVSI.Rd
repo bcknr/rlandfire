@@ -6,6 +6,9 @@
 \usage{
 landfireVSI(landfire_api)
 }
+\arguments{
+\item{landfire_api}{A \code{landfire_api} object created by \code{landfireAPIv2()}}
+}
 \value{
 SpatRaster object of the requested LANDFIRE product/s
 }

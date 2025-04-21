@@ -25,6 +25,8 @@ viewProducts <- function() {
 #' file system` (VSI). This allows you to read in LANDFIRE products without
 #' having to download the file to your local machine or if the file
 #' already exists on your local machine without having to unzip it.
+#' 
+#' @param landfire_api A `landfire_api` object created by `landfireAPIv2()`
 #'
 #'
 #' @return SpatRaster object of the requested LANDFIRE product/s

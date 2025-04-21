@@ -1,15 +1,15 @@
 {
-    "jobId": "6f5ba39c-09f7-4f6d-97fa-543af185eb1b",
+    "jobId": "be7fab41-867e-41a5-b594-c469f118bc49",
     "queuePosition": -1,
     "status": "Succeeded",
     "messages": [
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Start Time: Wednesday, April 16, 2025 11:30:16 AM"
+            "description": "Start Time: Monday, April 21, 2025 10:51:05 AM"
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "AOI: -123.7835 41.7534 -123.6352 41.8042"
+            "description": "AOI: -105.402073426741 40.1122440067607 -105.235264686219 40.1961284789623"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -29,7 +29,7 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "US_ASP2020"
+            "description": "US_SLPP2020"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -37,7 +37,23 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "US_230CC"
+            "description": "US_240FBFM13"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "No Output projection input provided."
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Entering CreateLocalProjection()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "local projection string: PROJCS[\"Albers\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-105.31866905647999],PARAMETER[\"Standard_Parallel_1\",40.1122440067607],PARAMETER[\"Standard_Parallel_2\",40.1961284789623],PARAMETER[\"Latitude_Of_Origin\",40.1541862428615],UNIT[\"Meter\",1.0]]"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Exiting CreateLocalProjection()"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -45,27 +61,7 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Start resample of geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Finish resample of geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
             "description": "Finished creating geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Start editing geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Edit Round: 1"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Finished editing geotif"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -81,8 +77,8 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Succeeded at Wednesday, April 16, 2025 11:30:22 AM (Elapsed Time: 6.88 seconds)"
+            "description": "Succeeded at Monday, April 21, 2025 10:51:09 AM (Elapsed Time: 4.63 seconds)"
         }
     ],
-    "outputFile": "https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/jbef9804ddd7048578b38d9d387f887f3/scratch/jbef9804ddd7048578b38d9d387f887f3.zip"
+    "outputFile": "https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/jd0285f8499c448f7b795044b0d16966a/scratch/jd0285f8499c448f7b795044b0d16966a.zip"
 }

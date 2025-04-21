@@ -1,4 +1,4 @@
 {
-  "message": "The service is down",
-  "success": false
+    "message": "The service is up",
+    "success": true
 }

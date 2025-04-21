@@ -49,7 +49,6 @@
   # resp_body  <- jsonlite::fromJSON(httr2::resp_body_string(response))
   resp_body  <- httr2::resp_body_json(response)
 
-  # API always returns a successful status code (200) for LFPS v1
   status <- httr2::resp_status(response)
 
   if(status != 200) {
@@ -74,9 +73,11 @@
         "\n-------------------\n")
   }
 
+  call_status <- "pending"
+
   # If failed exit and report
   if(grepl("Failed",job_status)) {
-    status <- "Failed"
+    call_status <- "Failed"
 
     warning("Job ", job_id, " has failed with:\n\t",
             inf_msg[grepl("ERROR", inf_msg)],
@@ -89,14 +90,9 @@
     if (method != "none"){
       utils::download.file(dwl_url, landfire_api$path,
                          method = method, quiet = !verbose)
-      status <- "Succeeded"
+      call_status <- "Succeeded"
     } else {
-      rlang::inform(message = "Download Skipped: `method` set to 'none'",
-        body = paste("The file can be accessed using `landfire_vsi()`,",
-                     "by visiting the `dwl_url`,",
-                     "or by using `checkStatus()`"),
-        frequency = "once", frequency_id = "method_none")
-      status <- "Succeeded (download skipped)"
+      call_status <- "Succeeded (download skipped)"
     }
     landfire_api$request$dwl_url <- dwl_url
   }
@@ -105,7 +101,7 @@
   landfire_api$request$job_id <- job_id
   landfire_api$content <- inf_msg
   landfire_api$response <- response
-  landfire_api$status <- status
+  landfire_api$status <- call_status
 
   return(landfire_api)
 
