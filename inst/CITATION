@@ -2,10 +2,10 @@ citHeader("To cite rlandfire in publications use:")
 
 bibentry(
   bibtype    = "Manual",
-  title    = "rlandfire: Tools for Accessing and Working with LANDFIRE",
+  title    = "rlandfire: Interface to 'LANDFIRE Product Service' API",
     author   = person("Mark A. Buckner", role = "aut"),
-    year     = 2023,
-    note     = "R Package version 1.0.0",
-    url      = "https://github.com/bcknr/rlandfire",
+    year     = 2025,
+    note     = "R Package version 2.0.0",
+    url      = "https://CRAN.R-project.org/package=rlandfire",
     doi      = "10.6084/m9.figshare.22203250"
 )

@@ -1,6 +1,23 @@
-# rlandfire (development version)
+# rlandfire 2.0.0
+-   Added support for the new "version 2" LANDFIRE Products Service (LFPS) API
+-   Deprecated the old `landfireAPI()` function in favor of `landfireAPIv2()`
+-   Added new features to `landfireAPIv2()` including:
+    -   `edit_mask` to restrict edit rules to a specific area using a shapefile
+    -   Support for more complex `edit_rule` requests
+    -   Option to run calls in the background with `background = TRUE`
+-   Added new functions:
+    -   `cancelJob()`: cancels a previously submitted job
+    -   `checkStatus()`: checks the status of a background job manually and download files if complete
+    -   `healthCheck()`: checks the current status of the LFPS API
+    -   `landfireVSI()`: reads LANDFIRE GeoTIFFs as a Spatraster using GDAL's Virtual File System (VSI)
+-   Improved error handling and reporting and minor bug fixes
+-   Updated documentation, vignette, and examples to reflect the new API
+-   License for v2.0.0 is now GPL-3.0 due to dependencies on `terra`
+
+# rlandfire 1.0.1
 -   Created startup message with warning about potential/upcoming product name changes
 -   Updated links to LFPS products table in documentation and `viewProducts()`
+-   Updated documentation to reflect product name changes
 -   Added documentation to `README.md` and the vignette on working with categorical data
 -   Added `foreign` to suggests
 

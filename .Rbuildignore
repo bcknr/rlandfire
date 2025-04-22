@@ -5,3 +5,6 @@
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
 ^\.github$
+^doc$
+^Meta$
+^tests/testthat/_mock$

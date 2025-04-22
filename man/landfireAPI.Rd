@@ -2,7 +2,7 @@
 % Please edit documentation in R/landfireAPI.R
 \name{landfireAPI}
 \alias{landfireAPI}
-\title{Call the LANDFIRE Product Service (LFPS) API}
+\title{Depreciated: Call the LANDFIRE Product Service (LFPS) API}
 \usage{
 landfireAPI(
   products,
@@ -19,7 +19,7 @@ landfireAPI(
 }
 \arguments{
 \item{products}{Product names as character vector
-(see: \href{https://lfps.usgs.gov/helpdocs/productstable.html}{Products Table})}
+(see: Products Table)}
 
 \item{aoi}{Area of interest as character or numeric vector defined by
 latitude and longitude in decimal degrees in WGS84 and ordered
@@ -33,7 +33,7 @@ resample resolution in meters. Default is 30m.}
 
 \item{edit_rule}{Optional. A list of character vectors ordered "operator class"
 "product", "operator", "value". Limited to fuel theme products only.
-(see: \href{https://lfps.usgs.gov/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
+(see: LFPS Guide)}
 
 \item{edit_mask}{Optional. \strong{Not currently functional}}
 
@@ -42,7 +42,8 @@ If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
 
-\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
+\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file} or
+use "none" to skip download and use \code{landfire_vsi()}}
 
 \item{verbose}{If FALSE suppress all status messages}
 }
@@ -57,15 +58,18 @@ Returns a \code{landfire_api} object with named elements:
 }
 }
 \description{
+Depreciated: \code{landfireAPI()} is no longer supported due to updates to the
+LFPS API. Use \code{landfireAPIv2()} instead.
+
 \code{landfireAPI} downloads LANDFIRE data by calling the LFPS API
 }
 \examples{
 \dontrun{
-products <-  c("ASP2020", "ELEV2020", "140CC")
+products <-  c("ASP2020", "ELEV2020", "230CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 projection <- 6414
 resolution <- 90
-edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "140CC", "st", 181))
+edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
 save_file <- tempfile(fileext = ".zip")
 resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 }

@@ -1,0 +1,104 @@
+{
+    "jobId": "357f1d79-e562-418e-bbb8-efbefd4a8a8e",
+    "queuePosition": -1,
+    "status": "Succeeded",
+    "messages": [
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Start Time: Wednesday, April 16, 2025 4:36:31 PM"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "AOI: -113.79 42.148 -113.56 42.29"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Entering ValidateCoordinates()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Entering DetermineRegion()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "region: US_"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Exiting DetermineRegion()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_ELEV2020"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_SLPD2020"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_ASP2020"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_230FBFM40"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_230CC"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_230CH"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_230CBH"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "US_230CBD"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "No Output projection input provided."
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Entering CreateLocalProjection()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "local projection string: PROJCS[\"Albers\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-113.67500000000001],PARAMETER[\"Standard_Parallel_1\",42.148],PARAMETER[\"Standard_Parallel_2\",42.29],PARAMETER[\"Latitude_Of_Origin\",42.219],UNIT[\"Meter\",1.0]]"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Exiting CreateLocalProjection()"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Start creating geotif"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Finished creating geotif"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Start zipping of files"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "All files zipped successfully."
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Job Finished"
+        },
+        {
+            "type": "esriJobMessageTypeInformative",
+            "description": "Succeeded at Wednesday, April 16, 2025 4:36:39 PM (Elapsed Time: 7.36 seconds)"
+        }
+    ],
+    "outputFile": "https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/j9cca9aa4148d442c8c99c41a4c081bde/scratch/j9cca9aa4148d442c8c99c41a4c081bde.zip"
+}

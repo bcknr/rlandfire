@@ -1,0 +1,14 @@
+{
+    "jobId": "1c08895e-155a-4bac-83bb-ed12092940da",
+    "status": "Pending",
+    "job": {
+        "email": "rlandfire@markabuckner.com",
+        "layerList": "ASP2020",
+        "areaOfInterest": "-123.65 41.75 -123.63 41.83",
+        "editRule": "",
+        "editMask": "",
+        "ip": "73.243.41.73",
+        "aoiSize": 3645,
+        "geoArea": "SW"
+    }
+}

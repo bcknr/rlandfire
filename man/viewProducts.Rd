@@ -13,6 +13,7 @@ NULL. Opens the LF products table in your default browser.
 \code{viewProducts()} opens the LFPS products table in your web browser
 }
 \examples{
+\dontrun{
 viewProducts()
-
+}
 }

@@ -4,3 +4,6 @@
 .Ruserdata
 inst/doc
 CRAN-SUBMISSION
+/doc/
+/Meta/
+tests/testthat/misc.r
