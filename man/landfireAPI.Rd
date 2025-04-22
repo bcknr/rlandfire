@@ -19,7 +19,7 @@ landfireAPI(
 }
 \arguments{
 \item{products}{Product names as character vector
-(see: \href{https://lfps.usgs.gov/lfps/helpdocs/productstable.html}{Products Table})}
+(see: Products Table)}
 
 \item{aoi}{Area of interest as character or numeric vector defined by
 latitude and longitude in decimal degrees in WGS84 and ordered
@@ -33,7 +33,7 @@ resample resolution in meters. Default is 30m.}
 
 \item{edit_rule}{Optional. A list of character vectors ordered "operator class"
 "product", "operator", "value". Limited to fuel theme products only.
-(see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
+(see: LFPS Guide)}
 
 \item{edit_mask}{Optional. \strong{Not currently functional}}
 

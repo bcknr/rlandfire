@@ -62,12 +62,12 @@ library(rlandfire)
 #>     |  _| | .'|   | . |  _| |  _| -_|
 #>     |_| |_|__,|_|_|___|_| |_|_| |___|
 #>                                  
-#>     [0mversion:1.0.1[38;5;160m
+#>     [0mversion:2.0.0[38;5;160m
 #> 
-#> WARNING:[0m
+#> NOTICE:[0m
 #> The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.
 #> To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`
-#> Product names may have changed. Type 'viewProducts()' to view the current names
+#> Product names and availability may have changed, check `viewProducts()`
 #> 
 #> [38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.[0m
 library(sf)
@@ -91,7 +91,7 @@ utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
 
 boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `wildfire' from data source `/tmp/RtmpooCGYq/wildfire/wildfire.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpMhYwlT/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -133,9 +133,8 @@ an `sf` object or which corresponds to the supplied zone name. See
 For this example, we are interested in canopy cover data for two years,
 2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type
 (`200EVT`). All available data products, and their abbreviated names,
-can be found in the [products
-table](https://lfps.usgs.gov/lfps/helpdocs/productstable.html) which can
-be opened by calling `viewProducts()`.
+can be found in the [products table](https://lfps.usgs.gov/products)
+which can be opened by calling `viewProducts()`.
 
 ``` r
 products <- c("200CC_19", "220CC_22", "200EVT")
@@ -169,8 +168,7 @@ canopy cover layers should be set to a specified value.
 To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`,
 the “condition,” the canopy cover layers should be set equal (`st`) to
 `1`, the “change.” The edit rule syntax is explained in more depth in
-the [LFPS
-guide](https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf).
+the [LFPS guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
 
 *(How the API applies edit rules can be unintuitive. For example, if we
 used ‘clear value’ \[`cv`\] or set the value outside of 0-100 the edits

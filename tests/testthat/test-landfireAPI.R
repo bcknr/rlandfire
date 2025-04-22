@@ -3,7 +3,7 @@
 test_that("`landfireAPIv2()` recognizes argument errors", {
   products <-  c("ASP2020", "ELEV2020", "230CC")
   aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-  email <- "mab677@cornell.edu"
+  email <- "rlandfire@markabuckner.com"
   projection <- 6414
   resolution <- 90
   edit_rule <- list(c("condition", "ELEV2020", "lt", 500),
@@ -144,7 +144,7 @@ httptest2::with_mock_dir("_mock/landfireAPI-failed", {
 
     products <-  "NotAProduct"
     aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-    email <- "mab677@cornell.edu"
+    email <- "rlandfire@markabuckner.com"
     projection <- 123456
     path <- tempfile(fileext = ".zip")
 
@@ -159,7 +159,7 @@ httptest2::with_mock_dir("_mock/landfireAPI-edge", {
 
     products <-  c("ASP2020")
     aoi <- c("-123.65", "41.75", "-123.63", "41.83")
-    email <- "mab677@cornell.edu"
+    email <- "rlandfire@markabuckner.com"
     path <- tempfile(fileext = ".zip")
 
     # Resets resolution to NULL when user sets resolution = 30
@@ -173,7 +173,7 @@ httptest2::with_mock_dir("_mock/landfireAPI-aoi", {
   test_that("`landfireAPIv2()` works with `getAOI()`", {
 
     products <-  c("ASP2020")
-    email <- "mab677@cornell.edu"
+    email <- "rlandfire@markabuckner.com"
     path <- tempfile(fileext = ".zip")
 
     r <- terra::rast(nrows = 50, ncols = 50,
@@ -197,7 +197,7 @@ httptest2::with_mock_dir("_mock/landfireAPI-zone", {
   test_that("`landfireAPIv2()` works with `getZone()`", {
 
     products <-  c("ASP2020")
-    email <- "mab677@cornell.edu"
+    email <- "rlandfire@markabuckner.com"
     resolution <- 90
     path <- tempfile(fileext = ".zip")
 

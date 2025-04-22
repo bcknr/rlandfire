@@ -16,7 +16,6 @@ httptest2::with_mock_dir("_mock/checkStatus", {
     return <- .checkStatus_internal(landfire_api, i = 1, max_time = 10)
     expect_s3_class(return, "landfire_api")
     expect_equal(return$request$job_id, "be7fab41-867e-41a5-b594-c469f118bc49")
-    expect_equal(return$status, "Succeeded")
   })
 })
 

@@ -13,15 +13,21 @@ landfireVSI(landfire_api)
 SpatRaster object of the requested LANDFIRE product/s
 }
 \description{
-\code{landfire_vsi()} opens a request LANDFIRE GeoTIFF using the GDAL \verb{virtual file system} (VSI). This allows you to read in LANDFIRE products without
-having to download the file to your local machine or if the file
-already exists on your local machine without having to unzip it.
+\code{landfire_vsi()} opens a request LANDFIRE GeoTIFF using the GDAL \verb{virtual file system} (VSI).
+}
+\details{
+The GDAL virtual file system allows you to read in LANDFIRE products without
+having to download the file to your local machine within 60 minutes of the
+request or if the file already exists on your local machine without having
+to unzip it.
 }
 \examples{
 \dontrun{
+aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
+email <- "email@example"
 rast <- landfireAPIv2(products = "240EVC",
                       aoi = aoi, email = email,
-                      download = FALSE)  |>
+                      method = "none")  |>
         landfireVSI()
 }
 }

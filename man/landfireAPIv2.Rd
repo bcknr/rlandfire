@@ -42,7 +42,7 @@ resample resolution in meters. Default is 30m.}
 \item{edit_rule}{Optional. A list of character vectors ordered "operator class"
 "product", "operator", "value" where "operator class" is one of "condition",
 "ORcondition", or "change". Edits are limited to fuel theme products only.
-(see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
+(see: \href{https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf}{LFPS Guide})}
 
 \item{edit_mask}{Optional. Path to a compressed shapefile (.zip) to be used
 as an edit mask. The shapefile must be less than 1MB in size and must
@@ -71,6 +71,7 @@ Returns a \code{landfire_api} object with named elements:
 \item \code{content} - Informative messages passed from API
 \item \code{response} - Full response
 \item \code{status} - Final API status, one of "Failed", "Succeeded", or "Timed out"
+\item \code{time} - time of job completion
 \item \code{path} - path to save directory
 }
 }

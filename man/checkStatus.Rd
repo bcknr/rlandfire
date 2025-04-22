@@ -21,6 +21,7 @@ Returns a \code{landfire_api} object with named elements:
 \item \code{content} - Informative messages passed from API
 \item \code{response} - Full response
 \item \code{status} - Final API status, one of "Failed", "Succeeded", or "Timed out"
+\item \code{time} - time of job completion
 \item \code{path} - path to save directory
 }
 }
