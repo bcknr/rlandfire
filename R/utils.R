@@ -22,11 +22,15 @@ viewProducts <- function() {
 #'
 #' @description
 #' `landfire_vsi()` opens a request LANDFIRE GeoTIFF using the GDAL `virtual
-#' file system` (VSI). This allows you to read in LANDFIRE products without
-#' having to download the file to your local machine or if the file
-#' already exists on your local machine without having to unzip it.
-#' 
+#' file system` (VSI).
+#'
 #' @param landfire_api A `landfire_api` object created by `landfireAPIv2()`
+#'
+#' @details
+#' The GDAL virtual file system allows you to read in LANDFIRE products without
+#' having to download the file to your local machine within 60 minutes of the
+#' request or if the file already exists on your local machine without having
+#' to unzip it.
 #'
 #'
 #' @return SpatRaster object of the requested LANDFIRE product/s
@@ -36,9 +40,11 @@ viewProducts <- function() {
 #'
 #' @examples
 #' \dontrun{
+#' aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
+#' email <- "email@example"
 #' rast <- landfireAPIv2(products = "240EVC",
 #'                       aoi = aoi, email = email,
-#'                       download = FALSE)  |>
+#'                       method = "none")  |>
 #'         landfireVSI()
 #' }
 
@@ -48,12 +54,11 @@ landfireVSI <- function(landfire_api) {
     stop("argument `landfire_api` must be a landfire_api object")
   }
   if (is.null(landfire_api$path) && is.null(landfire_api$request$dwl_url)) {
-    stop("the provided `landfire_api` object does not contain a valid `path` or `dwl_url`")
+    stop("The provided `landfire_api` object does not contain a valid `path` or `dwl_url`")
   }
   # end checks
 
-  #TODO: need to verify that this will work with the new naming convention
-  if (file.exists(landfire_api$path)) {
+  if (!is.null(landfire_api$path) && file.exists(landfire_api$path)) {
     r <- terra::rast(
       sprintf("/vsizip/%s/%s",
               landfire_api$path,
@@ -61,10 +66,14 @@ landfireVSI <- function(landfire_api) {
                    value = TRUE))
     )
   } else if (!is.null(landfire_api$request$dwl_url)) {
+    if (difftime(Sys.time(), landfire_api$time, units = "min") > 60) {
+      stop("The requested file is no longer available for download")
+    }
+
     r <- terra::rast(
       sprintf("/vsizip/vsicurl/%s/%s",
               landfire_api$request$dwl_url,
-              gsub("\\.zip$",".tif",basename(landfire_api$request$dwl_url)))
+              gsub("\\.zip$",".tif", basename(landfire_api$request$dwl_url)))
     )
   } else {
     stop("No file associated with the provide `landfire_api` object was found")
@@ -96,7 +105,8 @@ landfireVSI <- function(landfire_api) {
 #' }
 .build_landfire_api <- function(params = NULL, request = NULL, init_resp = NULL,
                                 job_id = NULL, dwl_url = NULL, content = NULL,
-                                response = NULL, status = NULL, path = NULL) {
+                                response = NULL, status = NULL, time = NULL,
+                                path = NULL) {
   structure(
     list(
       request = list(query = params, # User input in rlandfire formats
@@ -108,6 +118,7 @@ landfireVSI <- function(landfire_api) {
       content = content,
       response = response,
       status = status,
+      time = time,
       path = path
     ),
     class = "landfire_api"

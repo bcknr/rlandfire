@@ -23,10 +23,6 @@
   stopifnot("argument `landfire_api` must be a landfire_api object"
             = inherits(landfire_api, "landfire_api"))
   stopifnot("argument `verbose` must be logical" = inherits(verbose, "logical"))
-  stopifnot(
-    "`method` is invalid. See `?download.file`" =
-      method %in% c("internal", "libcurl", "wget", "curl", "wininet", "auto")
-  )
   stopifnot("argument `i` must be an integer" = is.numeric(i))
   stopifnot("argument `max_time` must be numeric" = is.numeric(max_time))
   # End Checks
@@ -102,6 +98,7 @@
   landfire_api$content <- inf_msg
   landfire_api$response <- response
   landfire_api$status <- call_status
+  landfire_api$time  <- Sys.time()
 
   return(landfire_api)
 
@@ -123,6 +120,7 @@
 #' * `content` - Informative messages passed from API
 #' * `response` - Full response
 #' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
+#' * `time` - time of job completion
 #' * `path` - path to save directory
 #'
 #' @md

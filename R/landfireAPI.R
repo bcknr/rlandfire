@@ -19,7 +19,7 @@
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
 #'   "product", "operator", "value" where "operator class" is one of "condition",
 #'   "ORcondition", or "change". Edits are limited to fuel theme products only.
-#'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
+#'   (see: \href{https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf}{LFPS Guide})
 #' @param edit_mask Optional. Path to a compressed shapefile (.zip) to be used
 #'   as an edit mask. The shapefile must be less than 1MB in size and must 
 #'   comply with ESRI shapefile naming rules.
@@ -40,6 +40,7 @@
 #' * `content` - Informative messages passed from API
 #' * `response` - Full response
 #' * `status` - Final API status, one of "Failed", "Succeeded", or "Timed out"
+#' * `time` - time of job completion
 #' * `path` - path to save directory
 #'
 #' @md
@@ -191,7 +192,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   # Submit job and get initial response
   req <- httr2::req_error(request, is_error = \(req) FALSE) |>
          httr2::req_perform()
-  
+
   req_response <- httr2::resp_body_json(req, simplifyVector = TRUE)
 
   if(req$status != 200) {
@@ -218,7 +219,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
               "Or visit URL to check status and download manually:\n   ",
               lfps_return$response$url)
       break
-    } else if (lfps_return$status %in% c("Failed","Succeeded")) {
+    } else if (lfps_return$status %in% c("Failed",
+                                         "Succeeded",
+                                         "Succeeded (download skipped)")) {
       break
     }
 
@@ -416,7 +419,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' `landfireAPI` downloads LANDFIRE data by calling the LFPS API
 #'
 #' @param products Product names as character vector
-#'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/productstable.html}{Products Table})
+#'   (see: Products Table)
 #' @param aoi Area of interest as character or numeric vector defined by
 #'   latitude and longitude in decimal degrees in WGS84 and ordered
 #'   `xmin`, `ymin`, `xmax`, `ymax` or a LANDFIRE map zone.
@@ -426,7 +429,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'   resample resolution in meters. Default is 30m.
 #' @param edit_rule Optional. A list of character vectors ordered "operator class"
 #'   "product", "operator", "value". Limited to fuel theme products only.
-#'   (see: \href{https://lfps.usgs.gov/lfps/helpdocs/LFProductsServiceUserGuide.pdf}{LFPS Guide})
+#'   (see: LFPS Guide)
 #' @param edit_mask Optional. **Not currently functional**
 #' @param path Path to `.zip` directory. Passed to [utils::download.file()].
 #'   If NULL, a temporary directory is created.
@@ -460,7 +463,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                         edit_rule = NULL, edit_mask = NULL, path = NULL,
                         max_time = 10000, method = "curl", verbose = TRUE) {
-  
+  requireNamespace("lifecycle", quietly = TRUE)
   lifecycle::deprecate_warn(
     "1.0.0",
     "landfireAPI()",
