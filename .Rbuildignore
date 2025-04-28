@@ -8,3 +8,4 @@
 ^doc$
 ^Meta$
 ^tests/testthat/_mock$
+^tests/testthat/misc.r

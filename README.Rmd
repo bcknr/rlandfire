@@ -52,7 +52,7 @@ This package is still in development, and users may encounter bugs or unexpected
 
 To demonstrate `rlandfire`, we will explore how ponderosa pine forest canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
-```{r setup}
+```{r setup, message = FALSE, warning = FALSE}
 library(rlandfire)
 library(sf)
 library(terra)

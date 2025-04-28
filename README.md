@@ -56,27 +56,8 @@ canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
 ``` r
 library(rlandfire)
-#> [38;5;208m                           
-#>          _           _ ___ _         
-#>      ___| |___ ___ _| |  _|_|___ ___ 
-#>     |  _| | .'|   | . |  _| |  _| -_|
-#>     |_| |_|__,|_|_|___|_| |_|_| |___|
-#>                                  
-#>     [0mversion:2.0.0[38;5;160m
-#> 
-#> NOTICE:[0m
-#> The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.
-#> To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`
-#> Product names and availability may have changed, check `viewProducts()`
-#> 
-#> [38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.[0m
 library(sf)
-#> Linking to GEOS 3.11.1, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
-#> WARNING: different compile-time and runtime versions for GEOS found:
-#> Linked against: 3.11.1-CAPI-1.17.1 compiled against: 3.10.2-CAPI-1.16.0
-#> It is probably a good idea to reinstall sf (and maybe lwgeom too)
 library(terra)
-#> terra 1.8.29
 library(foreign)
 ```
 
@@ -91,7 +72,7 @@ utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
 
 boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `wildfire' from data source `/tmp/RtmpMhYwlT/wildfire/wildfire.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpViWB1y/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
