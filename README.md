@@ -71,12 +71,7 @@ library(rlandfire)
 #> 
 #> [38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.[0m
 library(sf)
-#> Linking to GEOS 3.11.1, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
-#> WARNING: different compile-time and runtime versions for GEOS found:
-#> Linked against: 3.11.1-CAPI-1.17.1 compiled against: 3.10.2-CAPI-1.16.0
-#> It is probably a good idea to reinstall sf (and maybe lwgeom too)
 library(terra)
-#> terra 1.8.29
 library(foreign)
 ```
 
