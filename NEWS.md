@@ -1,3 +1,5 @@
+# rlandfire (development version)
+
 # rlandfire 2.0.0
 -   Added support for the new "version 2" LANDFIRE Products Service (LFPS) API
 -   Deprecated the old `landfireAPI()` function in favor of `landfireAPIv2()`
