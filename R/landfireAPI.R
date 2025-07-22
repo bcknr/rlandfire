@@ -284,13 +284,16 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_body_multipart(
       file = curl::form_file(file, type = "application/zip"),
       description = "string"
-    )
+    ) |>
+    httr2::req_error(is_error = function(resp) FALSE)
 
   # Perform the request
-  upload_resp <- httr2::req_error(req, is_error = \(upload_resp) FALSE) |>
-                 httr2::req_perform()
+  upload_resp <- httr2::req_perform(req)
 
-  upload_body <- httr2::resp_body_json(upload_resp)
+  upload_body <- tryCatch(
+    httr2::resp_body_json(upload_resp),
+    error = function(e) list(message = "Could not parse response body")
+  )
 
   # Check for errors
   if (upload_resp$status != 200) {

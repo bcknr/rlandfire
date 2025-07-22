@@ -295,17 +295,22 @@ test_that("`.post_request` catches file issues", {
 })
 
 # Tests for .post_editmask (internal)
-test_that("`.post_editmask` returns expected response", {
+httptest2::with_mock_dir("_mock/post-editmask", {
+  test_that("`.post_editmask` returns expected response", {
 
-  skip_on_cran()
+    shapefile <- testthat::test_path("testdata", "wildfire.zip")
+    result <- rlandfire:::.post_editmask(shapefile)
 
-  shapefile <- testthat::test_path("testdata", "wildfire.zip")
-  result <- .post_editmask(shapefile)
+    expect_match(result$item_id, "[{\"itemID\":\".*\"}]")
+    expect_match(result$item_name, "wildfire.shp$")
 
-  expect_match(result$item_id, "[{\"itemID\":\".*\"}]")
-  expect_match(result$item_name, "wildfire.shp$")
-
+  })
 })
+
+# httptest2::capture_requests({
+#     shapefile <- testthat::test_path("testdata", "wildfire.zip")
+#     rlandfire:::.post_editmask(shapefile)
+# })
 
 # Tests for .fmt_editrules (internal)
 test_that("`.fmt_editrules` correctly formats requests",{
