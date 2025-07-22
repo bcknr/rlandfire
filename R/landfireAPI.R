@@ -413,7 +413,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' Depreciated: Call the LANDFIRE Product Service (LFPS) API
 #'
 #' @description
-#' Depreciated: `landfireAPI()` is no longer supported due to updates to the 
+#' Superseded: `landfireAPI()` is no longer supported due to updates to the 
 #' LFPS API. Use `landfireAPIv2()` instead.
 #' 
 #' `landfireAPI` downloads LANDFIRE data by calling the LFPS API
@@ -464,11 +464,11 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                         edit_rule = NULL, edit_mask = NULL, path = NULL,
                         max_time = 10000, method = "curl", verbose = TRUE) {
   requireNamespace("lifecycle", quietly = TRUE)
-  lifecycle::deprecate_warn(
-    "1.0.0",
-    "landfireAPI()",
-    "landfireAPIv2()",
-    c("The LANDFIRE Products Services API has been updated to v2 as of May 2025.",
+  lifecycle::deprecate_stop(
+    when = "1.0.0",
+    what = "landfireAPI()",
+    with = "landfireAPIv2()",
+    details = c("The LANDFIRE Products Services API has been updated to v2 as of May 2025.",
       "New parameters and syntax are required.",
       "See `?rlandfire::landfireAPIv2` for more information.")
   )
