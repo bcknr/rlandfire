@@ -5,7 +5,7 @@ bibentry(
   title    = "rlandfire: Interface to 'LANDFIRE Product Service' API",
     author   = person("Mark A. Buckner", role = "aut"),
     year     = 2025,
-    note     = "R Package version 2.0.0",
+    note     = "R Package version 2.0.1",
     url      = "https://CRAN.R-project.org/package=rlandfire",
     doi      = "10.6084/m9.figshare.22203250"
 )
