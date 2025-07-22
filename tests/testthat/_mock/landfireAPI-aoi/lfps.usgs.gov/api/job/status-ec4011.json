@@ -1,15 +1,15 @@
 {
-    "jobId": "8e8a9c3a-526f-467c-a5ba-767e551c6164",
+    "jobId": "2daf6b63-9345-4860-80eb-1b2c47b01efc",
     "queuePosition": -1,
     "status": "Succeeded",
     "messages": [
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Start Time: Thursday, April 17, 2025 5:44:57 PM"
+            "description": "Start Time: Tuesday, July 22, 2025 9:29:22 AM"
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "AOI: 3"
+            "description": "AOI: -123.803 41.723 -123.616 41.834"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -41,7 +41,7 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "local projection string: PROJCS[\"Albers\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-123.284155274],PARAMETER[\"Standard_Parallel_1\",37.44162178300007],PARAMETER[\"Standard_Parallel_2\",42.027033786000075],PARAMETER[\"Latitude_Of_Origin\",39.734327784500074],UNIT[\"Meter\",1.0]]"
+            "description": "local projection string: PROJCS[\"Albers\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-123.70949999999999],PARAMETER[\"Standard_Parallel_1\",41.723],PARAMETER[\"Standard_Parallel_2\",41.834],PARAMETER[\"Latitude_Of_Origin\",41.7785],UNIT[\"Meter\",1.0]]"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -53,23 +53,7 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Start resample of geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Finish resample of geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
             "description": "Finished creating geotif"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Start extracting data to map zone"
-        },
-        {
-            "type": "esriJobMessageTypeInformative",
-            "description": "Finished extracting data to map zone"
         },
         {
             "type": "esriJobMessageTypeInformative",
@@ -85,8 +69,8 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "Succeeded at Thursday, April 17, 2025 5:45:50 PM (Elapsed Time: 53.17 seconds)"
+            "description": "Succeeded at Tuesday, July 22, 2025 9:29:29 AM (Elapsed Time: 6.75 seconds)"
         }
     ],
-    "outputFile": "https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/j60741539415f47ecb64c014a59cfc1f1/scratch/j60741539415f47ecb64c014a59cfc1f1.zip"
+    "outputFile": "https://lfps.usgs.gov/arcgis/rest/directories/arcgisjobs/landfireproductservice_gpserver/j8fca94b9ee31425991fc0aacb09a2066/scratch/j8fca94b9ee31425991fc0aacb09a2066.zip"
 }

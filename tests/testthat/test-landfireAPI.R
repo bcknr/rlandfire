@@ -138,7 +138,6 @@ httptest2::with_mock_dir("_mock/landfireAPI-priority", {
   })
 })
 
-
 httptest2::with_mock_dir("_mock/landfireAPI-failed", {
   test_that("`landfireAPIv2()` recognizes failed call", {
 
@@ -154,6 +153,19 @@ httptest2::with_mock_dir("_mock/landfireAPI-failed", {
   })
 })
 
+# httptest2::capture_requests({
+
+#     products <-  "NotAProduct"
+#     aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+#     email <- "rlandfire@markabuckner.com"
+#     projection <- 123456
+#     path <- tempfile(fileext = ".zip")
+
+#     landfireAPIv2(products, aoi, email, projection, path = path)
+
+# })
+
+
 httptest2::with_mock_dir("_mock/landfireAPI-edge", {
   test_that("`landfireAPIv2()` edge cases", {
 
@@ -164,10 +176,21 @@ httptest2::with_mock_dir("_mock/landfireAPI-edge", {
 
     # Resets resolution to NULL when user sets resolution = 30
     result  <- landfireAPIv2(products, aoi, email,
-                            resolution = 30, path = path)
+                             resolution = 30, path = path)
     expect_null(result$request$query$resolution)
   })
 })
+
+# httptest2::capture_requests({
+
+#     products <-  c("ASP2020")
+#     aoi <- c("-123.65", "41.75", "-123.63", "41.83")
+#     email <- "rlandfire@markabuckner.com"
+#     path <- tempfile(fileext = ".zip")
+
+#     # Resets resolution to NULL when user sets resolution = 30
+#     landfireAPIv2(products, aoi, email, resolution = 30, path = path)
+# })
 
 httptest2::with_mock_dir("_mock/landfireAPI-aoi", {
   test_that("`landfireAPIv2()` works with `getAOI()`", {
@@ -193,6 +216,23 @@ httptest2::with_mock_dir("_mock/landfireAPI-aoi", {
   })
 })
 
+# httptest2::capture_requests({
+
+#     products <-  c("ASP2020")
+#     email <- "rlandfire@markabuckner.com"
+#     path <- tempfile(fileext = ".zip")
+
+#     r <- terra::rast(nrows = 50, ncols = 50,
+#                     xmin = -2261174.94, xmax = -2247816.36,
+#                     ymin = 2412704.65, ymax = 2421673.98,
+#                     crs = terra::crs("epsg:5070"),
+#                     vals = rnorm(2500))
+
+#     aoi <- round(getAOI(r),3)
+
+#     landfireAPIv2(products = products, aoi = aoi, email = email, path = path)
+# })
+
 httptest2::with_mock_dir("_mock/landfireAPI-zone", {
   test_that("`landfireAPIv2()` works with `getZone()`", {
 
@@ -210,6 +250,21 @@ httptest2::with_mock_dir("_mock/landfireAPI-zone", {
                      "3")
   })
 })
+
+# httptest2::capture_requests({
+
+#     products <-  c("ASP2020")
+#     email <- "rlandfire@markabuckner.com"
+#     resolution <- 90
+#     path <- tempfile(fileext = ".zip")
+
+#     zone <- getZone("Northern California Coastal Range")
+
+#     landfireAPIv2(products = products, aoi = zone,
+#                   email = email, resolution = resolution,
+#                   path = path)
+
+# })
 
 # Tests for .post_request (internal)
 test_that("`.post_request` catches file issues", {
