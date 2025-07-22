@@ -58,7 +58,7 @@ Returns a \code{landfire_api} object with named elements:
 }
 }
 \description{
-Depreciated: \code{landfireAPI()} is no longer supported due to updates to the
+Superseded: \code{landfireAPI()} is no longer supported due to updates to the
 LFPS API. Use \code{landfireAPIv2()} instead.
 
 \code{landfireAPI} downloads LANDFIRE data by calling the LFPS API
