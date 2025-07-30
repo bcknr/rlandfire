@@ -72,7 +72,7 @@ utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
 
 boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `wildfire' from data source `/tmp/RtmpViWB1y/wildfire/wildfire.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpV4trFT/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -322,20 +322,13 @@ dbf <- list.files(lf_cat, pattern = ".dbf$",
 dbf_tbl  <- foreign::read.dbf(dbf)
 
 head(attr_tbl[[1]])
-#>   Value                        CLASSNAMES   R   G   B      RED    GREEN
-#> 1    11                        Open Water   0   0 255 0.000000 0.000000
-#> 2    13 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
-#> 3    14 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
-#> 4    15     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
-#> 5    16       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
-#> 6    17        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
-#>       BLUE
-#> 1 1.000000
-#> 2 0.658824
-#> 3 0.537255
-#> 4 0.803922
-#> 5 0.960784
-#> 6 0.843137
+#>   Value                        CLASSNAMES Count   R   G   B RED GREEN BLUE
+#> 1    11                        Open Water   229   0   0 255   0     0  255
+#> 2    13 Developed-Upland Deciduous Forest   119  64  61 168  64    61  168
+#> 3    14 Developed-Upland Evergreen Forest   337  68  79 137  68    79  137
+#> 4    15     Developed-Upland Mixed Forest   198 102 119 205 102   119  205
+#> 5    16       Developed-Upland Herbaceous   365 122 142 245 122   142  245
+#> 6    17        Developed-Upland Shrubland   181 158 170 215 158   170  215
 head(dbf_tbl)
 #>   Value Count                        CLASSNAMES   R   G   B      RED    GREEN
 #> 1    11   229                        Open Water   0   0 255 0.000000 0.000000
