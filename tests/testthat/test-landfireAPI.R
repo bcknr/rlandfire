@@ -203,54 +203,62 @@ test_that("`landfireAPIv2()` formats priority requests correctly", {
 })
 
 
-httptest2::with_mock_dir("_mock/landfireAPI-messages", {
+test_that("`landfireAPIv2()` returns expected messages", {
+  expect_message(
+    landfireAPIv2(products, aoi, email, background = TRUE, execute = FALSE),
+    "`path` is missing. Files will be saved in temporary directory: .*"
+  )
+})
+
+
+test_that("`landfireAPIv2()` returns expected background messages", {
+  skip_on_cran()
+
   products <- c("ELEV2020")
   aoi <- c("-113.79", "42.148", "-113.56", "42.29")
   email <- "rlandfire@markabuckner.com"
   path <- "path.zip"
+  # Return correct message with background jobs
+  expect_message(
+    output <- landfireAPIv2(products, aoi, email,
+      background = TRUE, path = path,
+      method = "none", verbose = FALSE
+    ),
+    "Job submitted in background.*"
+  )
 
-  test_that("`landfireAPIv2()` returns expected messages", {
-    expect_message(
-      landfireAPIv2(products, aoi, email, background = TRUE),
-      "`path` is missing. Files will be saved in temporary directory: .*"
-    )
+  cancelJob(output$request$job_id)
 
-    # Return correct message with background jobs
-    expect_message(
-      landfireAPIv2(products, aoi, email,
-        background = TRUE, path = path,
-        method = "none"
-      ),
-      "Job submitted in background.*"
-    )
-    expect_message(
-      landfireAPIv2(products, aoi, email,
-        max_time = 0, path = path,
-        method = "none"
-      ),
-      "Job submitted in background.*"
-    )
-  })
+  expect_message(
+    output <- landfireAPIv2(products, aoi, email,
+      max_time = 0, path = path,
+      method = "none", verbose = FALSE
+    ),
+    "Job submitted in background.*"
+  )
+
+  cancelJob(output$request$job_id)
 })
 
 
-httptest2::with_mock_dir("_mock/landfireAPI-failed", {
-  test_that("`landfireAPIv2()` recognizes failed call", {
-    products <- "NotAProduct"
-    aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-    email <- "rlandfire@markabuckner.com"
-    projection <- 123456
-    path <- tempfile(fileext = ".zip")
 
-    expect_warning(
-      landfireAPIv2(products, aoi, email, projection, path = path),
-      paste(
-        "Job .* has failed with:\n\t.*\nPlease check the LFPS",
-        "API documentation for more information."
-      )
+test_that("`landfireAPIv2()` recognizes failed call", {
+  skip_on_cran()
+  products <- "NotAProduct"
+  aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+  email <- "rlandfire@markabuckner.com"
+  projection <- 123456
+  path <- tempfile(fileext = ".zip")
+
+  expect_warning(
+    landfireAPIv2(products, aoi, email, projection, path = path),
+    paste(
+      "Job .* has failed with:\n\t.*\nPlease check the LFPS",
+      "API documentation for more information."
     )
-  })
+  )
 })
+
 
 
 
