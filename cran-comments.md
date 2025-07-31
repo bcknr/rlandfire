@@ -5,8 +5,9 @@
 * Changes include:
 
     - All tests that require API access are mocked when possible or conditionally skipped with `skip_on_cran()`.
-    - Tests expected to fail prior to making an API call are now wrapped in `without_internet()` to prevent unexpected calls.
-    - The old `landfireAPI` function has been fully deprecated. 
+    - Tests expected to fail prior to making an API call are now terminated early with `execute=FALSE` argument in `landfireAPIv2()`.
+    - The old `landfireAPI` function has been fully deprecated.
+    - Shapefile POST requests are repeated if they fail with status code 500, up to a maximum of 3 attempts.
 
 ## R CMD check results
 
