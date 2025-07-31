@@ -17,7 +17,8 @@ landfireAPIv2(
   max_time = 10000,
   method = "curl",
   verbose = TRUE,
-  background = FALSE
+  background = FALSE,
+  execute = TRUE
 )
 }
 \arguments{
@@ -63,6 +64,9 @@ If NULL, a temporary directory is created.}
 \item{background}{If TRUE, the function will return immediately and the job
 will run in the background. User will need to check the status of the job
 manually with \code{checkStatus()}.}
+
+\item{execute}{If FALSE, the function will build a request without submitting
+it to the LFPS API.}
 }
 \value{
 Returns a \code{landfire_api} object with named elements:

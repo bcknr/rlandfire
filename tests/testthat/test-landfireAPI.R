@@ -1,186 +1,190 @@
 # Tests for landfireAPIv2.R
 
 test_that("`landfireAPIv2()` recognizes argument errors", {
-  without_internet({
-    products <- c("ASP2020", "ELEV2020", "230CC")
-    aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-    email <- "rlandfire@markabuckner.com"
-    projection <- 6414
-    resolution <- 90
-    edit_rule <- list(
-      c("condition", "ELEV2020", "lt", 500),
-      c("change", "230CC", "st", 181)
-    )
-    path <- tempfile(fileext = ".zip")
+  products <- c("ASP2020", "ELEV2020", "230CC")
+  aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+  email <- "rlandfire@markabuckner.com"
+  projection <- 6414
+  resolution <- 90
+  edit_rule <- list(
+    c("condition", "ELEV2020", "lt", 500),
+    c("change", "230CC", "st", 181)
+  )
+  path <- tempfile(fileext = ".zip")
 
-    # Check for required arguments
-    expect_error(
-      landfireAPIv2(aoi = aoi, email = email),
-      "argument `products` is missing with no default"
-    )
+  # Check for required arguments
+  expect_error(
+    landfireAPIv2(aoi = aoi, email = email, execute = FALSE),
+    "argument `products` is missing with no default"
+  )
 
-    expect_error(
-      landfireAPIv2(products, email = email),
-      "argument `aoi` is missing with no default"
-    )
+  expect_error(
+    landfireAPIv2(products, email = email, execute = FALSE),
+    "argument `aoi` is missing with no default"
+  )
 
-    expect_error(
-      landfireAPIv2(products, aoi),
-      'argument "email" is missing, with no default'
-    )
+  expect_error(
+    landfireAPIv2(products, aoi, execute = FALSE),
+    'argument "email" is missing, with no default'
+  )
 
-    # Check class
-    expect_error(
-      landfireAPIv2(
-        products = c(1, 2, 3), aoi,
-        email = email, path = path
-      ),
-      "argument `products` must be a character vector"
-    )
+  # Check class
+  expect_error(
+    landfireAPIv2(
+      products = c(1, 2, 3), aoi,
+      email = email, path = path,
+      execute = FALSE
+    ),
+    "argument `products` must be a character vector"
+  )
 
-    expect_error(
-      landfireAPIv2(products,
-        aoi = list(1, 2, 3),
-        email = email, path = path
-      ),
-      "argument `aoi` must be a character or numeric vector"
-    )
+  expect_error(
+    landfireAPIv2(products,
+      aoi = list(1, 2, 3),
+      email = email, path = path, execute = FALSE
+    ),
+    "argument `aoi` must be a character or numeric vector"
+  )
 
-    expect_error(
-      landfireAPIv2(products, aoi, email = "notanemail"),
-      "A valid `email` address is required.*"
-    )
+  expect_error(
+    landfireAPIv2(products, aoi, email = "notanemail", execute = FALSE),
+    "A valid `email` address is required.*"
+  )
 
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        max_time = TRUE, path = path
-      ),
-      "argument `max_time` must be numeric"
-    )
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      max_time = TRUE, path = path, execute = FALSE
+    ),
+    "argument `max_time` must be numeric"
+  )
 
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        verbose = "yes", path = path
-      ),
-      "argument `verbose` must be logical"
-    )
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      verbose = "yes", path = path, execute = FALSE
+    ),
+    "argument `verbose` must be logical"
+  )
 
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        edit_rule = "edit_rule"
-      ),
-      "argument `edit_rule` must be a list"
-    )
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      edit_rule = "edit_rule", execute = FALSE
+    ),
+    "argument `edit_rule` must be a list"
+  )
 
-    # Check `aoi` errors
-    expect_error(
-      landfireAPIv2(products, aoi = 100, email = email, path = path),
-      "argument `aoi` must be between 1 and 79.*"
-    )
+  # Check `aoi` errors
+  expect_error(
+    landfireAPIv2(products,
+      aoi = 100, email = email,
+      path = path, execute = FALSE
+    ),
+    "argument `aoi` must be between 1 and 79.*"
+  )
 
-    expect_error(
-      landfireAPIv2(products,
-        aoi = c(-200, 43, -179, 44),
-        email = email, path = path
-      ),
-      "argument `aoi` must be latitude and longitude.*"
-    )
+  expect_error(
+    landfireAPIv2(products,
+      aoi = c(-200, 43, -179, 44),
+      email = email, path = path, execute = FALSE
+    ),
+    "argument `aoi` must be latitude and longitude.*"
+  )
 
-    expect_error(
-      landfireAPIv2(products,
-        aoi = c(-123, 43, -124, 44),
-        email = email, path = path
-      ),
-      "argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`"
-    )
+  expect_error(
+    landfireAPIv2(products,
+      aoi = c(-123, 43, -124, 44),
+      email = email, path = path, execute = FALSE
+    ),
+    "argument `aoi` must be ordered `xmin`, `ymin`, `xmax`, `ymax`"
+  )
 
-    expect_error(
-      landfireAPIv2(products,
-        aoi = c(65, 66),
-        email = email, path = path
-      ),
-      "argument `aoi` must be vector of coordinates.*"
-    )
+  expect_error(
+    landfireAPIv2(products,
+      aoi = c(65, 66),
+      email = email, path = path, execute = FALSE
+    ),
+    "argument `aoi` must be vector of coordinates.*"
+  )
 
-    # Check `resolution`
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        resolution = 20, path = path
-      ),
-      "argument `resolution` must be between 30 and 9999 or `NULL`"
-    )
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        resolution = 10000, path = path
-      ),
-      "argument `resolution` must be between 30 and 9999 or `NULL`"
-    )
+  # Check `resolution`
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      resolution = 20, path = path, execute = FALSE
+    ),
+    "argument `resolution` must be between 30 and 9999 or `NULL`"
+  )
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      resolution = 10000, path = path, execute = FALSE
+    ),
+    "argument `resolution` must be between 30 and 9999 or `NULL`"
+  )
 
-    # Check edit_rule arguments
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        edit_rule = list(
-          c("wrong", "ELEV2020", "lt", 500),
-          c("change", "230CC", "st", 181)
-        )
-      ),
-      "`edit_rule` operator classes must only be .*"
-    )
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        edit_rule = list(
-          c("condition", "ELEV2020", "xx", 500),
-          c("change", "230CC", "st", 181)
-        )
-      ),
-      "`edit_rule` conditional operators must be one of .*"
-    )
+  # Check edit_rule arguments
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      edit_rule = list(
+        c("wrong", "ELEV2020", "lt", 500),
+        c("change", "230CC", "st", 181)
+      ), execute = FALSE
+    ),
+    "`edit_rule` operator classes must only be .*"
+  )
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      edit_rule = list(
+        c("condition", "ELEV2020", "xx", 500),
+        c("change", "230CC", "st", 181)
+      ), execute = FALSE
+    ),
+    "`edit_rule` conditional operators must be one of .*"
+  )
 
-    # Returns error if `edit_mask` but no edit_rule
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = email,
-        edit_mask = testthat::test_path("testdata", "wildfire.zip"),
-        path = path
-      ),
-      "`edit_mask` requires `edit_rule` to be specified."
-    )
-  })
+  # Returns error if `edit_mask` but no edit_rule
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = email,
+      edit_mask = testthat::test_path("testdata", "wildfire.zip"),
+      path = path, execute = FALSE
+    ),
+    "`edit_mask` requires `edit_rule` to be specified."
+  )
 })
 
 test_that("`landfireAPIv2()` returns errors with email/priority_code", {
-  without_internet({
-    products <- c("ASP2020")
-    aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
-    projection <- 6414
-    path <- tempfile(fileext = ".zip")
+  products <- c("ASP2020")
+  aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
+  projection <- 6414
+  path <- tempfile(fileext = ".zip")
 
-    # ID errors with LFPSv1 requests with positional arguments
-    expect_error(
-      landfireAPIv2(products, aoi, projection, path = path),
-      "A valid `email` address is required.*"
-    )
+  # ID errors with LFPSv1 requests with positional arguments
+  expect_error(
+    landfireAPIv2(products, aoi, projection,
+      path = path,
+      execute = FALSE
+    ),
+    "A valid `email` address is required.*"
+  )
 
-    # Check class
-    expect_error(
-      landfireAPIv2(products, aoi,
-        email = "test@email.com",
-        priority_code = 1, path = path
-      ),
-      "argument `priority_code` must be a character string"
-    )
-  })
+  # Check class
+  expect_error(
+    landfireAPIv2(products, aoi,
+      email = "test@email.com",
+      priority_code = 1, path = path, execute = FALSE
+    ),
+    "argument `priority_code` must be a character string"
+  )
 })
 
 
-httptest2::with_mock_dir("_mock/landfireAPI-priority", {
+
+test_that("`landfireAPIv2()` formats priority requests correctly", {
   products <- c(
     "ELEV2020", "SLPD2020", "ASP2020", "230FBFM40",
     "230CC", "230CH", "230CBH", "230CBD"
@@ -190,13 +194,12 @@ httptest2::with_mock_dir("_mock/landfireAPI-priority", {
   priority_code <- "K3LS9F"
   path <- tempfile(fileext = ".zip")
 
-  test_that("`landfireAPIv2()` formats priority requests correctly", {
-    output <- landfireAPIv2(products, aoi, email,
-      priority_code = priority_code,
-      path = path, method = "none"
-    )
-    expect_identical(output$request$url, "https://lfps.usgs.gov/api/job/submit?Email=example%40domain.com&Layer_List=ELEV2020%3BSLPD2020%3BASP2020%3B230FBFM40%3B230CC%3B230CH%3B230CBH%3B230CBD&Area_of_Interest=-113.79%2042.148%20-113.56%2042.29&Priority_Code=K3LS9F")
-  })
+  output <- landfireAPIv2(products, aoi, email,
+    priority_code = priority_code,
+    path = path, method = "none",
+    execute = FALSE
+  )
+  expect_identical(output$request$url, "https://lfps.usgs.gov/api/job/submit?Email=example%40domain.com&Layer_List=ELEV2020%3BSLPD2020%3BASP2020%3B230FBFM40%3B230CC%3B230CH%3B230CBH%3B230CBD&Area_of_Interest=-113.79%2042.148%20-113.56%2042.29&Priority_Code=K3LS9F")
 })
 
 
@@ -250,72 +253,72 @@ httptest2::with_mock_dir("_mock/landfireAPI-failed", {
 })
 
 
-httptest2::with_mock_dir("_mock/landfireAPI-edge", {
-  test_that("`landfireAPIv2()` edge cases", {
-    products <- c("ASP2020")
-    aoi <- c("-123.65", "41.75", "-123.63", "41.83")
-    email <- "rlandfire@markabuckner.com"
-    path <- tempfile(fileext = ".zip")
 
-    # Resets resolution to NULL when user sets resolution = 30
-    result <- landfireAPIv2(products, aoi, email,
-      resolution = 30, path = path,
-      method = "none"
-    )
-    expect_null(result$request$query$resolution)
-  })
+test_that("`landfireAPIv2()` edge cases", {
+  products <- c("ASP2020")
+  aoi <- c("-123.65", "41.75", "-123.63", "41.83")
+  email <- "rlandfire@markabuckner.com"
+  path <- tempfile(fileext = ".zip")
+
+  # Resets resolution to NULL when user sets resolution = 30
+  result <- landfireAPIv2(products, aoi, email,
+    resolution = 30, path = path,
+    method = "none", execute = FALSE
+  )
+  expect_null(result$request$query$resolution)
 })
 
-httptest2::with_mock_dir("_mock/landfireAPI-aoi", {
-  test_that("`landfireAPIv2()` works with `getAOI()`", {
-    products <- c("ASP2020")
-    email <- "rlandfire@markabuckner.com"
-    path <- tempfile(fileext = ".zip")
-
-    r <- terra::rast(
-      nrows = 50, ncols = 50,
-      xmin = -2261174.94, xmax = -2247816.36,
-      ymin = 2412704.65, ymax = 2421673.98,
-      crs = terra::crs("epsg:5070"),
-      vals = rnorm(2500)
-    )
-
-    aoi <- round(getAOI(r), 3)
-
-    aoi_result <- landfireAPIv2(
-      products = products, aoi = aoi,
-      email = email, path = path,
-      method = "none"
-    )
 
 
-    expect_identical(
-      aoi_result$request$query$Area_of_Interest,
-      "-123.803 41.723 -123.616 41.834"
-    )
-  })
+test_that("`landfireAPIv2()` works with `getAOI()`", {
+  products <- c("ASP2020")
+  email <- "rlandfire@markabuckner.com"
+  path <- tempfile(fileext = ".zip")
+
+  r <- terra::rast(
+    nrows = 50, ncols = 50,
+    xmin = -2261174.94, xmax = -2247816.36,
+    ymin = 2412704.65, ymax = 2421673.98,
+    crs = terra::crs("epsg:5070"),
+    vals = rnorm(2500)
+  )
+
+  aoi <- round(getAOI(r), 3)
+
+  aoi_result <- landfireAPIv2(
+    products = products, aoi = aoi,
+    email = email, path = path,
+    method = "none", execute = FALSE
+  )
+
+
+  expect_identical(
+    aoi_result$request$query$Area_of_Interest,
+    "-123.803 41.723 -123.616 41.834"
+  )
 })
 
-httptest2::with_mock_dir("_mock/landfireAPI-zone", {
-  test_that("`landfireAPIv2()` works with `getZone()`", {
-    products <- c("ASP2020")
-    email <- "rlandfire@markabuckner.com"
-    resolution <- 90
-    path <- tempfile(fileext = ".zip")
 
-    zone <- getZone("Northern California Coastal Range")
 
-    zone_result <- landfireAPIv2(
-      products = products, aoi = zone,
-      email = email, resolution = resolution,
-      path = path, method = "none"
-    )
-    expect_identical(
-      zone_result$request$query$Area_of_Interest,
-      "3"
-    )
-  })
+test_that("`landfireAPIv2()` works with `getZone()`", {
+  products <- c("ASP2020")
+  email <- "rlandfire@markabuckner.com"
+  resolution <- 90
+  path <- tempfile(fileext = ".zip")
+
+  zone <- getZone("Northern California Coastal Range")
+
+  zone_result <- landfireAPIv2(
+    products = products, aoi = zone,
+    email = email, resolution = resolution,
+    path = path, method = "none", execute = FALSE
+  )
+  expect_identical(
+    zone_result$request$query$Area_of_Interest,
+    "3"
+  )
 })
+
 
 # Tests for .post_request (internal)
 test_that("`.post_request` catches file issues", {

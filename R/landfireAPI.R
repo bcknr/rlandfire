@@ -33,6 +33,8 @@
 #' @param background If TRUE, the function will return immediately and the job
 #'   will run in the background. User will need to check the status of the job
 #'   manually with `checkStatus()`.
+#' @param execute If FALSE, the function will build a request without submitting
+#'   it to the LFPS API.
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
@@ -64,7 +66,8 @@
 landfireAPIv2 <- function(products, aoi, email, projection = NULL,
                         resolution = NULL, edit_rule = NULL, edit_mask = NULL,
                         priority_code = NULL, path = NULL, max_time = 10000,
-                        method = "curl", verbose = TRUE, background = FALSE) {
+                        method = "curl", verbose = TRUE, background = FALSE,
+                        execute = TRUE) {
 
   #### Checks
   # Missing
@@ -188,6 +191,11 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_url_query(!!!params) |>
     httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
     httr2::req_headers("Accept" = "application/json")
+
+  if (!execute) {
+    lfps <- .build_landfire_api(params = params, request = request)
+    return(lfps)
+  }
 
   # Submit job and get initial response
   req <- httr2::req_error(request, is_error = \(req) FALSE) |>
