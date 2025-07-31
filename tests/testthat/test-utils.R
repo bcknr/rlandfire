@@ -30,7 +30,8 @@ test_that("landfireVSI() works with a valid url", {
     email <- "rlandfire@markabuckner.com"
     resp <- landfireAPIv2(products = "240EVC",
                           aoi = aoi, email = email,
-                          method = "none")
+                          method = "none",
+                          verbose = FALSE)
     
     expect_s4_class(landfireVSI(resp), "SpatRaster")
 

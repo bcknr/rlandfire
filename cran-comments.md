@@ -1,13 +1,13 @@
-## Update (v2.0.0)
+## Update (v2.0.1)
 
-* This is a major update to the existing `rlandfire` package. 
+* This is a patch to the existing `rlandfire` package. To address issues resulting in failed checks on CRAN.
 
 * Changes include:
 
-    - Update to the new LANDFIRE Product Suite (LFPS) API
-    - New functions: `cancelJob()`, `checkStatus()`, `healthCheck()`, `landfireVSI()`
-    - Updated documentation to reflect/warn users of ongoing changes
-    - Added documentation to `README.md` and the vignette on working with categorical data, edit mask, and vsi
+    - All tests that require API access are mocked when possible or conditionally skipped with `skip_on_cran()`.
+    - Tests expected to fail prior to making an API call are now terminated early with `execute=FALSE` argument in `landfireAPIv2()`.
+    - The old `landfireAPI` function has been fully deprecated.
+    - Shapefile POST requests are repeated if they fail with status code 500, up to a maximum of 3 attempts.
 
 ## R CMD check results
 
@@ -19,4 +19,4 @@
     
   Both of the flagged words are spelled correctly.
 
-* Some tests requiring API access are conditionally skipped.
+* Tests requiring API access are conditionally skipped or mocked.

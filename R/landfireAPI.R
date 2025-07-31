@@ -33,6 +33,8 @@
 #' @param background If TRUE, the function will return immediately and the job
 #'   will run in the background. User will need to check the status of the job
 #'   manually with `checkStatus()`.
+#' @param execute If FALSE, the function will build a request without submitting
+#'   it to the LFPS API.
 #'
 #' @return
 #' Returns a `landfire_api` object with named elements:
@@ -64,7 +66,8 @@
 landfireAPIv2 <- function(products, aoi, email, projection = NULL,
                         resolution = NULL, edit_rule = NULL, edit_mask = NULL,
                         priority_code = NULL, path = NULL, max_time = 10000,
-                        method = "curl", verbose = TRUE, background = FALSE) {
+                        method = "curl", verbose = TRUE, background = FALSE,
+                        execute = TRUE) {
 
   #### Checks
   # Missing
@@ -189,6 +192,11 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_user_agent("rlandfire (https://CRAN.R-project.org/package=rlandfire)") |>
     httr2::req_headers("Accept" = "application/json")
 
+  if (!execute) {
+    lfps <- .build_landfire_api(params = params, request = request)
+    return(lfps)
+  }
+
   # Submit job and get initial response
   req <- httr2::req_error(request, is_error = \(req) FALSE) |>
          httr2::req_perform()
@@ -284,13 +292,22 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_body_multipart(
       file = curl::form_file(file, type = "application/zip"),
       description = "string"
-    )
+    ) |>
+    httr2::req_error(is_error = function(resp) FALSE)
 
   # Perform the request
-  upload_resp <- httr2::req_error(req, is_error = \(upload_resp) FALSE) |>
-                 httr2::req_perform()
+  tries <- 0
+  repeat {
+    tries <- tries + 1
+    upload_resp <- httr2::req_perform(req)
+    if (upload_resp$status != 500 || tries >= 3) break
+    Sys.sleep(1)
+  }
 
-  upload_body <- httr2::resp_body_json(upload_resp)
+  upload_body <- tryCatch(
+    httr2::resp_body_json(upload_resp),
+    error = function(e) list(message = "Could not parse response body")
+  )
 
   # Check for errors
   if (upload_resp$status != 200) {
@@ -413,7 +430,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #' Depreciated: Call the LANDFIRE Product Service (LFPS) API
 #'
 #' @description
-#' Depreciated: `landfireAPI()` is no longer supported due to updates to the 
+#' Superseded: `landfireAPI()` is no longer supported due to updates to the 
 #' LFPS API. Use `landfireAPIv2()` instead.
 #' 
 #' `landfireAPI` downloads LANDFIRE data by calling the LFPS API
@@ -464,11 +481,11 @@ landfireAPI <- function(products, aoi, projection = NULL, resolution = NULL,
                         edit_rule = NULL, edit_mask = NULL, path = NULL,
                         max_time = 10000, method = "curl", verbose = TRUE) {
   requireNamespace("lifecycle", quietly = TRUE)
-  lifecycle::deprecate_warn(
-    "1.0.0",
-    "landfireAPI()",
-    "landfireAPIv2()",
-    c("The LANDFIRE Products Services API has been updated to v2 as of May 2025.",
+  lifecycle::deprecate_stop(
+    when = "1.0.0",
+    what = "landfireAPI()",
+    with = "landfireAPIv2()",
+    details = c("The LANDFIRE Products Services API has been updated to v2 as of May 2025.",
       "New parameters and syntax are required.",
       "See `?rlandfire::landfireAPIv2` for more information.")
   )

@@ -1,4 +1,7 @@
-# rlandfire (development version)
+# rlandfire 2.0.1
+- Fully deprecated the old `landfireAPI()` function in favor of `landfireAPIv2()`
+- Shapefile POST requests are repeated if they fail with status code 500, up to a maximum of 3 attempts.
+- Minor bug fixes and improvements to address CRAN check issues on Windows-release
 
 # rlandfire 2.0.0
 -   Added support for the new "version 2" LANDFIRE Products Service (LFPS) API
