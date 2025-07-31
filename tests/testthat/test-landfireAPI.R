@@ -204,6 +204,11 @@ test_that("`landfireAPIv2()` formats priority requests correctly", {
 
 
 test_that("`landfireAPIv2()` returns expected messages", {
+  products <- c("ELEV2020")
+  aoi <- c("-113.79", "42.148", "-113.56", "42.29")
+  email <- "rlandfire@markabuckner.com"
+  path <- "path.zip"
+  
   expect_message(
     landfireAPIv2(products, aoi, email, background = TRUE, execute = FALSE),
     "`path` is missing. Files will be saved in temporary directory: .*"
