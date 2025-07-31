@@ -296,7 +296,13 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_error(is_error = function(resp) FALSE)
 
   # Perform the request
-  upload_resp <- httr2::req_perform(req)
+  tries <- 0
+  repeat {
+    tries <- tries + 1
+    upload_resp <- httr2::req_perform(req)
+    if (upload_resp$status != 500 || tries >= 3) break
+    Sys.sleep(1)
+  }
 
   upload_body <- tryCatch(
     httr2::resp_body_json(upload_resp),
