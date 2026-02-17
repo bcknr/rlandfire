@@ -17,7 +17,7 @@ NULL. Prints a message to the console about the job status.
 }
 \examples{
 \dontrun{
-products <-  c("ASP2020", "ELEV2020", "230CC")
+products <-  c("LF2020_ASP", "LF2020_ELEV", "LF2022_CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 email <- "email@example.com>"
 

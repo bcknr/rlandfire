@@ -28,7 +28,7 @@ test_that("landfireVSI() works with a valid url", {
 
     aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
     email <- "rlandfire@markabuckner.com"
-    resp <- landfireAPIv2(products = "240EVC",
+    resp <- landfireAPIv2(products = "LF2023_EVC",
                           aoi = aoi, email = email,
                           method = "none",
                           verbose = FALSE)

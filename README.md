@@ -112,13 +112,13 @@ an `sf` object or which corresponds to the supplied zone name. See
 ### Products
 
 For this example, we are interested in canopy cover data for two years,
-2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type
-(`200EVT`). All available data products, and their abbreviated names,
+2016 (`LF2016_CC`) and 2022 (`LF2022_CC`), and existing vegetation type
+(`LF2016_EVT`). All available data products, and their abbreviated names,
 can be found in the [products table](https://lfps.usgs.gov/products)
 which can be opened by calling `viewProducts()`.
 
 ``` r
-products <- c("200CC_19", "220CC_22", "200EVT")
+products <- c("LF2016_CC", "LF2022_CC", "LF2016_EVT")
 ```
 
 ### Email
@@ -146,7 +146,7 @@ statement should tell the API that when existing vegetation cover is
 anything other than Ponderosa Pine Woodland (`7054`), the value of the
 canopy cover layers should be set to a specified value.
 
-To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`,
+To do so, we specify that when `LF2022_EVT` is not equal (`ne`) to `7054`,
 the “condition,” the canopy cover layers should be set equal (`st`) to
 `1`, the “change.” The edit rule syntax is explained in more depth in
 the [LFPS guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
@@ -157,9 +157,9 @@ we want would not work. To work around this behavior, we set the values
 to `1` since it is not found in the original data set.*)
 
 ``` r
-edit_rule <- list(c("condition","200EVT","ne",7054),
-                  c("change", "200CC_19", "st", 1),
-                  c("change", "220CC_22", "st", 1))
+edit_rule <- list(c("condition","LF2016_EVT","ne",7054),
+                  c("change", "LF2016_CC", "st", 1),
+                  c("change", "LF2022_CC", "st", 1))
 ```
 
 Note: Edits are performed in the order that they are listed and are
@@ -233,10 +233,10 @@ are not classified as Ponderosa Pine, calculate the change, and plot our
 results.
 
 ``` r
-lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
-lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
+lf$US_LF2016_CC[lf$US_LF2016_CC == 1] <- NA
+lf$US_LF2022_CC[lf$US_LF2022_CC == 1] <- NA
 
-change <- lf$US_220CC_22 - lf$US_200CC_19
+change <- lf$US_LF2022_CC - lf$US_LF2016_CC
 
 plot(change, col = rev(terrain.colors(250)),
      main = "Canopy Cover Loss - Calwood Fire (2020)",
@@ -255,7 +255,7 @@ variables and returns a database file (`.dbf`) containing the full
 attribute table.
 
 To demonstrate, we will download the Existing Vegetation Cover product
-from LF 2.4.0 (`240EVC`). Unlike in the example above we will submit a
+from LF 2.4.0 (`LF2023_EVC`). Unlike in the example above we will submit a
 minimal request with the default projection and resolution. We will also
 allow `rlandfire` to save the files to a temporary directory
 automatically. As mentioned above, we can find the path to the temporary
@@ -263,7 +263,7 @@ directory in the `$path` element of the `landfire_api` object returned
 by `landfireAPIv2()`.
 
 ``` r
-resp <- landfireAPIv2(products = "240EVC",
+resp <- landfireAPIv2(products = "LF2023_EVC",
                     aoi = aoi,
                     email = email,
                     verbose = FALSE)
