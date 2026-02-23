@@ -369,7 +369,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             = or_cnd %in% sapply(cnd_grp, `[`, 1))
 
   # Add edit mask if provided
-  if(!is.null(mask)) {
+  if (!is.null(unlist(mask))) {
 
     mask_file  <- sprintf('"mask":"%s"', mask$item_name)
 
