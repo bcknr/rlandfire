@@ -66,10 +66,10 @@ boundary_file <- file.path(tempdir(), "wildfire")
 utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
              exdir = tempdir())
 
-boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
+boundary <- st_read(file.path(boundary_file, "wildfire.shp")) |>
   sf::st_transform(crs = st_crs(32613))
 
-plot(boundary$geometry, main = "Calwood Fire Boundary (2020)", 
+plot(boundary$geometry, main = "Calwood Fire Boundary (2020)",
      border = "red", lwd = 1.5)
 ```
 
@@ -118,7 +118,7 @@ To do so, we specify that when `LF2022_EVT` is not equal (`ne`) to `7054`, the "
 *(How the API applies edit rules can be unintuitive. For example, if we used 'clear value' [`cv`] or set the value outside of 0-100 the edits we want would not work. To work around this behavior, we set the values to `1` since it is not found in the original data set.*)
 
 ```{r}
-edit_rule <- list(c("condition","LF2016_EVT","ne",7054),
+edit_rule <- list(c("condition", "LF2016_EVT", "ne", 7054),
                   c("change", "LF2016_CC", "st", 1),
                   c("change", "LF2022_CC", "st", 1))
 ```
@@ -147,13 +147,13 @@ Now we are able to submit a request to the LANDFIRE Product Services API with th
 
 ```{r,eval=FALSE}
 resp <- landfireAPIv2(products = products,
-                    aoi = aoi, 
-                    email = email,
-                    projection = projection, 
-                    resolution = resolution,
-                    edit_rule = edit_rule,
-                    path = path,
-                    verbose = FALSE)
+                      aoi = aoi,
+                      email = email,
+                      projection = projection,
+                      resolution = resolution,
+                      edit_rule = edit_rule,
+                      path = path,
+                      verbose = TRUE)
 ```
 
 `landfireAPIv2()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
@@ -175,8 +175,8 @@ The files returned by the LFPS API are compressed `.zip` files. We need to unzip
 lf_dir <- file.path(tempdir(), "lf")
 utils::unzip(path, exdir = lf_dir)
 
-lf <- terra::rast(list.files(lf_dir, pattern = ".tif$", 
-                             full.names = TRUE, 
+lf <- terra::rast(list.files(lf_dir, pattern = ".tif$",
+                             full.names = TRUE,
                              recursive = TRUE))
 ```
 
@@ -210,9 +210,9 @@ can find the path to the temporary directory in the `$path` element of the
 
 ```{r,eval=FALSE}
 resp <- landfireAPIv2(products = "LF2023_EVC",
-                    aoi = aoi,
-                    email = email,
-                    verbose = FALSE)
+                      aoi = aoi,
+                      email = email,
+                      verbose = FALSE)
 ```
 
 ```{r,include=FALSE}
@@ -227,9 +227,9 @@ When we read in and plot the EVC layer the legend will now list the `classnames`
 lf_cat <- file.path(tempdir(), "lf_cat")
 utils::unzip(resp$path, exdir = lf_cat)
 
-evc <- terra::rast(list.files(lf_cat, pattern = ".tif$", 
-                             full.names = TRUE, 
-                             recursive = TRUE))
+evc <- terra::rast(list.files(lf_cat, pattern = ".tif$",
+                              full.names = TRUE,
+                              recursive = TRUE))
 
 plot(evc)
 ```

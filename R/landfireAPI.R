@@ -359,9 +359,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   cnd_grp <- lapply(seq(length(breaks) - 1),
                     function(i) cnd[(breaks[i] + 1):breaks[i+1]])
 
-  cnd <- lapply(cnd_grp, function(i) paste0('"condition":[{',
-                                            paste0(params[i],
-                                            collapse = '},{'),'}]'))
+  cnd <- lapply(cnd_grp, function(i) {
+    paste0('"condition":[{', paste0(params[i], collapse = '},{'),'}]')
+  })
 
   # Check for OR condition
   or_cnd <- grep("OR.*", class)
@@ -380,7 +380,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
         length(mask$item_name) == length(cnd_grp)) {
       cnd[mask_grp]  <- paste(mask_file, cnd[mask_grp], sep = ",")
     } else {
-      stop("The number of `edit_mask` count should match the number of", 
+      stop("The number of `edit_mask` count should match the number of",
            "`edit_rules` condition groups when using multiple shapefiles.")
     }
   }
@@ -391,9 +391,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   chng_grp <- lapply(seq(length(breaks) - 1),
                      function(i) chng[(breaks[i] + 1):breaks[i+1]])
 
-  chng <- lapply(chng_grp, function(i) paste0('"change":[{',
-                                              paste0(params[i],
-                                              collapse = '},{'),'}]'))
+  chng <- lapply(chng_grp, function(i) {
+    paste0('"change":[{', paste0(params[i], collapse = '},{'),'}]')
+  })
 
   # Retain original order
   order_cnd <- sapply(cnd_grp, `[`, 1)
@@ -413,8 +413,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     sprintf('"edit":[{%s,%s}]', out_rules[i], out_rules[i + 1])
   })
   } else {
-    out_rules <- paste0('"edit":[{', 
-                       paste(out_rules, collapse = ','),
+    out_rules <- paste0('"edit":[{',
+                        paste(out_rules, collapse = ','),
                         '}]')
   }
 
