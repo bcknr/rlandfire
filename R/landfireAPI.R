@@ -193,7 +193,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_headers("Accept" = "application/json")
 
   if (!execute) {
-    lfps <- .build_landfire_api(params = params, request = request)
+    lfps <- .build_landfire_api(params = params, request = request, path = path)
     return(lfps)
   }
 
