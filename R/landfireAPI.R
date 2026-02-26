@@ -29,10 +29,12 @@
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
+#'   If `method = none` the file will not be downloaded, instead data can be
+#'   read into R directly from the LFPS server [rlandfire::landfireVSI()].
 #' @param verbose If FALSE suppress all status messages
 #' @param background If TRUE, the function will return immediately and the job
 #'   will run in the background. User will need to check the status of the job
-#'   manually with `checkStatus()`.
+#'   manually with [rlandfire::checkStatus()].
 #' @param execute If FALSE, the function will build a request without submitting
 #'   it to the LFPS API.
 #'
@@ -350,7 +352,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   params <- lapply(rules, function(x) {
     paste0('"product":"', x[2],
            '","operator":"', x[3],
-           '","value":', x[4])
+           ifelse(x[3] == "cv", '"', paste0('","value":', x[4])))
   })
 
   # Condition - ID groups with same class and build request
