@@ -28,11 +28,23 @@ test_that("landfireVSI() works with a valid url", {
 
     aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
     email <- "rlandfire@markabuckner.com"
-    resp <- landfireAPIv2(products = "LF2023_EVC",
+    resp <- landfireAPIv2(products = "LF2016_EVC",
                           aoi = aoi, email = email,
                           method = "none",
+                          priority_code = "CRNLUN",
                           verbose = FALSE)
     
+    expect_s4_class(landfireVSI(resp), "SpatRaster")
+
+})
+
+test_that("landfireVSI() works with a existing local zip", {
+    skip_on_cran()
+
+    zip_path = system.file("extdata/LFPS_Return_new.zip", package = "rlandfire")
+    
+    resp <- .build_landfire_api(path = zip_path)
+
     expect_s4_class(landfireVSI(resp), "SpatRaster")
 
 })
