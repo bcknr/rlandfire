@@ -42,7 +42,7 @@ viewProducts <- function() {
 #' \dontrun{
 #' aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
 #' email <- "email@example"
-#' rast <- landfireAPIv2(products = "LF2023_EVC",
+#' rast <- landfireAPIv2(products = "LF2016_EVT",
 #'                       aoi = aoi, email = email,
 #'                       method = "none")  |>
 #'         landfireVSI()
