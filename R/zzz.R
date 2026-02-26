@@ -11,6 +11,6 @@
 "\033[38;5;160m\n\nNOTICE:\033[0m\n",
 "The LFPS API has been updated (LFPSv1 -> LFPSv2) and has new requirements.\n",
 "To review the required parameters and syntax for LFPSv2 view `?rlandfire::landfireAPIv2`\n",
-"Product names and availability may have changed, check `viewProducts()`\n\n",
-"\033[38;5;160mWorkflows built before May 2025 or with `rlandfire` versions < 2.0.0 will need to be updated.\033[0m")
+"Product names and availability have changed, check `viewProducts()`\n\n",
+"\033[38;5;160mWorkflows built before March 2026 or with `rlandfire` versions < 2.0.0 will need to be updated.\033[0m")
 }
