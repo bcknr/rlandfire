@@ -1,13 +1,12 @@
-## Update (v2.0.1)
+## Update (v2.0.2)
 
-* This is a patch to the existing `rlandfire` package. To address issues resulting in failed checks on CRAN.
+* This is a minor update to the existing `rlandfire` package to ensure compatability with the LFPS API's new naming convensions.
 
 * Changes include:
 
-    - All tests that require API access are mocked when possible or conditionally skipped with `skip_on_cran()`.
-    - Tests expected to fail prior to making an API call are now terminated early with `execute=FALSE` argument in `landfireAPIv2()`.
-    - The old `landfireAPI` function has been fully deprecated.
-    - Shapefile POST requests are repeated if they fail with status code 500, up to a maximum of 3 attempts.
+    - All product names were updated in vignette, examples, and tests
+    - A minor bug causing an erroneous error in `landfireAPIv2()` when `edit_rule` was provided but `edit_mask` is not.
+    - Documentation was updated to better reflect the current suggested workflow for the package.
 
 ## R CMD check results
 

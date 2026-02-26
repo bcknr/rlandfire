@@ -55,10 +55,6 @@ library(terra)
 library(foreign)
 ```
 
-```{r include=FALSE}
-devtools::load_all()
-```
-
 First, we will load the Calwood Fire perimeter data which was downloaded from Boulder County's [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/).
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}

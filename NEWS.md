@@ -1,3 +1,10 @@
+# rlandfire 2.0.2
+- Update product layer names to comply with new naming convension released on March 18, 2026
+- Fix bug causing error referencing `edit_mask` when `edit_rule` is provided without `edit_mask`
+- Allow `edit_rule` with no value when change operator is `cv`
+- Update vignette to show use of `landfireVSI()` instead of only unzip and read
+- Minor edits to tests, documentation, and startup message
+
 # rlandfire 2.0.1
 - Fully deprecated the old `landfireAPI()` function in favor of `landfireAPIv2()`
 - Shapefile POST requests are repeated if they fail with status code 500, up to a maximum of 3 attempts.
