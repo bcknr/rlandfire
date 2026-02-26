@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 <img src="../man/figures/rlandfire.png" align="left" width="125" height="125"/>
 
-## rlandfire: Tools for Accessing and Working with LANDFIRE in R
+## rlandfire: Interface to 'LANDFIRE Product Service' API
 \
 \
 `rlandfire` provides access to a diverse suite of spatial data layers via the LANDFIRE Product Services ([LFPS](https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer)) API. [LANDFIRE](https://landfire.gov) is a joint program of the USFS, DOI, and other major partners, which provides data layers for wildfire management, fuel modeling, ecology, natural resource management, climate, conservation, etc. The complete list of available layers and additional resources can be found on the LANDFIRE webpage.
@@ -42,17 +42,21 @@ Set `build_vignettes = TRUE` to access this vignette in R:
 devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
 ```
 
-This package is still in development, and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
+This package being maintained in my free time and users may encounter bugs or unexpected behavior. Please report any issues, feature requests, or suggestions in the package's [GitHub repo](https://github.com/bcknr/rlandfire/issues).
 
 ## Using `rlandfire`
 
 To demonstrate `rlandfire`, we will explore how ponderosa pine forest canopy cover changed after the 2020 Calwood fire near Boulder, Colorado.
 
-```{r setup}
+```{r setup, message = FALSE, warning = FALSE}
 library(rlandfire)
 library(sf)
 library(terra)
 library(foreign)
+```
+
+```{r include=FALSE}
+devtools::load_all()
 ```
 
 First, we will load the Calwood Fire perimeter data which was downloaded from Boulder County's [geospatial data hub](https://opendata-bouldercounty.hub.arcgis.com/).
@@ -62,7 +66,7 @@ boundary_file <- file.path(tempdir(), "wildfire")
 utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
              exdir = tempdir())
 
-boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
+boundary <- st_read(file.path(boundary_file, "wildfire.shp")) |>
   sf::st_transform(crs = st_crs(32613))
 
 plot(boundary$geometry, main = "Calwood Fire Boundary (2020)", 
@@ -91,9 +95,9 @@ products <- c("LF2016_CC", "LF2022_CC", "LF2016_EVT")
 ```
 
 ### Email
-
+As part of the LANDFIRE program's update to LFPSv2 an email is now required with each request. See the [LFPS Guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf) for more information.
 ```{r}
-email <- "rlandfire@example.com"
+email <- "rlandfire@markabuckner.com"
 ```
 
 ### Projection and resolution
@@ -101,25 +105,27 @@ email <- "rlandfire@example.com"
 We can ask the API to project the data to the same CRS as our fire perimeter data by providing the `WKID` for our CRS of interest and a resolution of our choosing, in meters.
 
 ```{r}
-projection <- 32613
+projection <- 32613 # WGS 84 / UTM zone 13N
 resolution <- 90
 ```
 
 ### Edit rule
 
-We will use the `edit_rule` argument to filter out canopy cover data that does not correspond to Ponderosa Pine Woodland. The `edit_rule` statement should tell the API that when existing vegetation cover is anything other than Ponderosa Pine Woodland (`7054`), the value of the canopy cover layers should be set to a specified value.
+We will use the `edit_rule` argument to filter out canopy cover data that does not correspond to Ponderosa Pine Woodland. The `edit_rule` statement should tell the API that when existing vegetation cover is anything other than Ponderosa Pine Woodland (`7054`), the value of the canopy cover layers should be set to (`st`) a specified value.
 
-To do so, we specify that when `LF2022_EVT` is not equal (`ne`) to `7054`, the "condition," the canopy cover layers should be set equal (`st`) to `1`, the "change." The edit rule syntax is explained in more depth in the [LFPS guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
+To do so, we specify that when `LF2016_EVT` is not equal (`ne`) to `7054`, the "condition," the canopy cover layers should be set equal (`st`) to `1`, the "change." The edit rule syntax is explained in more depth in the [LFPS guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
 
 *(How the API applies edit rules can be unintuitive. For example, if we used 'clear value' [`cv`] or set the value outside of 0-100 the edits we want would not work. To work around this behavior, we set the values to `1` since it is not found in the original data set.*)
 
 ```{r}
-edit_rule <- list(c("condition","LF2016_EVT","ne",7054),
-                  c("change", "LF2016_CC", "st", 1),
-                  c("change", "LF2022_CC", "st", 1))
+edit_rule <- list(
+  c("condition", "LF2016_EVT", "ne", 7054),
+  c("change", "LF2016_CC", "st", 1),
+  c("change", "LF2022_CC", "st", 1)
+)
 ```
 
-Note: Edits are performed in the order that they are listed and are limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height).
+Note: Edits are performed in the order that they are listed and are limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk Density, Forest Canopy Cover, and Forest Canopy Height). The more advanced functionality of the LFPS edit rules are available and implemented in this package, but not covered here.
 
 If we wanted to restrict these edits to a certain area we could pass the path to a zip archive (`.zip`) containing a shapefile to `edit_mask`:
 
@@ -127,11 +133,13 @@ If we wanted to restrict these edits to a certain area we could pass the path to
 edit_mask <- "path/to/wildfire.zip"
 ```
 
-Note: The file must follow ESRI shapefile naming standards (e.g., no special characters) and be less than 1MB in size.
+If an `edit_mask` is provided `landfireAPIv2` will automatically post the raster to the LFPS and integrate it into your call.
+
+(*Note: The file must follow ESRI shapefile naming standards (e.g., no special characters) and be less than 1MB in size.*)
 
 ### Path
 
-Finally, we will provide a path to a temporary zip file. Setting the path as a temp file is not strictly necessary because if `path` is left blank `landfireAPIv2()` will save the data to a temporary folder by default.
+Finally, we will provide a path to a temporary zip file. Setting the path as a temp file is not strictly necessary because if `path` is left blank `landfireAPIv2()` will save the data to a temporary folder by default. The path can be set to any writable directory.
 
 ```{r}
 path <- tempfile(fileext = ".zip")
@@ -143,31 +151,46 @@ Now we are able to submit a request to the LANDFIRE Product Services API with th
 
 ```{r,eval=FALSE}
 resp <- landfireAPIv2(products = products,
-                    aoi = aoi, 
-                    email = email,
-                    projection = projection, 
-                    resolution = resolution,
-                    edit_rule = edit_rule,
-                    path = path,
-                    verbose = FALSE)
+                      aoi = aoi,
+                      email = email,
+                      projection = projection,
+                      resolution = resolution,
+                      edit_rule = edit_rule,
+                      path = path,
+                      verbose = TRUE)
 ```
 
 `landfireAPIv2()` will download your requested data into the folder provided in the path argument. If you did not provide one, you can find the path to your data in the `$path` element of the `landfire_api` object.
+
+```{r,include=FALSE}
+# Build example without calling API
+resp <- landfireAPIv2(products = products,
+                      aoi = aoi,
+                      email = email,
+                      projection = projection,
+                      resolution = resolution,
+                      edit_rule = edit_rule,
+                      path = path,
+                      execute = FALSE,
+                      verbose = FALSE)
+```
 
 ```{r,eval=FALSE}
 resp$path
 ```
 
-### Load and process LF data
-
 ```{r,include=FALSE}
-path <- system.file("extdata/LFPS_Return.zip", package = "rlandfire")
+# Modify path to extdata
+resp$path <- system.file("extdata/LFPS_Return_new.zip", package = "rlandfire")
 ```
 
+### Load and process LF data
 
-The files returned by the LFPS API are compressed `.zip` files. We need to unzip the directory before reading the `.tif` file. Note: all additional metadata is included in this same directory.
+The files returned by the LFPS API are compressed `.zip` files containing a single multiband `GeoTIFF` and the metadata files. We have two options for programmatically accessing the files:
 
-```{r}
+1. Manually unzip the directory before reading the `.tif` file using `terra`, or
+
+```{r, eval=FALSE}
 lf_dir <- file.path(tempdir(), "lf")
 utils::unzip(path, exdir = lf_dir)
 
@@ -176,13 +199,22 @@ lf <- terra::rast(list.files(lf_dir, pattern = ".tif$",
                              recursive = TRUE))
 ```
 
+2. Read the `GeoTIFF` file in directly using GDAL's Virtual File system in a single line.
+
+```{r}
+lf  <- landfireVSI(resp)
+lf
+```
+
+Note: `landfireVSI()` can also be used to read data directly from the LFPS server into R when using `method = "none"` in `landfireAPIv2()`.
+
 Now we can reclassify the canopy cover layers to remove any values which are not classified as Ponderosa Pine, calculate the change, and plot our results.
 
 ```{r, fig.align = "center", fig.height = 5, fig.width = 7}
-lf$US_LF2016_CC[lf$US_LF2016_CC == 1] <- NA
-lf$US_LF2022_CC[lf$US_LF2022_CC == 1] <- NA
+lf$LF2016_CC_CONUS[lf$LF2016_CC_CONUS == 1] <- NA
+lf$LF2022_CC_CONUS[lf$LF2022_CC_CONUS == 1] <- NA
 
-change <- lf$US_LF2022_CC - lf$US_LF2016_CC
+change <- lf$LF2022_CC_CONUS - lf$LF2016_CC_CONUS
 
 plot(change, col = rev(terrain.colors(250)),
      main = "Canopy Cover Loss - Calwood Fire (2020)",
@@ -212,21 +244,20 @@ resp <- landfireAPIv2(products = "LF2023_EVC",
 ```
 
 ```{r,include=FALSE}
-resp <- c()
-resp$path <- system.file("extdata/LFPS_cat_Return.zip", package = "rlandfire")
+resp <- landfireAPIv2(products = "LF2023_EVC",
+                    aoi = aoi,
+                    email = email,
+                    execute = FALSE,
+                    verbose = FALSE)
+
+resp$path <- system.file("extdata/LFPS_Return_cat_new.zip", package = "rlandfire")
 ```
 
 When we read in and plot the EVC layer the legend will now list the `classnames`
  for each vegetation type.
 
 ```{r}
-lf_cat <- file.path(tempdir(), "lf_cat")
-utils::unzip(resp$path, exdir = lf_cat)
-
-evc <- terra::rast(list.files(lf_cat, pattern = ".tif$", 
-                             full.names = TRUE, 
-                             recursive = TRUE))
-
+evc <- landfireVSI(resp)
 plot(evc)
 ```
 
@@ -241,15 +272,19 @@ head(levels(evc)[[1]])
 Alternatively, we can access the full attribute table using two methods. 
 We can use the function `cats()` which works similarly to `levels()` but 
 returns the full attribute table as a data frame. Alternatively, we can read the 
-database file using  `foreign::read.dbf()`. Both methods return similar results,
-although in this case, we see that the `.dbf` file includes an additional `Count`
-column not included in the data frame returned from `cats()`.
+database file using  `foreign::read.dbf()` which requires us to unzip the 
+directory first. Both methods return similar results, although in this case, we 
+see that the `.dbf` file includes an additional `Count` column not included in 
+the data frame returned from `cats()`.
 
 ```{r}
 # cats
 attr_tbl <- cats(evc)
 
 # Find path to database file
+lf_cat <- file.path(tempdir(), "lf_cat")
+utils::unzip(resp$path, exdir = lf_cat)
+
 dbf <- list.files(lf_cat, pattern = ".dbf$",
                   full.names = TRUE,
                   recursive = TRUE)
@@ -263,4 +298,6 @@ head(dbf_tbl)
 
 ### Citation
 
-Visit the [LANDFIRE webpage](https://landfire.gov/data/citation) for information on citing LANDFIRE data layers. The package citation information can be viewed with `citation("rlandfire")`.
+Visit the [LANDFIRE webpage](https://landfire.gov/data/citation) for information 
+on citing LANDFIRE data layers. The package citation information can be viewed 
+with `citation("rlandfire")`.
