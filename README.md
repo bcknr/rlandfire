@@ -72,7 +72,7 @@ utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
 
 boundary <- st_read(file.path(boundary_file, "wildfire.shp")) |>
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `wildfire' from data source `/tmp/Rtmp5r7O0N/wildfire/wildfire.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpHghXRj/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -364,13 +364,20 @@ head(attr_tbl[[1]])
 #> 5    16       Developed-Upland Herbaceous   369 122 142 245 122   142  245
 #> 6    17        Developed-Upland Shrubland   183 158 170 215 158   170  215
 head(dbf_tbl)
-#>   Value Count                        CLASSNAMES   R   G   B      RED    GREEN     BLUE
-#> 1    11   228                        Open Water   0   0 255 0.000000 0.000000 1.000000
-#> 2    13   120 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216 0.658824
-#> 3    14   332 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804 0.537255
-#> 4    15   193     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667 0.803922
-#> 5    16   369       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863 0.960784
-#> 6    17   183        Developed-Upland Shrubland 158 170 215 0.619608 0.666667 0.843137
+#>   Value Count                        CLASSNAMES   R   G   B      RED    GREEN
+#> 1    11   228                        Open Water   0   0 255 0.000000 0.000000
+#> 2    13   120 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
+#> 3    14   332 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
+#> 4    15   193     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
+#> 5    16   369       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
+#> 6    17   183        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
+#>       BLUE
+#> 1 1.000000
+#> 2 0.658824
+#> 3 0.537255
+#> 4 0.803922
+#> 5 0.960784
+#> 6 0.843137
 ```
 
 ### Citation
