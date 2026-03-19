@@ -33,7 +33,7 @@
         },
         {
             "type": "esriJobMessageTypeInformative",
-            "description": "US_ELEV2020"
+            "description": "US_LF2020_ELEV"
         },
         {
             "type": "esriJobMessageTypeInformative",

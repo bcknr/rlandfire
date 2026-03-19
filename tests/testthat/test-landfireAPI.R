@@ -1,14 +1,14 @@
 # Tests for landfireAPIv2.R
 
 test_that("`landfireAPIv2()` recognizes argument errors", {
-  products <- c("ASP2020", "ELEV2020", "230CC")
+  products <- c("LF2016_CC", "LF2016_CBH")
   aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
   email <- "rlandfire@markabuckner.com"
   projection <- 6414
   resolution <- 90
   edit_rule <- list(
-    c("condition", "ELEV2020", "lt", 500),
-    c("change", "230CC", "st", 181)
+    c("condition", "LF2016_CC", "lt", 50),
+    c("change", "LF2016_CBH", "st", 0)
   )
   path <- tempfile(fileext = ".zip")
 
@@ -129,8 +129,8 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
     landfireAPIv2(products, aoi,
       email = email,
       edit_rule = list(
-        c("wrong", "ELEV2020", "lt", 500),
-        c("change", "230CC", "st", 181)
+        c("wrong", "LF2016_CC", "lt", 50),
+        c("change", "LF2016_CBH", "st", 0)
       ), execute = FALSE
     ),
     "`edit_rule` operator classes must only be .*"
@@ -139,8 +139,8 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
     landfireAPIv2(products, aoi,
       email = email,
       edit_rule = list(
-        c("condition", "ELEV2020", "xx", 500),
-        c("change", "230CC", "st", 181)
+        c("condition", "LF2016_CC", "xx", 50),
+        c("change", "LF2016_CBH", "st", 0)
       ), execute = FALSE
     ),
     "`edit_rule` conditional operators must be one of .*"
@@ -158,7 +158,7 @@ test_that("`landfireAPIv2()` recognizes argument errors", {
 })
 
 test_that("`landfireAPIv2()` returns errors with email/priority_code", {
-  products <- c("ASP2020")
+  products <- c("LF2016_CC")
   aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
   projection <- 6414
   path <- tempfile(fileext = ".zip")
@@ -186,8 +186,8 @@ test_that("`landfireAPIv2()` returns errors with email/priority_code", {
 
 test_that("`landfireAPIv2()` formats priority requests correctly", {
   products <- c(
-    "ELEV2020", "SLPD2020", "ASP2020", "230FBFM40",
-    "230CC", "230CH", "230CBH", "230CBD"
+    "LF2016_CC", "LF2020_SLPD", "LF2020_ASP", "LF2022_FBFM40",
+    "LF2022_CC", "LF2022_CH", "LF2022_CBH", "LF2022_CBD"
   )
   aoi <- c("-113.79", "42.148", "-113.56", "42.29")
   email <- "example@domain.com"
@@ -199,12 +199,12 @@ test_that("`landfireAPIv2()` formats priority requests correctly", {
     path = path, method = "none",
     execute = FALSE
   )
-  expect_identical(output$request$url, "https://lfps.usgs.gov/api/job/submit?Email=example%40domain.com&Layer_List=ELEV2020%3BSLPD2020%3BASP2020%3B230FBFM40%3B230CC%3B230CH%3B230CBH%3B230CBD&Area_of_Interest=-113.79%2042.148%20-113.56%2042.29&Priority_Code=K3LS9F")
+  expect_identical(output$request$url, "https://lfps.usgs.gov/api/job/submit?Email=example%40domain.com&Layer_List=LF2016_CC%3BLF2020_SLPD%3BLF2020_ASP%3BLF2022_FBFM40%3BLF2022_CC%3BLF2022_CH%3BLF2022_CBH%3BLF2022_CBD&Area_of_Interest=-113.79%2042.148%20-113.56%2042.29&Priority_Code=K3LS9F")
 })
 
 
 test_that("`landfireAPIv2()` returns expected messages", {
-  products <- c("ELEV2020")
+  products <- c("LF2016_CC")
   aoi <- c("-113.79", "42.148", "-113.56", "42.29")
   email <- "rlandfire@markabuckner.com"
   path <- "path.zip"
@@ -219,7 +219,7 @@ test_that("`landfireAPIv2()` returns expected messages", {
 test_that("`landfireAPIv2()` returns expected background messages", {
   skip_on_cran()
 
-  products <- c("ELEV2020")
+  products <- c("LF2016_CC")
   aoi <- c("-113.79", "42.148", "-113.56", "42.29")
   email <- "rlandfire@markabuckner.com"
   path <- "path.zip"
@@ -227,12 +227,16 @@ test_that("`landfireAPIv2()` returns expected background messages", {
   expect_message(
     output <- landfireAPIv2(products, aoi, email,
       background = TRUE, path = path,
-      method = "none", verbose = FALSE
+      method = "none", verbose = FALSE,
     ),
     "Job submitted in background.*"
   )
 
-  cancelJob(output$request$job_id)
+  expect_message(
+    cancelJob(output$request$job_id),
+    "Job .* has been canceled"
+  )
+
 
   expect_message(
     output <- landfireAPIv2(products, aoi, email,
@@ -268,7 +272,7 @@ test_that("`landfireAPIv2()` recognizes failed call", {
 
 
 test_that("`landfireAPIv2()` edge cases", {
-  products <- c("ASP2020")
+  products <- c("LF2016_CC")
   aoi <- c("-123.65", "41.75", "-123.63", "41.83")
   email <- "rlandfire@markabuckner.com"
   path <- tempfile(fileext = ".zip")
@@ -284,7 +288,7 @@ test_that("`landfireAPIv2()` edge cases", {
 
 
 test_that("`landfireAPIv2()` works with `getAOI()`", {
-  products <- c("ASP2020")
+  products <- c("LF2016_CC")
   email <- "rlandfire@markabuckner.com"
   path <- tempfile(fileext = ".zip")
 
@@ -314,7 +318,7 @@ test_that("`landfireAPIv2()` works with `getAOI()`", {
 
 
 test_that("`landfireAPIv2()` works with `getZone()`", {
-  products <- c("ASP2020")
+  products <- c("LF2020_ASP")
   email <- "rlandfire@markabuckner.com"
   resolution <- 90
   path <- tempfile(fileext = ".zip")
@@ -335,7 +339,7 @@ test_that("`landfireAPIv2()` works with `getZone()`", {
 
 # Tests for .post_request (internal)
 test_that("`.post_request` catches file issues", {
-  without_internet({
+  httptest2::without_internet({
     expect_error(
       .post_editmask("notafile.zip"),
       "`edit_mask` file not found"
@@ -382,71 +386,91 @@ test_that("`.post_editmask` returns expected response", {
 
 
 # Tests for .fmt_editrules (internal)
+# These are nonsense but they meet the goal
 test_that("`.fmt_editrules` correctly formats requests", {
+
+  products <- c("LF2016_CC", "LF2016_CBH")
+  aoi <- c("-123.65", "41.75", "-123.63", "41.83")
+  email <- "rlandfire@markabuckner.com"
+  
   # One condition, one change
   single_rule <- list(
-    c("condition", "ELEV2020", "lt", 500),
-    c("change", "230CC", "st", 181)
+    c("condition", "LF2016_CC", "lt", 50),
+    c("change", "LF2016_CBH", "st", 0)
   )
   expect_identical(
     .fmt_editrules(single_rule),
-    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}]}]}"
+    "{\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"lt\",\"value\":50}],\"change\":[{\"product\":\"LF2016_CBH\",\"operator\":\"st\",\"value\":0}]}]}"
   )
 
   # Multiple conditions
   multi_rule <- list(
-    c("condition", "ELEV2020", "lt", 500),
-    c("change", "230CC", "st", 181),
-    c("condition", "ELEV2020", "ge", 600),
-    c("change", "230CC", "db", 20),
-    c("condition", "ELEV2020", "eq", 550),
-    c("change", "230CC", "st", 0)
+    c("condition", "LF2016_CC", "lt", 15),
+    c("change", "LF2016_CBH", "st", 0),
+    c("condition", "LF2016_CC", "ge", 50),
+    c("change", "LF2016_CBH", "db", 2),
+    c("condition", "LF2016_CC", "eq", 100),
+    c("change", "LF2016_CBH", "st", 1000)
   )
   expect_identical(
     .fmt_editrules(multi_rule),
-    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":181}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"ge\",\"value\":600}],\"change\":[{\"product\":\"230CC\",\"operator\":\"db\",\"value\":20}],\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":550}],\"change\":[{\"product\":\"230CC\",\"operator\":\"st\",\"value\":0}]}]}"
+    "{\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"lt\",\"value\":15}],\"change\":[{\"product\":\"LF2016_CBH\",\"operator\":\"st\",\"value\":0}],\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"ge\",\"value\":50}],\"change\":[{\"product\":\"LF2016_CBH\",\"operator\":\"db\",\"value\":2}],\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"eq\",\"value\":100}],\"change\":[{\"product\":\"LF2016_CBH\",\"operator\":\"st\",\"value\":1000}]}]}"
   )
 
 
-  # Single condition with multiple changes (Pulled from documentation)
+  # Single condition with multiple changes
+  products <- c("LF2016_CC", "LF2016_FBFM40", "LF2016_CBH")
+
   multi_change <- list(
-    c("condition", "ELEV2020", "lt", 500),
-    c("change", "140FBFM", "st", 181),
-    c("change", "140CBH", "ib", 5)
+    c("condition", "LF2016_CC", "lt", 500),
+    c("change", "LF2016_FBFM40", "st", 181),
+    c("change", "LF2016_CBH", "ib", 5)
   )
   expect_identical(
     .fmt_editrules(multi_change),
-    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}]}"
+    "{\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"lt\",\"value\":500}],\"change\":[{\"product\":\"LF2016_FBFM40\",\"operator\":\"st\",\"value\":181},{\"product\":\"LF2016_CBH\",\"operator\":\"ib\",\"value\":5}]}]}"
   )
 
-  # Multiple conditions with OR (Pulled from documentation)
+  # Multiple conditions with OR
   or_rule <- list(
-    c("condition", "ELEV2020", "", 0),
-    c("change", "140FBFM", "st", 181),
-    c("change", "140CBH", "ib", 5),
-    c("ORcondition", "ELEV2020", "gt", 500),
-    c("condition", "ELEV2020", "lt", 600),
-    c("change", "140FBFM", "st", 181),
-    c("change", "140CBH", "ib", 5)
+    c("condition", "LF2016_CC", "eq", 0),
+    c("change", "LF2016_FBFM40", "st", 181),
+    c("change", "LF2016_CBH", "ib", 5),
+    c("ORcondition", "LF2016_CC", "gt", 50),
+    c("condition", "LF2016_CC", "lt", 60),
+    c("change", "LF2016_FBFM40", "st", 181),
+    c("change", "LF2016_CBH", "ib", 5)
   )
   expect_identical(
     .fmt_editrules(or_rule),
-    "{\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"\",\"value\":0}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}],\"edit\":[{\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"gt\",\"value\":500},{\"product\":\"ELEV2020\",\"operator\":\"lt\",\"value\":600}],\"change\":[{\"product\":\"140FBFM\",\"operator\":\"st\",\"value\":181},{\"product\":\"140CBH\",\"operator\":\"ib\",\"value\":5}]}]}"
+    "{\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"eq\",\"value\":0}],\"change\":[{\"product\":\"LF2016_FBFM40\",\"operator\":\"st\",\"value\":181},{\"product\":\"LF2016_CBH\",\"operator\":\"ib\",\"value\":5}]}],\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"gt\",\"value\":50},{\"product\":\"LF2016_CC\",\"operator\":\"lt\",\"value\":60}],\"change\":[{\"product\":\"LF2016_FBFM40\",\"operator\":\"st\",\"value\":181},{\"product\":\"LF2016_CBH\",\"operator\":\"ib\",\"value\":5}]}]}"
   )
 
   # Single `edit_mask` with simple edit rules
-  single_mask <- list(
-    c("condition", "ELEV2020", "eq", 593),
-    c("change", "140CC", "st", 500),
-    c("change", "140CH", "ib", 50)
+  products <- c("LF2016_CC", "LF2016_CH")
+  single_rule <- list(
+    c("condition", "LF2016_CC", "ge", 50),
+    c("change", "LF2016_CC", "st", 50),
+    c("change", "LF2016_CH", "ib", 5)
   )
   mask <- list(
-    item_id = "{\"itemID\":\"i5ce09134-4e57-41fe-bcaa-0c38879bc3fc\"}]",
+    item_id = "{\"itemID\":\"i33f34c28-e953-4504-a979-6de40495410e\"}]",
     item_name = "wildfire.shp"
   )
   expect_identical(
-    .fmt_editrules(single_mask, mask),
-    "{\"edit\":[{\"mask\":\"wildfire.shp\",\"condition\":[{\"product\":\"ELEV2020\",\"operator\":\"eq\",\"value\":593}],\"change\":[{\"product\":\"140CC\",\"operator\":\"st\",\"value\":500},{\"product\":\"140CH\",\"operator\":\"ib\",\"value\":50}]}]}"
+    .fmt_editrules(single_rule, mask),
+    "{\"edit\":[{\"mask\":\"wildfire.shp\",\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"ge\",\"value\":50}],\"change\":[{\"product\":\"LF2016_CC\",\"operator\":\"st\",\"value\":50},{\"product\":\"LF2016_CH\",\"operator\":\"ib\",\"value\":5}]}]}"
+  )
+
+  # Correctly formats without value when "cv"
+  cv_rule <- list(
+    c("condition", "LF2016_CC", "le", 50),
+    c("change", "LF2016_CH", "cv")
+  )
+
+  expect_identical(
+    .fmt_editrules(cv_rule),
+      "{\"edit\":[{\"condition\":[{\"product\":\"LF2016_CC\",\"operator\":\"le\",\"value\":50}],\"change\":[{\"product\":\"LF2016_CH\",\"operator\":\"cv\"}]}]}"
   )
 
   # Returns NULL if no file is provided

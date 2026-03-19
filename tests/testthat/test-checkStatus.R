@@ -25,7 +25,7 @@ httptest2::with_mock_dir("_mock/checkStatus", {
 
 # Tests for checkStatus()
 test_that("`checkStatus()` recognizes argument errors", {
-  without_internet({
+  httptest2::without_internet({
     expect_error(checkStatus(),
       "argument `landfire_api` is missing with no default",
       fixed = TRUE
@@ -57,7 +57,7 @@ test_that("`checkStatus()` recognizes argument errors", {
 
 # Tests for cancelJob()
 test_that("`cancelJob()` recognizes arguement errors", {
-  without_internet({
+  httptest2::without_internet({
     expect_error(
       cancelJob(),
       "argument `job_id` is missing with no default"

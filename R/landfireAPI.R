@@ -29,10 +29,12 @@
 #'   If NULL, a temporary directory is created.
 #' @param max_time Maximum time, in seconds, to wait for job to be completed.
 #' @param method Passed to [utils::download.file()]. See `?download.file`
+#'   If `method = none` the file will not be downloaded, instead data can be
+#'   read into R directly from the LFPS server [rlandfire::landfireVSI()].
 #' @param verbose If FALSE suppress all status messages
 #' @param background If TRUE, the function will return immediately and the job
 #'   will run in the background. User will need to check the status of the job
-#'   manually with `checkStatus()`.
+#'   manually with [rlandfire::checkStatus()].
 #' @param execute If FALSE, the function will build a request without submitting
 #'   it to the LFPS API.
 #'
@@ -50,13 +52,13 @@
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' products <-  c("LF2016_EVT", "LF2016_CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' email <- "email@@example.com"
 #' projection <- 6414
 #' resolution <- 90
-#' edit_rule <- list(c("condition","ELEV2020","lt",500),
-#'                   c("change", "230CC", "st", 181))
+#' edit_rule <- list(c("condition","LF2016_EVT","ne", 7054),
+#'                   c("change", "LF2016_CC", "st", 0))
 #' save_file <- tempfile(fileext = ".zip")
 #' resp <- landfireAPIv2(products, aoi, email, projection,
 #'                       resolution, edit_rule = edit_rule,
@@ -193,7 +195,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     httr2::req_headers("Accept" = "application/json")
 
   if (!execute) {
-    lfps <- .build_landfire_api(params = params, request = request)
+    lfps <- .build_landfire_api(params = params, request = request, path = path)
     return(lfps)
   }
 
@@ -334,8 +336,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' edit_rule <- list(c("condition","ELEV2020","lt",500),
-#'                   c("change", "230CC", "st", 181))
+#' edit_rule <- list(c("condition","LF2016_EVT","ne", 7054),
+#'                   c("change", "LF2016_CC", "st", 0))
 #' .fmt_editrules(edit_rule)
 #' }
 .fmt_editrules <- function(rules, mask = NULL) {
@@ -350,7 +352,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   params <- lapply(rules, function(x) {
     paste0('"product":"', x[2],
            '","operator":"', x[3],
-           '","value":', x[4])
+           ifelse(x[3] == "cv", '"', paste0('","value":', x[4])))
   })
 
   # Condition - ID groups with same class and build request
@@ -359,9 +361,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   cnd_grp <- lapply(seq(length(breaks) - 1),
                     function(i) cnd[(breaks[i] + 1):breaks[i+1]])
 
-  cnd <- lapply(cnd_grp, function(i) paste0('"condition":[{',
-                                            paste0(params[i],
-                                            collapse = '},{'),'}]'))
+  cnd <- lapply(cnd_grp, function(i) {
+    paste0('"condition":[{', paste0(params[i], collapse = '},{'),'}]')
+  })
 
   # Check for OR condition
   or_cnd <- grep("OR.*", class)
@@ -369,7 +371,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
             = or_cnd %in% sapply(cnd_grp, `[`, 1))
 
   # Add edit mask if provided
-  if(!is.null(mask)) {
+  if (!is.null(unlist(mask))) {
 
     mask_file  <- sprintf('"mask":"%s"', mask$item_name)
 
@@ -380,7 +382,7 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
         length(mask$item_name) == length(cnd_grp)) {
       cnd[mask_grp]  <- paste(mask_file, cnd[mask_grp], sep = ",")
     } else {
-      stop("The number of `edit_mask` count should match the number of", 
+      stop("The number of `edit_mask` count should match the number of",
            "`edit_rules` condition groups when using multiple shapefiles.")
     }
   }
@@ -391,9 +393,9 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
   chng_grp <- lapply(seq(length(breaks) - 1),
                      function(i) chng[(breaks[i] + 1):breaks[i+1]])
 
-  chng <- lapply(chng_grp, function(i) paste0('"change":[{',
-                                              paste0(params[i],
-                                              collapse = '},{'),'}]'))
+  chng <- lapply(chng_grp, function(i) {
+    paste0('"change":[{', paste0(params[i], collapse = '},{'),'}]')
+  })
 
   # Retain original order
   order_cnd <- sapply(cnd_grp, `[`, 1)
@@ -413,8 +415,8 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
     sprintf('"edit":[{%s,%s}]', out_rules[i], out_rules[i + 1])
   })
   } else {
-    out_rules <- paste0('"edit":[{', 
-                       paste(out_rules, collapse = ','),
+    out_rules <- paste0('"edit":[{',
+                        paste(out_rules, collapse = ','),
                         '}]')
   }
 
@@ -468,11 +470,11 @@ landfireAPIv2 <- function(products, aoi, email, projection = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' products <-  c("LF2020_ASP", "LF2020_ELEV", "LF2022_CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' projection <- 6414
 #' resolution <- 90
-#' edit_rule <- list(c("condition","ELEV2020","lt",500), c("change", "230CC", "st", 181))
+#' edit_rule <- list(c("condition","LF2020_ELEV","lt",500), c("change", "LF2022_CC", "st", 181))
 #' save_file <- tempfile(fileext = ".zip")
 #' resp <- landfireAPI(products, aoi, projection, resolution, edit_rule = edit_rule, path = save_file)
 #' }

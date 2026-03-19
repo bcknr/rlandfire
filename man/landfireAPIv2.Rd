@@ -57,13 +57,15 @@ If NULL, a temporary directory is created.}
 
 \item{max_time}{Maximum time, in seconds, to wait for job to be completed.}
 
-\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}}
+\item{method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. See \code{?download.file}
+If \code{method = none} the file will not be downloaded, instead data can be
+read into R directly from the LFPS server \code{\link[=landfireVSI]{landfireVSI()}}.}
 
 \item{verbose}{If FALSE suppress all status messages}
 
 \item{background}{If TRUE, the function will return immediately and the job
 will run in the background. User will need to check the status of the job
-manually with \code{checkStatus()}.}
+manually with \code{\link[=checkStatus]{checkStatus()}}.}
 
 \item{execute}{If FALSE, the function will build a request without submitting
 it to the LFPS API.}
@@ -84,13 +86,13 @@ Returns a \code{landfire_api} object with named elements:
 }
 \examples{
 \dontrun{
-products <-  c("ASP2020", "ELEV2020", "230CC")
+products <-  c("LF2016_EVT", "LF2016_CC")
 aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 email <- "email@example.com"
 projection <- 6414
 resolution <- 90
-edit_rule <- list(c("condition","ELEV2020","lt",500),
-                  c("change", "230CC", "st", 181))
+edit_rule <- list(c("condition","LF2016_EVT","ne", 7054),
+                  c("change", "LF2016_CC", "st", 0))
 save_file <- tempfile(fileext = ".zip")
 resp <- landfireAPIv2(products, aoi, email, projection,
                       resolution, edit_rule = edit_rule,

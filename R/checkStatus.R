@@ -128,7 +128,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' products <-  c("LF2016_EVT", "LF2016_CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' email <- "email@@example.com"
 #' resp <- landfireAPIv2(products, aoi, email, background = TRUE)
@@ -166,7 +166,7 @@ checkStatus <- function(landfire_api, verbose = TRUE, method = "curl") {
 #'
 #' @examples
 #' \dontrun{
-#' products <-  c("ASP2020", "ELEV2020", "230CC")
+#' products <-  c("LF2016_EVT", "LF2016_CC")
 #' aoi <- c("-123.7835", "41.7534", "-123.6352", "41.8042")
 #' email <- "email@@example.com>"
 #'

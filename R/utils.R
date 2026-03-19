@@ -42,7 +42,7 @@ viewProducts <- function() {
 #' \dontrun{
 #' aoi  <- c("-113.79", "42.148", "-113.56", "42.29")
 #' email <- "email@example"
-#' rast <- landfireAPIv2(products = "240EVC",
+#' rast <- landfireAPIv2(products = "LF2016_EVT",
 #'                       aoi = aoi, email = email,
 #'                       method = "none")  |>
 #'         landfireVSI()
@@ -67,7 +67,7 @@ landfireVSI <- function(landfire_api) {
     )
   } else if (!is.null(landfire_api$request$dwl_url)) {
     if (difftime(Sys.time(), landfire_api$time, units = "min") > 60) {
-      stop("The requested file is no longer available for download")
+      stop("The requested file is no longer available for download. Jobs are only retained for 60 minutes.")
     }
 
     r <- terra::rast(

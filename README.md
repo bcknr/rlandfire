@@ -44,9 +44,9 @@ Set `build_vignettes = TRUE` to access this vignette in R:
 devtools::install_github("bcknr/rlandfire", build_vignettes = TRUE)
 ```
 
-This package is still in development, and users may encounter bugs or
-unexpected behavior. Please report any issues, feature requests, or
-suggestions in the package’s [GitHub
+This package being maintained in my free time and users may encounter
+bugs or unexpected behavior. Please report any issues, feature requests,
+or suggestions in the package’s [GitHub
 repo](https://github.com/bcknr/rlandfire/issues).
 
 ## Using `rlandfire`
@@ -70,9 +70,9 @@ boundary_file <- file.path(tempdir(), "wildfire")
 utils::unzip(system.file("extdata/wildfire.zip", package = "rlandfire"),
              exdir = tempdir())
 
-boundary <- st_read(file.path(boundary_file, "wildfire.shp")) %>% 
+boundary <- st_read(file.path(boundary_file, "wildfire.shp")) |>
   sf::st_transform(crs = st_crs(32613))
-#> Reading layer `wildfire' from data source `/tmp/RtmpV4trFT/wildfire/wildfire.shp' using driver `ESRI Shapefile'
+#> Reading layer `wildfire' from data source `/tmp/RtmpHghXRj/wildfire/wildfire.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 1 feature and 7 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
@@ -83,7 +83,7 @@ plot(boundary$geometry, main = "Calwood Fire Boundary (2020)",
      border = "red", lwd = 1.5)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" style="display: block; margin: auto;" />
 
 ### AOI
 
@@ -112,19 +112,25 @@ an `sf` object or which corresponds to the supplied zone name. See
 ### Products
 
 For this example, we are interested in canopy cover data for two years,
-2019 (`200CC_19`) and 2022 (`220CC_22`), and existing vegetation type
-(`200EVT`). All available data products, and their abbreviated names,
-can be found in the [products table](https://lfps.usgs.gov/products)
-which can be opened by calling `viewProducts()`.
+2016 (`LF2016_CC`) and 2022 (`LF2022_CC`), and existing vegetation type
+(`LF2016_EVT`). All available data products, and their abbreviated
+names, can be found in the [products
+table](https://lfps.usgs.gov/products) which can be opened by calling
+`viewProducts()`.
 
 ``` r
-products <- c("200CC_19", "220CC_22", "200EVT")
+products <- c("LF2016_CC", "LF2022_CC", "LF2016_EVT")
 ```
 
 ### Email
 
+As part of the LANDFIRE program’s update to LFPSv2 an email is now
+required with each request. See the [LFPS
+Guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf) for more
+information.
+
 ``` r
-email <- "rlandfire@example.com"
+email <- "rlandfire@markabuckner.com"
 ```
 
 ### Projection and resolution
@@ -134,7 +140,7 @@ perimeter data by providing the `WKID` for our CRS of interest and a
 resolution of our choosing, in meters.
 
 ``` r
-projection <- 32613
+projection <- 32613 # WGS 84 / UTM zone 13N
 resolution <- 90
 ```
 
@@ -144,12 +150,13 @@ We will use the `edit_rule` argument to filter out canopy cover data
 that does not correspond to Ponderosa Pine Woodland. The `edit_rule`
 statement should tell the API that when existing vegetation cover is
 anything other than Ponderosa Pine Woodland (`7054`), the value of the
-canopy cover layers should be set to a specified value.
+canopy cover layers should be set to (`st`) a specified value.
 
-To do so, we specify that when `220EVT` is not equal (`ne`) to `7054`,
-the “condition,” the canopy cover layers should be set equal (`st`) to
-`1`, the “change.” The edit rule syntax is explained in more depth in
-the [LFPS guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
+To do so, we specify that when `LF2016_EVT` is not equal (`ne`) to
+`7054`, the “condition,” the canopy cover layers should be set equal
+(`st`) to `1`, the “change.” The edit rule syntax is explained in more
+depth in the [LFPS
+guide](https://lfps.usgs.gov/LFProductsServiceUserGuide.pdf).
 
 *(How the API applies edit rules can be unintuitive. For example, if we
 used ‘clear value’ \[`cv`\] or set the value outside of 0-100 the edits
@@ -157,15 +164,19 @@ we want would not work. To work around this behavior, we set the values
 to `1` since it is not found in the original data set.*)
 
 ``` r
-edit_rule <- list(c("condition","200EVT","ne",7054),
-                  c("change", "200CC_19", "st", 1),
-                  c("change", "220CC_22", "st", 1))
+edit_rule <- list(
+  c("condition", "LF2016_EVT", "ne", 7054),
+  c("change", "LF2016_CC", "st", 1),
+  c("change", "LF2022_CC", "st", 1)
+)
 ```
 
 Note: Edits are performed in the order that they are listed and are
 limited to fuel theme products (i.e., Fire Behavior Fuel Model 13, Fire
 Behavior Fuel Model 40, Forest Canopy Base Height, Forest Canopy Bulk
-Density, Forest Canopy Cover, and Forest Canopy Height).
+Density, Forest Canopy Cover, and Forest Canopy Height). The more
+advanced functionality of the LFPS edit rules are available and
+implemented in this package, but not covered here.
 
 If we wanted to restrict these edits to a certain area we could pass the
 path to a zip archive (`.zip`) containing a shapefile to `edit_mask`:
@@ -174,15 +185,18 @@ path to a zip archive (`.zip`) containing a shapefile to `edit_mask`:
 edit_mask <- "path/to/wildfire.zip"
 ```
 
-Note: The file must follow ESRI shapefile naming standards (e.g., no
-special characters) and be less than 1MB in size.
+If an `edit_mask` is provided `landfireAPIv2` will automatically post
+the raster to the LFPS and integrate it into your call.
+
+(*Note: The file must follow ESRI shapefile naming standards (e.g., no
+special characters) and be less than 1MB in size.*)
 
 ### Path
 
 Finally, we will provide a path to a temporary zip file. Setting the
 path as a temp file is not strictly necessary because if `path` is left
 blank `landfireAPIv2()` will save the data to a temporary folder by
-default.
+default. The path can be set to any writable directory.
 
 ``` r
 path <- tempfile(fileext = ".zip")
@@ -195,13 +209,13 @@ with the `landfireAPIv2()` function.
 
 ``` r
 resp <- landfireAPIv2(products = products,
-                    aoi = aoi, 
-                    email = email,
-                    projection = projection, 
-                    resolution = resolution,
-                    edit_rule = edit_rule,
-                    path = path,
-                    verbose = FALSE)
+                      aoi = aoi,
+                      email = email,
+                      projection = projection,
+                      resolution = resolution,
+                      edit_rule = edit_rule,
+                      path = path,
+                      verbose = TRUE)
 ```
 
 `landfireAPIv2()` will download your requested data into the folder
@@ -215,9 +229,12 @@ resp$path
 
 ### Load and process LF data
 
-The files returned by the LFPS API are compressed `.zip` files. We need
-to unzip the directory before reading the `.tif` file. Note: all
-additional metadata is included in this same directory.
+The files returned by the LFPS API are compressed `.zip` files
+containing a single multiband `GeoTIFF` and the metadata files. We have
+two options for programmatically accessing the files:
+
+1.  Manually unzip the directory before reading the `.tif` file using
+    `terra`, or
 
 ``` r
 lf_dir <- file.path(tempdir(), "lf")
@@ -228,15 +245,35 @@ lf <- terra::rast(list.files(lf_dir, pattern = ".tif$",
                              recursive = TRUE))
 ```
 
+2.  Read the `GeoTIFF` file in directly using GDAL’s Virtual File system
+    in a single line.
+
+``` r
+lf  <- landfireVSI(resp)
+lf
+#> class       : SpatRaster 
+#> size        : 108, 163, 3  (nrow, ncol, nlyr)
+#> resolution  : 90, 90  (x, y)
+#> extent      : 465554.1, 480224.1, 4440121, 4449841  (xmin, xmax, ymin, ymax)
+#> coord. ref. : WGS 84 / UTM zone 13N (EPSG:32613) 
+#> source      : j97f36f30e1f740f584847bde495d940d.tif 
+#> names       : LF2016_CC_CONUS, LF2016_EVT_CONUS, LF2022_CC_CONUS 
+#> min values  :               0,             7011,               0 
+#> max values  :              55,             9829,              65
+```
+
+Note: `landfireVSI()` can also be used to read data directly from the
+LFPS server into R when using `method = "none"` in `landfireAPIv2()`.
+
 Now we can reclassify the canopy cover layers to remove any values which
 are not classified as Ponderosa Pine, calculate the change, and plot our
 results.
 
 ``` r
-lf$US_200CC_19[lf$US_200CC_19 == 1] <- NA
-lf$US_220CC_22[lf$US_220CC_22 == 1] <- NA
+lf$LF2016_CC_CONUS[lf$LF2016_CC_CONUS == 1] <- NA
+lf$LF2022_CC_CONUS[lf$LF2022_CC_CONUS == 1] <- NA
 
-change <- lf$US_220CC_22 - lf$US_200CC_19
+change <- lf$LF2022_CC_CONUS - lf$LF2016_CC_CONUS
 
 plot(change, col = rev(terrain.colors(250)),
      main = "Canopy Cover Loss - Calwood Fire (2020)",
@@ -246,7 +283,7 @@ plot(boundary$geometry, add = TRUE, col = NA,
      border = "black", lwd = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" alt="" width="100%" style="display: block; margin: auto;" />
 
 ### Working with Categorical Products
 
@@ -255,15 +292,15 @@ variables and returns a database file (`.dbf`) containing the full
 attribute table.
 
 To demonstrate, we will download the Existing Vegetation Cover product
-from LF 2.4.0 (`240EVC`). Unlike in the example above we will submit a
-minimal request with the default projection and resolution. We will also
-allow `rlandfire` to save the files to a temporary directory
+from LF 2.4.0 (`LF2023_EVC`). Unlike in the example above we will submit
+a minimal request with the default projection and resolution. We will
+also allow `rlandfire` to save the files to a temporary directory
 automatically. As mentioned above, we can find the path to the temporary
 directory in the `$path` element of the `landfire_api` object returned
 by `landfireAPIv2()`.
 
 ``` r
-resp <- landfireAPIv2(products = "240EVC",
+resp <- landfireAPIv2(products = "LF2023_EVC",
                     aoi = aoi,
                     email = email,
                     verbose = FALSE)
@@ -273,17 +310,11 @@ When we read in and plot the EVC layer the legend will now list the
 `classnames` for each vegetation type.
 
 ``` r
-lf_cat <- file.path(tempdir(), "lf_cat")
-utils::unzip(resp$path, exdir = lf_cat)
-
-evc <- terra::rast(list.files(lf_cat, pattern = ".tif$", 
-                             full.names = TRUE, 
-                             recursive = TRUE))
-
+evc <- landfireVSI(resp)
 plot(evc)
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" alt="" width="100%" />
 
 To access the values each `classname` is assigned to we can uses the
 `levels()` function. This returns a simple two column data frame
@@ -304,16 +335,19 @@ head(levels(evc)[[1]])
 Alternatively, we can access the full attribute table using two methods.
 We can use the function `cats()` which works similarly to `levels()` but
 returns the full attribute table as a data frame. Alternatively, we can
-read the database file using `foreign::read.dbf()`. Both methods return
-similar results, although in this case, we see that the `.dbf` file
-includes an additional `Count` column not included in the data frame
-returned from `cats()`.
+read the database file using `foreign::read.dbf()` which requires us to
+unzip the directory first. Both methods return similar results, although
+in this case, we see that the `.dbf` file includes an additional `Count`
+column not included in the data frame returned from `cats()`.
 
 ``` r
 # cats
 attr_tbl <- cats(evc)
 
 # Find path to database file
+lf_cat <- file.path(tempdir(), "lf_cat")
+utils::unzip(resp$path, exdir = lf_cat)
+
 dbf <- list.files(lf_cat, pattern = ".dbf$",
                   full.names = TRUE,
                   recursive = TRUE)
@@ -323,20 +357,20 @@ dbf_tbl  <- foreign::read.dbf(dbf)
 
 head(attr_tbl[[1]])
 #>   Value                        CLASSNAMES Count   R   G   B RED GREEN BLUE
-#> 1    11                        Open Water   229   0   0 255   0     0  255
-#> 2    13 Developed-Upland Deciduous Forest   119  64  61 168  64    61  168
-#> 3    14 Developed-Upland Evergreen Forest   337  68  79 137  68    79  137
-#> 4    15     Developed-Upland Mixed Forest   198 102 119 205 102   119  205
-#> 5    16       Developed-Upland Herbaceous   365 122 142 245 122   142  245
-#> 6    17        Developed-Upland Shrubland   181 158 170 215 158   170  215
+#> 1    11                        Open Water   228   0   0 255   0     0  255
+#> 2    13 Developed-Upland Deciduous Forest   120  64  61 168  64    61  168
+#> 3    14 Developed-Upland Evergreen Forest   332  68  79 137  68    79  137
+#> 4    15     Developed-Upland Mixed Forest   193 102 119 205 102   119  205
+#> 5    16       Developed-Upland Herbaceous   369 122 142 245 122   142  245
+#> 6    17        Developed-Upland Shrubland   183 158 170 215 158   170  215
 head(dbf_tbl)
 #>   Value Count                        CLASSNAMES   R   G   B      RED    GREEN
-#> 1    11   229                        Open Water   0   0 255 0.000000 0.000000
-#> 2    13   119 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
-#> 3    14   337 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
-#> 4    15   198     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
-#> 5    16   365       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
-#> 6    17   181        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
+#> 1    11   228                        Open Water   0   0 255 0.000000 0.000000
+#> 2    13   120 Developed-Upland Deciduous Forest  64  61 168 0.250980 0.239216
+#> 3    14   332 Developed-Upland Evergreen Forest  68  79 137 0.266667 0.309804
+#> 4    15   193     Developed-Upland Mixed Forest 102 119 205 0.400000 0.466667
+#> 5    16   369       Developed-Upland Herbaceous 122 142 245 0.478431 0.556863
+#> 6    17   183        Developed-Upland Shrubland 158 170 215 0.619608 0.666667
 #>       BLUE
 #> 1 1.000000
 #> 2 0.658824
